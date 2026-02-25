@@ -985,20 +985,6 @@ std::cout << current_level << " " << num_poses << " " << percentage << std::endl
 			//      tie-breaking rule: for instance, in this case, the nearest neighbor may be chosen, among the clusters 
 			//       at equal minimum distance from current_cluster, by numbering the clusters arbitrarily and choosing 
 			//       the one with the smallest index
-#ifdef BALL_HAS_TBB
-			if (run_parallel)
-			{
-//				std::cout << "Parallel computation...";
-				ComputeNearestClusterTask_ root_task(this, active_clusters, current_cluster, rmsd_type);
-				tbb::parallel_reduce(tbb::blocked_range<size_t>(0, num_active_clusters), root_task);
-//				std::cout << "...done." << std::endl;
-
-				nearest_cluster = root_task.getMinIndex();
-				min_cluster_dist = root_task.getMinValue();
-			}
-			else
-			{
-#endif
 			for (Index i=0; i<(Index)num_active_clusters; ++i)
 			{
 				// check all pairs between all_clusters[*clust_it] and all_clusters[current_cluster]
@@ -1014,9 +1000,6 @@ std::cout << current_level << " " << num_poses << " " << percentage << std::endl
 					}
 				}
 			}
-#ifdef BALL_HAS_TBB
-			}
-#endif
 
 			// have we put this cluster to the stack before ?
 			// due to the reducibility of Ward's distance, this would imply that the cluster
@@ -1692,64 +1675,6 @@ std::cout << current_level << " " << num_poses << " " << percentage << std::endl
 
 	}
 
-
-#ifdef BALL_HAS_TBB
-	PoseClustering::ComputeNearestClusterTask_::ComputeNearestClusterTask_(PoseClustering* parent,
-	                                           const std::vector<ClusterTreeNode>& active_clusters, 
-					                                   Position current_cluster, Index rmsd_type)
-		: parent_(parent),
-		  active_clusters_(active_clusters),
-			current_cluster_(current_cluster),
-			rmsd_type_(rmsd_type),
-			my_min_value_(std::numeric_limits<float>::max())
-	{
-	}
-
-	PoseClustering::ComputeNearestClusterTask_::ComputeNearestClusterTask_(PoseClustering::ComputeNearestClusterTask_& cnct, tbb::split)
-	  : parent_(cnct.parent_),
-		  active_clusters_(cnct.active_clusters_),
-		  current_cluster_(cnct.current_cluster_),
-			rmsd_type_(cnct.rmsd_type_),
-			my_min_value_(std::numeric_limits<float>::max())
-	{
-	}
-
-	void PoseClustering::ComputeNearestClusterTask_::join(ComputeNearestClusterTask_ const& cnct)
-	{
-		if (my_min_value_ > cnct.my_min_value_)
-		{
-			my_min_value_ = cnct.my_min_value_;
-			my_min_index_ = cnct.my_min_index_;
-		}
-	}
-
-	void PoseClustering::ComputeNearestClusterTask_::operator() (const tbb::blocked_range<size_t>& r)
-	{
-		// we use a local variable to squeeze out a little more efficiency, if possible
-		float    min_value = my_min_value_;
-		Position min_index = my_min_index_;
-
-		size_t end = r.end();
-		for (size_t i = r.begin(); i != end; ++i)
-		{
-			// check all pairs between all_clusters[*clust_it] and all_clusters[current_cluster]
-			if (i != current_cluster_)
-			{
-				float rmsd = parent_->computeWardDistance_(active_clusters_[current_cluster_], active_clusters_[i], rmsd_type_);
-
-				// for stability, make sure that "really" smaller cases are always taken...
-				if (Maths::isLess(rmsd, min_value))
-				{
-					min_index = i;
-					min_value = rmsd;
-				}
-			}
-		}
-
-		my_min_index_ = min_index;
-		my_min_value_ = min_value;
-	}
-#endif
 
 		PoseClustering::ClusterProperties::ClusterProperties()
 				: size(0),

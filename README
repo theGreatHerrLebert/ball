@@ -1,5 +1,6 @@
 ===============================================
 ==  BALL  -  Biochemical ALgorithms Library  ==
+==             (ZOMBIE EDITION)              ==
 ===============================================
 
 
@@ -12,40 +13,9 @@ BUILD BALL
 
   * Then create a folder "build" and change into it
 
-  * Call "cmake .." (if you have a contrib directory for BALL, use
-	  "cmake .. -DBALL_CONTRIB_PATH=path_to_your_contrib")
+  * Call "cmake .."
 
   * Type "make"
-
-  If you want to build packages (currently mostly interesting on MacOS and
-  Windows), add the flag "-DBALL_ENABLE_PACKAGING=true" to the cmake command
-  line and run "make package" instead of a plain make.
-
-  On Windows, make sure to run the commands in a Visual Studio command shell.
-
-  For further details of the build process, please refer to our Wiki on
-  https://github.com/BALL-Project/ball/wiki/DevelopmentEnvironment
-
-  To build the documentation, run "make doc". Alternatively, you can refer
-  to the online documentation:
-
-    https://ball-project.org/documentation/
-
-
-FEEDBACK and CONTACT
---------------------
-  Please help us to improve the quality of this project by reporting all
-  problems you ran into, all criticism, encouragements, improvements,
-  bug reports, and wishes for further functionality either using the
-  GitHub issue tracker or by contacting us via our mailing lists:
-
-    https://github.com/BALL-Project/ball/issues
-    https://groups.google.com/forum/#!forum/ball-user-list
-    https://groups.google.com/forum/#!forum/ball-developer-list
-
-  Please have a look at our website as well:
-
-    https://ball-project.org
 
 
 CITE BALL

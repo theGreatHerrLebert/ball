@@ -162,7 +162,7 @@ endif ()
 
 # handle REQUIRED and QUIET options
 include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args (LibSVM DEFAULT_MSG LIBSVM_LIBRARY
+find_package_handle_standard_args (libSVM DEFAULT_MSG LIBSVM_LIBRARY
   _LIBSVM_VERSION_MATCH
   HAVE_MATH_H
   LIBSVM_INCLUDE_DIR

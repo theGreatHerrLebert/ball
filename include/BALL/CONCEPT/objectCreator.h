@@ -17,10 +17,6 @@
 # include <BALL/CONCEPT/textPersistenceManager.h>
 #endif
 
-#ifndef BALL_SYSTEM_NETWORKING_H
-#	include <BALL/SYSTEM/networking.h>
-#endif
-
 #include <vector>
 
 namespace BALL
@@ -97,21 +93,6 @@ namespace BALL
 		/**	@name	Operators
 		*/
 		//@{
-
-		/** Read from a socket stream.
-				This method will be called by the Server to convert objects
-				that are available at the TCPIOStream using the 
-				convertObject method.
-				It initializes the TextPersistenceManager by calling the method
-				initPersistenceManager if it is not already
-				initialized.
-				Calls initPersistenceManager.
-				Calls convertObject.
-				\param tcp_iostream a reference to a TCPIOStream object
-				\return Composite* a pointer to a received Composite object (<tt> 0</tt> if no composite object was received)
-		*/
-		Composite *operator() (TCPIOStream &tcp_iostream)
-			;
 
 		//@}
 

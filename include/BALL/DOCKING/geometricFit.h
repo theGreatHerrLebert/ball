@@ -303,11 +303,6 @@ namespace BALL
 			 */
 			void start();
 
-#ifdef BALL_HAS_MPI
-			/** This is the main loop of the geometric fit algorithm for the slaves of a parallel run **/
-			void MPI_Slave_start(int argc, char**argv);
-#endif
-
 			// return the overall docking progress as a percentage
 			float getProgress() const;
 

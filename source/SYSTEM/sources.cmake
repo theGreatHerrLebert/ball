@@ -5,15 +5,10 @@ SET(SOURCES_LIST
 	file.C
 	fileSystem.C
 	mutex.C
-	networking.C
 	path.C
 	simpleDownloader.C
 	sysinfo.C
 	timer.C
 )
-
-IF (BALL_HAS_MPI)
-	SET(SOURCES_LIST ${SOURCES_LIST} MPISupport.C)
-ENDIF()
 
 ADD_BALL_SOURCES("SYSTEM" "${SOURCES_LIST}")

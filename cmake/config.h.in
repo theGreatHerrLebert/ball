@@ -14,7 +14,6 @@
 // find the corresponding source code line.
 // See also COMMON/debug.h for these symbols.
 #cmakedefine BALL_DEBUG
-#cmakedefine BALL_VIEW_DEBUG
 #cmakedefine BALL_NO_INLINE_FUNCTIONS
 
 // BALL release version string
@@ -197,25 +196,6 @@
 // Nevertheless, it can be quite useful for debugging.
 #cmakedefine BALL_STRICT_PDB_LINE_IMPORT
 
-// the signature of the function arguments used in xdrrec_create differs
-// from platform to platform, so we define some symbols describing the
-// correct arguments: (void*, char*, int), (char*, char*, int), or (void)
-// take arguments of type (void*, char*, int)
-#cmakedefine BALL_XDRREC_CREATE_CHAR_CHAR_INT @BALL_XDRREC_CREATE_CHAR_CHAR_INT@
-#cmakedefine BALL_XDRREC_CREATE_VOID_VOID_INT @BALL_XDRREC_CREATE_VOID_VOID_INT@
-#cmakedefine BALL_XDRREC_CREATE_VOID_CHAR_INT @BALL_XDRREC_CREATE_VOID_CHAR_INT@
-#cmakedefine BALL_XDRREC_CREATE_VOID_VOID_UINT @BALL_XDRREC_CREATE_VOID_VOID_UINT@
-#cmakedefine BALL_XDRREC_CREATE_VOID @BALL_XDRREC_CREATE_VOID@
-
-// XDR
-#cmakedefine BALL_HAS_XDR
-
-// some platforms do not provide xdr_u_hyper, so we need a workaround for this
-#cmakedefine BALL_HAS_XDR_U_HYPER 
-
-// Define the argument type for xdr_u_hyper (64 bit)
-#cmakedefine BALL_XDR_UINT64_TYPE @BALL_XDR_UINT64_TYPE@
-
 // flex
 #cmakedefine BALL_HAS_YYLEX_DESTROY
 
@@ -237,35 +217,11 @@
 // Define whether BALL was built with libsvm support
 #cmakedefine BALL_HAS_LIBSVM
 
-// VIEW related options
-#cmakedefine BALL_HAS_VIEW
-
 // Define whether BALL was built with rtfact support
 #cmakedefine BALL_HAS_RTFACT
 
-//OpenBabel
-#cmakedefine BALL_HAS_OPENBABEL
-
 // QT options
 #define QT_THREAD_SUPPORT
-
-// Qt WebEngine
-#cmakedefine BALL_HAS_QTWEBENGINE
-
-// Glew
-#cmakedefine BALL_HAS_GLEW
-
-// MPI
-#cmakedefine BALL_HAS_MPI
-
-// TBB
-#cmakedefine BALL_HAS_TBB
-
-// RTfact
-#cmakedefine BALL_HAS_RTFACT
-
-// Define for activated PYTHON support
-#cmakedefine BALL_PYTHON_SUPPORT
 
 // Maximum line length for reading from files (see source/FORMAT)
 #cmakedefine BALL_MAX_LINE_LENGTH @BALL_MAX_LINE_LENGTH@

@@ -21,11 +21,6 @@
 #include <BALL/STRUCTURE/smartsMatcher.h>
 #include <BALL/KERNEL/system.h>
 
-#ifdef BALL_HAS_OPENBABEL
-	#include <openbabel/mol.h>
-#endif
-
-
 namespace BALL
 {
 	class BALL_EXPORT MolecularSimilarity
@@ -39,27 +34,6 @@ namespace BALL
 			void generateFingerprints(const list<Molecule*>& molecules, vector<vector<Size> >& fingerprints);
 
 			void generateFingerprint(Molecule& molecule, vector<Size>& fingerprint);
-
-
-			#ifdef BALL_HAS_OPENBABEL
-				/** Create an Openbabel-molecule from a given BALL::Molecule
-				 * @param suppress_warning if set to true, warning about aromatic bonds
-				 * of carboxyl- and guanidinium-groups being de-aromatized (which OpenBabel requires) will not be shown.
-				*/
-				static OpenBabel::OBMol* createOBMol(const Molecule& mol, bool ignore_hydrogen=0, bool suppress_warning=0);
-
-				/** Create a BALL::Molecule from a given OpenBabel-molecule
-				*/
-				static Molecule* createMolecule(OpenBabel::OBMol& obmol, bool ignore_hydrogen=0);
-
-				void generateCanSmile(const Molecule& mol, String& cansmile, OpenBabel::OBMol** output_obmol=0, bool ignore_hydrogen=0);
-
-				/** Match the given SMARTS pattern to the supplied smile and return the number of matches.
-				 * @param max_matches the maximal number of SMART matches to be made; can be used as a speed-up.
-				 * If this number of matches has been found, the SMARTS-matching algorithm will abort.
-				 * Specifying zero will not set any such constraint.*/
-				void matchSmarts(const String& usmile, const String& smarts, Size& no_matches, Size max_matches=0);
-			#endif
 
 			void generatePathFingerprint(Molecule& mol, vector<bool>& fingerprint);
 

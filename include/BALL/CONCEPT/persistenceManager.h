@@ -48,7 +48,7 @@ namespace BALL
 				- <b>Layer 0</b> contains the basic I/O routines for primitive
 					data types. All methods of layer 0 are virtual to exchange the 
 					implementation of the format-independent storage and retrieval of
-					this data (e.g. XDR or text format)
+					this data (e.g. text format)
 				- <b>Layer 1</b> implements the methods needed to store objects
 					or more complex data structures using Layer 0. To implement
 					object persistence for a user defined object, methods from layer
@@ -65,7 +65,6 @@ namespace BALL
 			abstract methods. Do not try to instantiate a PersistenceManager,
 			your compiler will be complaining.
 			@see	PersistentObject
-			@see	XDRPersistenceManager
 			@see	TextPersistenceManager
 		 \ingroup  Persistence
 	*/		

@@ -1,430 +1,0 @@
-347
-1
-[BALLVIEW_PROJECT]
-PersistenceFormat=XDR
-Representation0=0;0 2 2 3.500000 0 178 [0]|0000ff4d|
-TurnPoint=(4.087175,0.179179,0.000000) 
-Camera=(4.641346,-0.255093,7.229857)  (4.259898,0.043825,2.253403)  (-0.958227,0.271559,0.089760) 
-[MAIN]
-Version=1.4
-Font=Sans Serif,9,-1,5,50,0,0,0,0,0
-[WINDOWS]
-Main::x=0
-Main::y=0
-Main::width=2560
-Main::height=1385
-File::working_dir=/home/AH/sabmue/Kink_review/autoHelices
-Main::dockwidgets=AAAA/wAAAAD9AAAAAwAAAAAAAAMgAAAFDfwCAAAABfsAAAAUAFMAdAByAHUAYwB0AHUAcgBlAHMAAAAAQgAAAt0AAAAAAAAAAPsAAAAeAFIAZQBwAHIAZQBzAGUAbgB0AGEAdABpAG8AbgBzAQAAAEIAAAUOAAAAAAAAAAD7AAAAHABIAFQATQBMAE4AYQB2AGkAZwBhAHQAaQBvAG4AAAAAQgAABQ4AAAAWAP////sAAAAUAFMAdAByAHUAawB0AHUAcgBlAG4AAAAAQwAAAt4AAAC2AAA6mPsAAAAgAFIAZQBwAHIA5ABzAGUAbgB0AGEAdABpAG8AbgBlAG4AAAAAQwAABQ0AAAB0AAA6mAAAAAIAAAAAAAAAAPwBAAAAAvsAAAAQAEQAYQB0AGEAcwBlAHQAcwAAAAAA/////wAAAAAAAAAA+wAAABQARABhAHQAZQBuAHMA5AB0AHoAZQAAAAAA/////wAAAF4AADqYAAAAAwAACgAAAAEc/AEAAAAI+wAAABIAQgBBAEwATAAgAEQAbwBjAHUAAAAAAP////8AAAAAAAAAAPsAAAAaAEIAQQBMAEwAVgBpAGUAdwAgAEQAbwBjAHUAAAAAAP////8AAABeAAA6mPsAAAAIAEwAbwBnAHMAAAAAAAAACgAAAAAAAAAAAPsAAAAYAEYAaQBsAGUATwBiAHMAZQByAHYAZQByAAAAAAD/////AAAAAAAAAAD7AAAAJABQAHkAdABoAG8AbgAgAEkAbgB0AGUAcgBwAHIAZQB0AGUAcgAAAARTAAAFrQAAAIMAADqY+wAAACQAQgBBAEwATAAgAEQAbwBrAHUAbQBlAG4AdABhAHQAaQBvAG4AAAAAAP////8AAABeAAA6mPsAAAASAFAAcgBvAHQAbwBrAG8AbABsAAAAAAAAAAoAAAAAXgAAOpj7AAAAIABEAGEAdABlAGkAIABiAGUAbwBiAGEAYwBoAHQAZQBuAAAAAAD/////AAAASAD///8AAAoAAAAFDQAAAAQAAAAEAAAACAAAAAj8AAAAAQAAAAIAAAADAAAAGABNAGEAaQBuACAAVABvAG8AbABiAGEAcgEAAAAA/////wAAAAAAAAAAAAAALgAzAEQAIABWAGkAZQB3ACAAQwBvAG4AdAByAG8AbAAgAHQAbwBvAGwAYgBhAHIBAAABvv////8AAAAAAAAAAAAAACgARQBkAGkAdAAgAEMAbwBuAHQAcgBvAGwAIAB0AG8AbwBsAGIAYQByAQAAAjL/////AAAAAAAAAAA=
-Molek¸ldatei Dialog::x=0
-Molek¸ldatei Dialog::y=0
-Molek¸ldatei Dialog::width=100
-Molek¸ldatei Dialog::height=30
-PubChem Dialog::x=0
-PubChem Dialog::y=0
-PubChem Dialog::width=600
-PubChem Dialog::height=565
-Plugin Dialog::x=0
-Plugin Dialog::y=0
-Plugin Dialog::width=681
-Plugin Dialog::height=332
-UndoManagerDialog::x=1519
-UndoManagerDialog::y=81
-UndoManagerDialog::width=378
-UndoManagerDialog::height=478
-ModifyRepresentationDialog::x=0
-ModifyRepresentationDialog::y=0
-ModifyRepresentationDialog::width=584
-ModifyRepresentationDialog::height=422
-BALLView Einf¸hrung::x=0
-BALLView Einf¸hrung::y=0
-BALLView Einf¸hrung::width=311
-BALLView Einf¸hrung::height=375
-Label Dialog::x=0
-Label Dialog::y=0
-Label Dialog::width=321
-Label Dialog::height=423
-Label::customcolor=000000ff
-Label::font=Helvetica,12,-1,5,50,0,0,0,0,0
-Label::manylabels=1
-AssignBondOrderConfigurationDialog::x=0
-AssignBondOrderConfigurationDialog::y=0
-AssignBondOrderConfigurationDialog::width=582
-AssignBondOrderConfigurationDialog::height=412
-AssignBondOrderResultsDialog::x=0
-AssignBondOrderResultsDialog::y=0
-AssignBondOrderResultsDialog::width=569
-AssignBondOrderResultsDialog::height=698
-3D View::on=1
-3D View::x=0
-3D View::y=67
-3D View::width=2560
-3D View::height=1293
-Repr‰sentationseigenschaften::x=0
-Repr‰sentationseigenschaften::y=0
-Repr‰sentationseigenschaften::width=638
-Repr‰sentationseigenschaften::height=335
-Test Framework::x=0
-Test Framework::y=0
-Test Framework::width=100
-Test Framework::height=30
-Python Interpreter::on=0
-Python Interpreter::x=1108
-Python Interpreter::y=1076
-Python Interpreter::width=1452
-Python Interpreter::height=284
-Preferences::x=20
-Preferences::y=20
-[PDBFiles]
-History=1jyn#3eml#3OXC#2QD7#3OTJ#1ea1#3pti#4pti#2LOO#3E86#1K4C#3EML#2RH1#"RH!#1XIO#3A7K#2U19#2VV5#3HQZ#2OAR#3EHZ#3IGQ#2BG9#3H9V#2QTS#1N9P#2RLF#2KIX#3BKD#3GK2#3BEH#2R9R#2A79#1XL4#3JYC#3K6N#2qks#1P7B#1ORQ#1YGM#2wjn#2J58#2Vqg#2wcd#2vt4#1u19#2lzt#1glu#1bna#1egy#5ttr#5tta#2ptc#2nmw#2ovc#1mah#1pth#2pti#1MBN#1q9b#1a01#104m#1tau#2ge4#1qjp#1qj8#1q9f#1py5#1aar#2hde#1ots#1a6d#1bz5#100d#1hv4#1p5y#1wpl#1a51#1pma#1lae#1aw4#6exn#2ovc+#1djh#1lee#1opd#1yjp#1hh3#2ol9#1byz#1a0m#1qu9#1jtv#1m05#1lwc#2hu4#329d#1adb#1hho#2rh1#1hfr#1ane#2p3d#1tf6#1pq9#1qpq9#1prc#1iep#1aoi#1MAH#1MH#2e7a#2fv5#1buv#1HMI#1FKo#1FK9#2HMI#1IA0#1CLL#1CFD#3os1#1qd6#3ncw#1hev#1kx5#1zbb#2PTC#
-[ElectronDensityFiles]
-History=
-[BALLVIEW_PLUGIN_DIRECTORIES]
-PluginManager=%2Fhome%2FAH%2Fsabmue%2FBALLdevel%2Fbuild%2Flib?%2Fhome%2FAH%2Fsabmue%2FBALLrtfact%2FBALL_devel%2Fbuild%2Flib?%2Fhome%2FHPL%2Fanne%2FBALL%2FBALL-RAY%2Fplugins?%2Fhome%2Fandreas%2FBALL_contrib%2Fbuild%2Fcontrib%2F%2Fplugins?%2Fhome%2Fdemouser%2Flocal%2F%2Fplugins?%2Flocal%2Fanne%2FBALL%2Fcontrib%2Fplugins?%2Flocal%2Fnicste%2FBALL_contrib%2Fcontrib%2Fplugins?%2Fspace%2FBALL-RAY-GCB%2FBALL_devel%2Fcontrib%2Fplugins?%2Ftmp%2Fdaniel%2Fcontrib%2Fplugins?%2Fusr%2Flib%2Fqt4%2Fplugins?C%3A%5CQt%5C4.6.3%5Cplugins?C%3A%5CQt%5Cqt-win-opensource-src-4.5.1%5Cplugins
-activate_all_plugins_check_box=0
-[MOLECULARCONTROL]
-ShowSS=0
-RegularExpressions=SMARTS([$([#6D3](~[#8D1]))])   |SMARTS([#6r5]=[#6r5]-[$([#7D3](-[*])~[#6r5])])|SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[#1,*])(-[#6r5])(-[#6r5]))])  |numberOfBonds(3) |SMARTS([$([C])]) AND numberOfBonds(3)|SMARTS([$([#6D3])])|SMARTS([$[#7D3]-H])|SMARTS([$(N)-H])|SMARTS([$([#7D3](-[#1])~[#6])])|SMARTS(COOH)|removeWater()|select(HOH)|SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1])(~[#8D1-,#16D1-]))])SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1,#8D1-,#16D1-])(~[#8D1-,#16D1-]))])|SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1])(~[#8D1-,#16D1-]))])SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1])(~[#8D1-,#16D1-]))]))|SMARTS([$([#7D3](-[#1])~[#6r5])])|element(H)|SMARTS([#6r5]-[$([#7D3](-[#1]))])|SMARTS([#6r5]=[#6r5]-[$([#7D3](-[#1,#6])~[#6r5])])|SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[#1,*])(-[#6r5]))])  |SMARTS([$([#7D3](~[#1])(~[#6]))])|SMARTS([#6r5]-[$([#7D3](-[#1])(~[#6r5]))]-[#6r5])|SMARTS([$([#15D4](~[#8D1,#16D1])])|backbone()|SMARTS([$([#15D4](~[#8D1,#16D1]))])|residueID(150) OR residueID(151) OR residueID(152) OR residueID(178) OR residueID(179) OR residueID(222) OR residueID(223) OR residueID(224) OR residueID(225) OR residueID(226) OR residueID(227) OR residueID(242) OR residueID(243) OR residueID(244) OR residueID(245) OR residueID(246) OR residueID(276) OR residueID(277) OR residueID(292) OR residueID(293) OR residueID(294) OR residueID(347) OR residueID(348) OR residueID(349) OR residueID(350) OR residueID(405) OR residueID(406) OR residueID(407)|SMARTS([$([#7D3](~[#8D1-,#16D1-])~[#8D1,#16D1])])|chain(E) OR chain(F)|SMARTS([#7D+])|SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[#1,*])(-[#6])(-[#6]))])  |SMARTS([#6r5]=[#6r5]-[$([#7D3](-[#1])~[#6r5])])|residue(ALA)|select(H)|backbone() AND element(C)|SMARTS([#6r5]=[#6r5]-[$([#7D3](-[R0])~[#6r5])])|SMARTS([#6r5]-[$([#7D3](-[#1])(~[#6r5]))])|SMARTS([#8D-])|delete(element(H))|backbone()  AND name(C)|chain(E) or chain(F)|residueID(ARG)|SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1,#8D1-,#16D1-])(~[#8D1-,#16D1-]))])|SMARTS(#15D4)|backbone()  AND type(CA)|remove(HOH)|SMARTS([#6r5]=[#6r5]-[$([#7D3](-[#1,#6r0])~[#6r5])])|SMARTS([$([C])]) and numberOfBonds(3)|SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1,#8D1-,#16D1-])(~[#8D1-,#16D1-]))]))|SMARTS([#6r5]-[$([#7D3](-[#1]))]-[#6r5])|SMARTS([#7D3])|residue(A)|residueID(151)|SMARTS([$([#6])]) and numberOfBonds(3) |SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[H])(~[#6r5]))])|name(G39)|SMARTS([#6r5]-[$([#7D3](-[#1])~[#6r5])])|SMARTS([#6r5]=[#6r5]-[$([#7D3](-[*])(~[#6r5])(~[#6r5]) )])|SMARTS([a])| numberOfBonds(3)|residue("G39")|aromaticBonds()|SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1])(~[#8D1-,#16D1-]))]))|SMARTS([$([#6D3](~[#8D1-,#16D1-]))])|SMARTS([#6r5]-[$([#7D3](-[H])(~[#6r5]))])|SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8;!#16,!D1])(~[!#8;!#16,!D1])(~[#8D1,#16D1]))])|SMARTS([#6])|SMARTS([OD1,SD1]~[#6D3]~[OD1,SD1])|SMARTS([#7D])|SMARTS([$([#7D3](~[#6])(~[#6]))])|residue(RG)|SMARTS([$([#6D3](~[#8D1,#16D1,#8#1,#16#1])(~[#8D1,#16D1]))])|SMARTS([#6r5]=[#6r5]-[$([#7D3](-[*r0])~[#6r5])])|backbone|SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[#1,*]))])  |SMARTS([$([C])])|SMARTS([#6r5]=[#6r5]-[$([#7D3](-[r0])~[#6r5])])|SMARTS([#6r5]-[$([#7D3](-[#1]))]-[*])|SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1])(~[#8D1-,#16D1-]))])|SMARTS([O-])|backbone()  AND element(C)|SMARTS([$([#6D3](~[#8D1]))]) |SMARTS([#6r5]=[#6r5]-[$([#7D3](-[*])(~[#6r5]))]-[#6r5])|SMARTS($([O-]))|SMARTS([$([#6D3](~[#8D2,#16D2])(~[#8D1,#16D1]))])|SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8;!#16,!D1])(~[!#8;!#16,!D1,#8D1-,#16D1-])(~[#8D1-,#16D1-]))])|SMARTS([#6r5]=[#6r5]-[$([#7D3](-[*])(~[#6r5])(~[#6r5]))]-)|SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3&v3](-[#6r5])(-[#1,*]))])  |chains()|SMARTS([OD1-])|SMARTS([#6r5]=[#6r5]-[$([#7D3](-[*])(~[#6r5]))])|SMARTS([$([#15D4](~[#8D1,#16D1])(~[#8D1,#16D1])(~[#8D1,#16D1])(~[!#8;!#16,!D1]))])|SMARTS([#7D3](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1])) AND element(O)|SMARTS([$([#7D3](~[#1])~[#6])])|SMARTS([$([#6D1](~[#7D2]))])|SMARTS([$([#6D3](~[#8D1-,#16D1-])~[#8D2,#16D2])])|SMARTS($([#8-]))|SMARTS([$([#6D3](~[#8D1-,#16D1-])~[#8D1,#16D1])])|SMARTS([$([#6D3](~[#8D1,#16D1])(~[#8D1,#16D1]))])|!element(H)|SMARTS($([#8]))|SMARTS([OD-])|SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[#6r5])(-[#1,*]))])  |residue(HOH)|residueID(103)|SMARTS([#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[*])(~[#6r5]))])|residueID(274)|SMARTS([#6r5]-[$([#7D3](-[#1]))]-)|SMARTS([#6D-])|SMARTS([O.])|residue(ARG)|delete(H)|residueID("G39")|SMARTS([#7D3R](~[#8D1,#16D1])) AND element(O)|SMARTS(OD1~C~OH)|SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[#1,*])(~[#6r5]))])  |residueID(103) |SMARTS([#6r5]=[#6r5]-[$([#7D3](-[*])(~[#6r5])(~[#6r5]))-[#6r5]])|SMARTS([$([#16D2](~[#8,#16])(~[#8,#16])]))|SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[H])(~[#6r5]))])  |SMARTS($[#7D3])|residueID(Arg)|SMARTS([#6r5]=[#6r5]-[$([#7D3](-[*])(~[#6r5])(~[#6r5]))]-[#6])|SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3&v4](-[#6r5])(-[#1,*]))])  |SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[#1])(~[#6r5]))])  |SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&amp;!#16,!D1])(~[!#8&amp;!#16,!D1])(~[#8D1,#16D1]))])|chain(A) OR chain(B)|residueID(134)|SMARTS([$[#7D3]])|name(H)|SMARTS([$([#6D3](~[#8D1,#16])(~[#8D1,#16]))])|SMARTS([$([#6D3])]) |SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1])(~[#8D1-,#16D1-]))])SMARTS([$([#15D4](~[#8D1,#16D1])(~[!#8&!#16,!D1])(~[!#8&!#16,!D1])(~[#8D1-,#16D1-]))])|SMARTS(H)|residueID(116) OR residueID(349) OR residueID(352) OR residueID(355) OR residueID(358) OR residueID(359) OR residueID(523) OR residueID(527) OR residueID(530) OR residueID(531)|SMARTS([#7D3+])|SMARTS([$([#6D3](~[#8D1,#16D1,#8H,#16H])(~[#8D1,#16D1]))])|SMARTS([$([#6D3](~[#8D1.#16])(~[#8D1,#16]))])|SMARTS([$([#16D2](~[#8,#16])~[#8,#16])])|SMARTS([$([#6D3](~[#8D1])(~[#8D1]))])|SMARTS([$([#8D3](~[#8D1-,#16D1-])~[#8D1,#16D1])])|SMARTS([#6r5]=[#7r5]-[#6r5]=[#6r5]-[$([#7D3](-[*])(~[#6r5]))])|SMARTS([#6r5]=[#6r5]-[$([#7D3](-[*])(~[#6r5])(~[#6r5]))])|
-[BONDORDERASSIGNER]
-overwrite_doubleBO_box=1
-max_n_opt_solutions=25
-add_hydrogens_checkBox=0
-parameter_file_edit=bond_lengths/BondOrder.xml
-groupBox_5=single_solution_button
-groupBox_2=kekulizeBonds_button
-overwrite_tripleBO_box=1
-groupBox_4=ASTAR_button
-penalty_balance_slider=0
-overwrite_singleBO_box=1
-overwrite_selected_bonds_box=0
-max_n_all_solutions=25
-[MINIMIZATION]
-max_iterations_lineedit=500
-energy_difference_lineedit=0.0001
-refresh_iterations_lineedit=10
-groupBox_2=useMMFF94RadioButton
-minimization_group=SLVMM_button
-max_grad_lineedit=0.5
-[MDSIMULATION]
-steps_lineedit=1000
-dcd_file_edit=trajectory.dcd
-textLabel1=d5d1cfff
-refresh_lineedit=1
-temperature_lineedit=300
-dielectric_group_2=canonical_button
-groupBox5=useMMFF94RadioButton
-timestep_linedit=0.0001
-enable_dcd=0
-textLabel2=d5d1cfff
-[AMBER]
-bends_box=1
-assign_charges_checkBox=1
-assign_typenames_checkBox=1
-assign_types_checkBox=1
-stretches_box=1
-scaling_electrostatic_1_4_line_edit=1.2
-nonbonded_cutoff_line_edit=20.0
-vdw_cutoff_line_edit=15.0
-electrostatic_cutoff_line_edit=15.0
-NB_box=1
-electrostatic_cuton_line_edit=13.0
-overwrite_typenames_checkBox=1
-parameter_file_edit=Amber/amber96.ini
-overwrite_charges_checkBox=1
-vdw_cuton_line_edit=13.0
-torsions_box=1
-dielectric_group=constant_button
-scaling_vdw_1_4_line_edit=2.0
-max_unassigned_atoms=10
-[CHARMM]
-torsions_box=1
-use_eef1_checkBox=1
-bends_box=1
-assign_types_checkBox=1
-electrostatic_cutoff_line_edit=9.0
-nonbonded_cutoff_line_edit=20.0
-overwrite_charges_checkBox=1
-dielectric_group=distance_button
-assign_typenames_checkBox=1
-vdw_cutoff_line_edit=9.0
-scaling_electrostatic_1_4_line_edit=1.0
-assign_charges_checkBox=1
-solvation_cutoff_line_edit=9.0
-electrostatic_cuton_line_edit=7.0
-NB_box=1
-overwrite_typenames_checkBox=1
-parameter_file_edit=CHARMM/EEF1/param19_eef1.ini
-scaling_vdw_1_4_line_edit=2.0
-solvation_cuton_line_edit=7.0
-max_unassigned_atoms=10
-stretches_box=1
-vdw_cuton_line_edit=7.0
-itorsions_box=1
-[MMFF94]
-max_unassigned_atoms=10
-vdw_box=1
-stretch_box=1
-es_box=1
-nonbonded_cutoff=16.0
-assign_charges_checkBox=1
-plane_box=1
-torsions_box=1
-stretch_bends_box=1
-assign_types_checkBox=1
-overwrite_typenames_checkBox=1
-overwrite_charges_checkBox=1
-electrostatic_cuton=13.0
-bends_box=1
-electrostatic_cutoff=15.0
-vdw_cutoff=15.0
-parameter_file_edit=MMFF94
-dielectric_group=constant_button
-vdw_cuton=13.0
-assign_typenames_checkBox=1
-[FORCEFIELD]
-selected=2
-[EXPORT]
-POVNR=100000
-VRMLNR=100000
-PNGNR=100001
-[LIGHTING]
-Light_0_Position=(0.000000,4.000000,-20.000000) 
-Light_0_Direction=(0.000000,0.000000,1.000000) 
-Light_0_Attenuation=(1.000000,0.000000,0.000000) 
-Light_0_Angle=10.000000
-Light_0_Intensity=0.800000
-Light_0_Color=(255,255,255,255)
-Light_0_Type=1
-Light_0_Relative=1
-attenuation_p_3=0
-attenuation_p_2=0
-position_x=0
-color_sample=ffffffff
-orientation_group=relative
-position_y=4
-position_z=-20
-max_intensity_factor=500
-direction_x=0
-update_directly_checkBox=0
-direction_z=1
-attenuation_p_1=1
-type_group=point
-intensity=80
-direction_y=0
-[REPRESENTATION]
-transparency_slider=178
-precision_combobox=2
-model_updates_enabled=1
-resolution_group=presets_precision_button
-coloring_updates_enabled=1
-model_type_combobox=0
-mode_combobox=2
-model_group=presets_precision_button
-coloring_method_combobox=0
-precision_slider=35
-[PYTHON]
-current_script=/home/peter/last_BALL_script.py
-script_edit=
-table=None¬∞F2¬∞runCurrentScript()¬∞Run current Python script¬∞@None¬∞F3¬∞hideAllRepresentations()¬∞Hide all loaded representations¬∞@None¬∞F4¬∞removeWater()¬∞Delete all water molecules¬∞@Shift¬∞F4¬∞randomizeAtoms(0.2)¬∞Randomize all atom positions by max 0.2 A¬∞@None¬∞F5¬∞printAtomTypesForHighlighted()¬∞Print the atom types for the currently highlighted molecular items¬∞@Shift¬∞F5¬∞printAtomTypesForLigands()¬∞Print the atom types for all ligands¬∞@None¬∞F6¬∞highlightLigand()¬∞Highlight the ligand in the molecular control¬∞@Shift¬∞F6¬∞showCartoonAndLigand()¬∞Create VDW for all ligands and a cartoon model for the receptor¬∞@None¬∞F7¬∞addOptimizedHydrogens()¬∞Add hydrogens through FragmentDB and optimize them¬∞@Shift¬∞F7¬∞relaxStructure()¬∞Quickly optimize a ligand¬∞@None¬∞F8¬∞quickSave()¬∞Quickly store a project file¬∞@Shift¬∞F8¬∞quickLoad()¬∞Quickly load a project file¬∞@None¬∞F12¬∞clearRepresentations()¬∞Delete all loaded representations¬∞@Shift¬∞F12¬∞clearAll()¬∞Delete all molecules and representations¬∞@
-font=Helvetica,12,-1,5,50,0,0,0,0,0
-[EDITING]
-only_highlighted=1
-[COLORING_OPTIONS]
-Elements=ffffffff;d8ffffff;cd7effff;c4ff00ff;ffb6b6ff;909090ff;8e8effff;f00000ff;b3ffffff;afe2f4ff;aa5df2ff;89ff00ff;d1a5a5ff;809a9aff;ff8000ff;ffc828ff;1af01aff;80d1e4ff;8e41d3ff;3dff00ff;e6e6e4ff;bfc3c6ff;a7a5acff;8999c6ff;9c7bc6ff;807bc6ff;5d6dffff;5d7bc3ff;ff7b62ff;7c80afff;c39090ff;669090ff;bc80e2ff;ffa100ff;a52121ff;5dbad1ff;702db1ff;00ff00ff;95fdffff;95e1e1ff;74c3cbff;54b5b6ff;3b9ea8ff;238e97ff;0a7c8cff;006985ff;99c6ffff;ffd890ff;a77572ff;668080ff;9e64b5ff;d47b00ff;930093ff;429eafff;56188eff;00cb00ff;70ddffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;4dc1ffff;4da7ffff;2693d6ff;267eacff;266797ff;185487ff;185b90ff;ffd123ff;b5b5c3ff;a7544dff;505960ff;9e4fb5ff;ac5d00ff;754f44ff;428397ff;420066ff;007c00ff;70aafbff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;ffffffff;
-Molecules=ff0000ff;00ff00ff;0000ffff;ffff00ff;00ffffff;ff00ffff;7f7f7fff;ff7f7fff;ffffffff;7f7f00ff;ff3333ff;e519e5ff;00e500ff;e50033ff;ffff7fff;7fffffff;ff7fffff;b233b2ff;33b2b2ff;b2b233ff;
-max_tf_slider=500
-force_min_value_slider=1
-Chains=ff0000ff;00ff00ff;0000ffff;ffff00ff;00ffffff;ff00ffff;7f7f7fff;ff7f7fff;ffffffff;7f7f00ff;ff3333ff;e519e5ff;00e500ff;e50033ff;ffff7fff;7fffffff;ff7fffff;b233b2ff;33b2b2ff;b2b233ff;
-Residues=d8ffffff;6464ffff;0000ffff;b3ffffff;8e41d3ff;ffb6b6ff;cd7effff;909090ff;ffffffff;afe2f4ff;d1a5a5ff;89ff00ff;80d1e4ff;f00000ff;809a9aff;1af01aff;ffc828ff;ffffffff;c4ff00ff;00ff00ff;ffff00ff;ff0000ff;8e8effff;ff8000ff;aa5df2ff;3dff00ff;
-max_distance_slider=100
-distance_show_selected=0
-force_max_value_slider=100
-[BALLVIEWSHORTCUTS]
-ShortcutRegistry=Shortcut%7CBuild%7CAdd_Hydrogens$Ctrl%2BAlt%2BH?Shortcut%7CBuild%7CAssign_Bond_Orders$Ctrl%2BAlt%2BO?Shortcut%7CBuild%7CBuild_Bonds$Ctrl%2BB?Shortcut%7CBuild%7CBuild_Peptide$Ctrl%2BAlt%2BU?Shortcut%7CBuild%7CCheck_Structure$Ctrl%2BK?Shortcut%7CDisplay%7CContinuousLoop%7CToggle$Space?Shortcut%7CDisplay%7CCreate%7CLabel$Ctrl%2BL?Shortcut%7CDisplay%7CDisplay_Properties$Ctrl%2BI?Shortcut%7CDisplay%7CEdit_Mode$Ctrl%2BE?Shortcut%7CDisplay%7CPicking_Mode$Ctrl%2BH?Shortcut%7CDisplay%7CRotate_Mode$Ctrl%2BR?Shortcut%7CDisplay%7CToggle_Fullscreen$Alt%2BX?Shortcut%7CDisplay%7CViewpoint%7CFocus_Camera$Ctrl%2BF?Shortcut%7CDisplay%7CViewpoint%7CSet_Viewpoint$Ctrl%2BN?Shortcut%7CDisplay%7CViewpoint%7CShow_Vie%26wpoint$Ctrl%2BW?Shortcut%7CEdit%7CCopy$Ctrl%2BC?Shortcut%7CEdit%7CCut$Ctrl%2BX?Shortcut%7CEdit%7CDelete$Del?Shortcut%7CEdit%7CPaste$Ctrl%2BV?Shortcut%7CEdit%7CPreferences$Ctrl%2BZ?Shortcut%7CFile%7CExport%7CPNG$Alt%2BP?Shortcut%7CFile%7CExport%7CPOVRay$Ctrl%2BY?Shortcut%7CFile%7COpen_Structure$Ctrl%2BO?Shortcut%7CFile%7COpen%7CDownload_Electron_Density$Ctrl%2BD?Shortcut%7CFile%7COpen%7CDownload_PDB$Ctrl%2BT?Shortcut%7CFile%7CPrint$Ctrl%2BP?Shortcut%7CFile%7CQuit$Ctrl%2BQ?Shortcut%7CFile%7CSave_Structure$Ctrl%2BS?Shortcut%7CMolecularMechanics%7CAbort_Calculation$Alt%2BC?Shortcut%7CMolecularMechanics%7CMolecular_Dynamics$Ctrl%2BM?Shortcut%7CMolecularMechanics%7CSingle_Point_Calculation$Ctrl%2BA?Shortcut%7CTools%7CCalculate_HBonds$Alt%2BN?Shortcut%7CTools%7CCalculate_SecondaryStructure$Alt%2BO?Shortcut%7CTools%7CGrid%7CRender_Contour_Surface$Ctrl%2BU?Shortcut%7CTools%7CPython%7CRun_current_script$Alt%2BY
-error_label=d5d1cfff
-predefined_combo_box=0
-settings_group=customize_button
-[NETWORK]
-password_edit=
-port_edit=
-login_edit=
-proxy_type_box=0
-pdb_suffix=.pdb
-host_edit=
-pdb_prefix=http://www.rcsb.org/pdb/files/
-server_status=0
-port=20000
-[MODEL_OPTIONS]
-hbonds_radius_slider=3
-stick_radius_slider=2
-tube_radius_slider=12
-force_base_slider=2
-force_max_length_slider=100
-ribbons_enabled=1
-ball_stick_cylinder_radius_slider=2
-cartoon_helix_radius_slider=20
-cartoon_dna_helix_radius_slider=2
-strand_arrow_width_slider=10
-surface_probe_radius_slider=15
-cartoon_dna_base_radius_slider=1
-strand_height_slider=4
-force_offset_slider=2
-cartoon_dna_wac=#
-vdw_radius_factor_slider=10
-cartoon_dna_ladder=
-ball_stick_dashed_bonds=1
-cartoon_tube_radius_slider=2
-strand_width_slider=22
-force_scaling_slider=11
-cartoon_dna_ladder_radius_slider=5
-ball_stick_sphere_radius_slider=4
-[MATERIAL_SETTINGS]
-ambient_factor_slider=10
-transparency_factor_slider=0
-shininess_factor_slider=77
-groupBox_11=radioButton_POVRay
-reflectiveness_color_label=ffffffff
-update_directly_checkBox=0
-specularity_color_label=ffffffff
-specularity_factor_slider=100
-reflectiveness_factor_slider=0
-ambient_color_label=ffffffff
-[STAGE]
-right_ymin_edit=
-left_width_edit=
-color_sample_=e0dfdeff
-use_vertex_buffers=0
-left_height_edit=
-resolution_factor=1
-right_width_edit=
-qt_spinbox_lineedit=1
-animation_smoothness=25
-capping_transparency=1
-show_fps=0
-color_sample=000000ff
-up_direction_x=0
-controlScreen_comboBox=1
-texture_file_edit=texture
-right_xmin_edit=
-groupBox=radioButton_perspectiveProjection
-rightEyeScreen_comboBox=-1
-interlaced_offset_2=
-smooth_lines_=0
-eye_level_lineEdit=180
-leftEyeScreen_comboBox=-1
-screen_distance_lineEdit=150
-fog_slider=200
-stereoScreensRenderer_comboBox=2
-eye_distance_slider=20
-capping_color=0000ffff
-RendererGroup=radioButton_rtfact
-interlaced_stride_2=
-use_preview=0
-up_direction_z=0
-groupBox_4=sideBySide_radioButton
-slider_=5
-up_direction_y=-1
-swap_sss_button=0
-sphere_points_slider=2
-left_xmin_edit=
-wheel_slider_=5
-protect_override=0
-right_height_edit=
-left_ymin_edit=
-offscreen_group=
-focal_distance_slider=40
-show_lights_=0
-fog_box=
-tube_points_slider=20
-downsampling_slider=4
-eye_distance_lineEdit=6
-label_10=e0dfdeff
-environment_map=
-controlRenderer_comboBox=2
-[GENERAL]
-logging_to_file=0
-style=Plastique
-language=de_DE
-[OpenSave]
-project_groupbox=binary_project_radiobutton
-pdb_model_box_=0
-Ä  ∏ﬁ≠æÔ   BALL::System    ®¸Ä    ®¸Ä    ®¸Ä                                   ©Í–    ©Í–                NNx k NNx k ﬁ≠Ï           1,3,7-trimethylpurine-2,6-dione ﬁ≠Ïﬁ≠ÏæÔﬁ≠Ä àﬁ≠æÔ   BALL::Molecule      ©Í–    ©Í–    ©Í–           ®¸Ä                    ®Ë∞    ∆Ø0                NNx k NNx k ﬁ≠Ï       !   BALL::NamedProperty     ∂£      PUBCHEM_COMPOUND_CID   2519ﬁ≠Ï   BALL::NamedProperty     ∂§      PUBCHEM_COMPOUND_CANONICALIZED     1   ﬁ≠Ï   BALL::NamedProperty     ∂§@      PUBCHEM_CACTVS_COMPLEXITY      293 ﬁ≠Ï   BALL::NamedProperty     ∂§h      PUBCHEM_CACTVS_HBOND_ACCEPTOR      2   ﬁ≠Ï   BALL::NamedProperty     ∂§ê      PUBCHEM_CACTVS_HBOND_DONOR     0   ﬁ≠Ï   BALL::NamedProperty     ∂§∏      PUBCHEM_CACTVS_ROTATABLE_BOND      0   ﬁ≠Ï   BALL::NamedProperty     ∂§‡      PUBCHEM_CACTVS_SUBSKEYS    úAAADccBzsAAAAAAAAAAAAAAAAAAAAWAAAAAsAAAAAAAAAFgBgAAAHgAAAAAACAgBlgQHsBcMEACoAQdxdACAgC0XEKABUAGoVECASAhASCAUAIgIByJAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==ﬁ≠Ï   BALL::NamedProperty     ∂•      PUBCHEM_IUPAC_OPENEYE_NAME     1,3,7-trimethylpurine-2,6-dione ﬁ≠Ï   BALL::NamedProperty     ∂•0      PUBCHEM_IUPAC_CAS_NAME     1,3,7-trimethylpurine-2,6-dione ﬁ≠Ï   BALL::NamedProperty     ∂•X      PUBCHEM_IUPAC_NAME     1,3,7-trimethylpurine-2,6-dione ﬁ≠Ï   BALL::NamedProperty     ∂•Ä      PUBCHEM_IUPAC_SYSTEMATIC_NAME      1,3,7-trimethylpurine-2,6-dione ﬁ≠Ï   BALL::NamedProperty     ∂•®      PUBCHEM_IUPAC_TRADITIONAL_NAME     caffeineﬁ≠Ï   BALL::NamedProperty     ∂•–      PUBCHEM_IUPAC_INCHI    CInChI=1S/C8H10N4O2/c1-10-4-9-6-5(10)7(13)12(3)8(14)11(6)2/h4H,1-3H3 ﬁ≠Ï   BALL::NamedProperty     ∂•¯      PUBCHEM_IUPAC_INCHIKEY     RYYVLZVUVIJVGH-UHFFFAOYSA-N ﬁ≠Ï   BALL::NamedProperty     ∂¶       PUBCHEM_XLOGP3     -0.1ﬁ≠Ï   BALL::NamedProperty     ∂¶H      PUBCHEM_EXACT_MASS     
-194.080376  ﬁ≠Ï   BALL::NamedProperty     ∂¶p      PUBCHEM_MOLECULAR_FORMULA      	C8H10N4O2   ﬁ≠Ï   BALL::NamedProperty     ∂¶ò      PUBCHEM_MOLECULAR_WEIGHT   194.1906ﬁ≠Ï   BALL::NamedProperty     ∂¶¿      PUBCHEM_OPENEYE_CAN_SMILES     CN1C=NC2=C1C(=O)N(C(=O)N2C)Cﬁ≠Ï   BALL::NamedProperty     ∂¶Ë      PUBCHEM_OPENEYE_ISO_SMILES     CN1C=NC2=C1C(=O)N(C(=O)N2C)Cﬁ≠Ï   BALL::NamedProperty     ∂ß      PUBCHEM_CACTVS_TPSA    58.4ﬁ≠Ï   BALL::NamedProperty     ∂ß8      PUBCHEM_MONOISOTOPIC_WEIGHT    
-194.080376  ﬁ≠Ï   BALL::NamedProperty     ∂ß`      PUBCHEM_TOTAL_CHARGE   0   ﬁ≠Ï   BALL::NamedProperty     ∂ßà      PUBCHEM_HEAVY_ATOM_COUNT   14  ﬁ≠Ï   BALL::NamedProperty     ∂ß∞      PUBCHEM_ATOM_DEF_STEREO_COUNT      0   ﬁ≠Ï   BALL::NamedProperty     ∂ßÿ      PUBCHEM_ATOM_UDEF_STEREO_COUNT     0   ﬁ≠Ï   BALL::NamedProperty     ∂®       PUBCHEM_BOND_DEF_STEREO_COUNT      0   ﬁ≠Ï   BALL::NamedProperty     ∂®(      PUBCHEM_BOND_UDEF_STEREO_COUNT     0   ﬁ≠Ï   BALL::NamedProperty     ∂®P      PUBCHEM_ISOTOPIC_ATOM_COUNT    0   ﬁ≠Ï   BALL::NamedProperty     ∂®x      PUBCHEM_COMPONENT_COUNT    1   ﬁ≠Ï   BALL::NamedProperty     ∂®†      PUBCHEM_CACTVS_TAUTO_COUNT     1   ﬁ≠Ï   BALL::NamedProperty     ∂®»      PUBCHEM_COORDINATE_TYPE    1   ﬁ≠Ï   BALL::NamedProperty     ∂®      PUBCHEM_BONDANNOTATIONS    3  10  8ﬁ≠Ï   1,3,7-trimethylpurine-2,6-dione ﬁ≠Ïﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      ∆Ø0    ∆Ø0            ©Í–    πî†                                                NNx k ﬁ≠Ï          BALL::NamedProperty     ≤[      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     ≤\      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     ≤\@       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     ≤\h      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     ≤\ê       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     ≤\∏       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     ≤\‡      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     ≤]      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ≤]0       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     ≤]X       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     ≤]Ä      InitialCharge       ﬁ≠Ï   H                  H      HC     >øt?@<?%ƒ¿¿«ù>@ñ£øâ Ë-\≠µΩ/+¡‹›          •x‡ﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      •x‡    •x‡                                                                                ﬁ≠Ï          BALL::NamedProperty     πó       MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     πó(      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     πóP      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     πóx      	MMFF94RBL   ?Ò|Ìëhr∞ﬁ≠Ï    ∆Ø0    π‘–           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      π‘–    π‘–            ©Í–    +ü    8¯–                                        NNx jÎﬁ≠Ï          BALL::NamedProperty     =¿      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     =Ë      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     >       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     >8      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     >`       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     >à       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     >∞      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     >ÿ      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ?        MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     ?(       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     ?P      InitialCharge       ﬁ≠Ï   C       >ô¶µ       C      CR     ?êﬁ?™zÜ=ÎpÂ?BøÄÌΩ£Z%≠IÀr¨–'¡≠#û          t    ªm0    ¡Ä    •x‡ﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      ¡Ä    ¡Ä                                                                                ﬁ≠Ï          BALL::NamedProperty     ¡ê      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     ¡∏      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     ¡‡      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     ¡      	MMFF94RBL   ?Ò|Ìëhr∞ﬁ≠Ï    π‘–    πî†           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      πî†    πî†            ©Í–    8Â     ∆Ø0                                        NNx j˛ﬁ≠Ï          BALL::NamedProperty     #Ûp      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     #Ûò      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     #Û¿       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     #ÛË      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     #Ù       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     #Ù8       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     #Ù`      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     #Ùà      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     #Ù∞       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     #Ùÿ       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     #ı       InitialCharge       ﬁ≠Ï   H                  H      HC     ?L˘Ô?æöøj¥Ã¿âÉﬂ>åÃà?[H®≠ºàé-5'Æ¨ÜÜ          ¡Äﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      8Â     8Â             ©Í–    ænÄ    πî†                                        NNx j¸ﬁ≠Ï          BALL::NamedProperty     2–¿      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     2–Ë      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     2—       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     2—8      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     2—`       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     2—à       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     2—∞      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     2—ÿ      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     2“        MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     2“(       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     2“P      InitialCharge       ﬁ≠Ï   H                  H      HC     ?ù!@çI?ºî¡'Tﬂ?¸d??)≠Ω-5· -[◊'≠TËï          ªm0ﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      ªm0    ªm0                                                                                ﬁ≠Ï          BALL::NamedProperty     º4p      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     º4ò      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     º4¿      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     º4Ë      	MMFF94RBL   ?Ò|Ìëhr∞ﬁ≠Ï    π‘–    8Â            ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      ænÄ    ænÄ            ©Í–    ¿@    8Â                                         NNx j˘ﬁ≠Ï          BALL::NamedProperty     ;ú       MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     ;úH      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     ;úp       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     ;úò      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     ;ú¿       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     ;úË       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     ;ù      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     ;ù8      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ;ù`       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     ;ùà       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     ;ù∞      InitialCharge       ﬁ≠Ï   H                  H      HC     @∆ @7¸øf„u@Àsê@ºW˘ø∫>_™À£¬-(ÏM,À¿˜          7Ë0ﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      7Ë0    7Ë0                                                                                ﬁ≠Ï          BALL::NamedProperty     8ø@      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     8øh      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     8øê      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     8ø∏      	MMFF94RBL   ?Ò|Ìëhr∞ﬁ≠Ï    ænÄ    +ü           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      +ü    +ü            ©Í–    '9     π‘–                                        NNx jÈﬁ≠Ï          BALL::NamedProperty     Ã`      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     Ãà      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     Ã∞       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     Ãÿ      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     Ã        MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     Ã(       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     ÃP      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     Ãx      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     Ã†       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     Ã»       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     Ã      InitialCharge       ﬁ≠Ï   C       >Çﬁ       C      CR     @“‹ﬁ@%¡º∆ÈZøOıÍø:´‰æ…˚,>~≠íAB≠up          ΩŸ†    ä◊     ©    7Ë0ﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      ©    ©                                                                                ﬁ≠Ï          BALL::NamedProperty     ©       MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     ©(      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     ©P      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     ©x      	MMFF94RBL   ?Ò|Ìëhr∞ﬁ≠Ï    +ü    ¿@           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      ¿@    ¿@            ©Í–    +å    ænÄ                                        NNx j˜ﬁ≠Ï          BALL::NamedProperty     §‡      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     §      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     §0       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     §X      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     §Ä       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     §®       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     §–      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     §¯      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     §        MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     §H       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     §p      InitialCharge       ﬁ≠Ï   H                  H      HC     @…`"@7ÔV?e–øl¸Õ¡+ı√AC±≠ØäíÆS>™≠!Ô=          ©ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      +å    +å            ©Í–     Ê‡    ¿@                                        NNx jıﬁ≠Ï          BALL::NamedProperty     7ì†      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     7ì»      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     7ì       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     7î      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     7î@       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     7îh       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     7îê      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     7î∏      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     7î‡       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     7ï       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     7ï0      InitialCharge       ﬁ≠Ï   H                  H      HC     @ıæ2@∑éΩæö@ÀàAi]Ó@
-∫À-ö´-+yj-∏¶j          ä◊ ﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      ä◊     ä◊                                                                                 ﬁ≠Ï          BALL::NamedProperty     äÿ0      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     äÿX      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     äÿÄ      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     äÿ®      	MMFF94RBL   ?Ò|Ìëhr∞ﬁ≠Ï    +ü    +å           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom       Ê‡     Ê‡            ©Í–    ¬¢–    +å                                        NNx jÛﬁ≠Ï          BALL::NamedProperty     +ùp      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     +ùò      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     +ù¿       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     +ùË      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     +û       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     +û8       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     +û`      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     +ûà      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     +û∞       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     +ûÿ       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     +ü       InitialCharge       ﬁ≠Ï   H                  H      HC     @èˆW¿P{¨ø!Y¿nwøé´h¿¢≈§-e*«-∞&U,˝Ï/          ∆’êﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      ∆’ê    ∆’ê                                                                                ﬁ≠Ï          BALL::NamedProperty     k      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     l      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     l@      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     lh      	MMFF94RBL   ?Ò|Ìëhr∞ﬁ≠Ï     Ê‡    '9            ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      '9     '9             ©Í–    ¡r‡    +ü                                        NNx jÂﬁ≠Ï          BALL::NamedProperty     º@      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     ºh      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     ºê       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     º∏      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     º‡       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     º       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     º0      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     ºX      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ºÄ       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     º®       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     º–      InitialCharge       ﬁ≠Ï   C       >ô¶µ       C      CR     @gÃz¿8ŸΩßäæ˝[¨>ƒAººµ-´'"^-M,ø|ü          Ø†    16Ä    á‡    ∆’êﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      á‡    á‡                                                                                ﬁ≠Ï          BALL::NamedProperty     à      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     â      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     â@      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     âh      	MMFF94RBL   ?Ò|Ìëhr∞ﬁ≠Ï    '9     ¬¢–           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      ¬¢–    ¬¢–            ©Í–    ∫>0     Ê‡                                        NNx jÒﬁ≠Ï          BALL::NamedProperty     ÕÃ†      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     ÕÃ»      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     ÕÃ       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     ÕÕ      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     ÕÕ@       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     ÕÕh       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     ÕÕê      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     ÕÕ∏      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ÕÕ‡       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     ÕŒ       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     ÕŒ0      InitialCharge       ﬁ≠Ï   H                  H      HC     @iH∑¿O|ä?Ä ÄøíòzADﬂ@(K∂-˜u4-*ûÖ≠ìA5          á‡ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      ∫>0    ∫>0            ©Í–    8¯–    ¬¢–                                        NNx jÔﬁ≠Ï          BALL::NamedProperty     •u      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     •v      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     •v@       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     •vh      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     •vê       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     •v∏       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     •v‡      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     •w      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     •w0       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     •wX       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     •wÄ      InitialCharge       ﬁ≠Ï   H                  H      HC     @.ÜÜ¿Re8ø≥ö>¯Ä±ø‘\éøîq™+°ùÍ*sqä-˚k1          16Äﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      16Ä    16Ä                                                                                ﬁ≠Ï          BALL::NamedProperty     Æd0      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     ÆdX      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     ÆdÄ      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     Æd®      	MMFF94RBL   ?Ò|Ìëhr∞ﬁ≠Ï    '9     ∫>0           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      8¯–    8¯–            ©Í–    π‘–    ∫>0                                        NNx jÌﬁ≠Ï          BALL::NamedProperty     ∫y       MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     ∫y(      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     ∫yP       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     ∫yx      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     ∫y†       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     ∫y»       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     ∫y      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     ∫z      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ∫z@       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     ∫zh       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     ∫zê      InitialCharge       ﬁ≠Ï   H       >ôö       H      HC     @¸FÊæÕú<¸ ?9» ¿Êi¿N€∫,~=N≠Å>X≠˜~          •p`ﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      •p`    •p`                                                                                ﬁ≠Ï          BALL::NamedProperty     •qp      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     •qò      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     •q¿      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     •qË      	MMFF94RBL   ?ÒGÆz·Hﬁ≠Ï    8¯–    ¡r‡           ﬁ≠ÏæÔﬁ≠Ä Lﬁ≠æÔ   
-BALL::Atom      ¡r‡    ¡r‡            ©Í–    4`    '9                                         NNx j‚ﬁ≠Ï          BALL::NamedProperty     ;Á¿      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     ;ÁË      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     ;Ë       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     ;Ë8      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     ;Ë`       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     ;Ëà       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     ;Ë∞      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     ;Ëÿ      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ;È        MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     ;È(       InRing     ﬁ≠Ï   BALL::NamedProperty     ;ÈP       
-IsAromatic     ﬁ≠Ï   BALL::NamedProperty     ;Èx      InitialCharge       ﬁ≠Ï   C       =Å       C      C5A    ?@Ÿ°£ær<u§êøkÃ9>Ññ?Eœﬂ¨≠l+≠-˙F¨ïeò          π¶      »P    •p`ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Bond       »P     »P                                                                                ﬁ≠Ï          BALL::NamedProperty     –G      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     –G8      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     –G`      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     –Gà       InRing     ﬁ≠Ï   BALL::NamedProperty     –G∞      	MMFF94RBL   ?ıI∫^5ﬁ≠Ï    ¡r‡    7é∞           ﬁ≠ÏæÔﬁ≠Ä Dﬁ≠æÔ   
-BALL::Atom      7é∞    7é∞            ©Í–    ´`    ¨L†                                        NNx j◊ﬁ≠Ï          BALL::NamedProperty     )P      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     )x      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     )†       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     )»      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     )       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     *       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     *@      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     *h      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     *ê       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     *∏       InRing     ﬁ≠Ï   BALL::NamedProperty     *‡       
-IsAromatic     ﬁ≠Ï   BALL::NamedProperty     +      InitialCharge       ﬁ≠Ï   N       ø∑Ä       N      N5B    B@¿Áèøö3;Zë©øO±÷?U∑?oÃ¨Å,≠îP<,qX          πÅ`     »Pﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Bond      πÅ`    πÅ`                                                                                ﬁ≠Ï          BALL::NamedProperty     å¿      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     åË      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     ç      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     ç8       InRing     ﬁ≠Ï   BALL::NamedProperty     ç`      	MMFF94RBL   ?ıÁlãCïÅﬁ≠Ï    7é∞    §00           ﬁ≠ÏæÔﬁ≠Ä Lﬁ≠æÔ   
-BALL::Atom      §00    §00            ©Í–    ¨L†    ™–                                        NNx j‹ﬁ≠Ï          BALL::NamedProperty     ∞p      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     ∞ò      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     ∞¿       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     ∞Ë      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     ±       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     ±8       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     ±`      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     ±à      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ±∞       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     ±ÿ       InRing     ﬁ≠Ï   BALL::NamedProperty     ≤        
-IsAromatic     ﬁ≠Ï   BALL::NamedProperty     ≤(      InitialCharge       ﬁ≠Ï   C       >îï       C      C5B    @@òOqø5?Rªëé¿º<)˘>¯´Å<Î%`,-y€¨œhb-éÍÁ          %u†    πÅ`    (“@ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Bond      (“@    (“@                                                                                ﬁ≠Ï          BALL::NamedProperty     (”∞      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     (”ÿ      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     (‘       MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     (‘(       InRing     ﬁ≠Ï   BALL::NamedProperty     (‘P      	MMFF94RBL   ?ˆ1&Èx’ﬁ≠Ï    §00    ¨L†           ﬁ≠ÏæÔﬁ≠Ä Lﬁ≠æÔ   
-BALL::Atom      ¨L†    ¨L†            ©Í–    7é∞    §00                                        NNx jŸﬁ≠Ï          BALL::NamedProperty     7Y`      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     7Yà      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     7Y∞       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     7Yÿ      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     7Z        MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     7Z(       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     7ZP      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     7Zx      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     7Z†       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     7Z»       InRing     ﬁ≠Ï   BALL::NamedProperty     7Z       
-IsAromatic     ﬁ≠Ï   BALL::NamedProperty     7[      InitialCharge       ﬁ≠Ï   C       ærGE       C      C5A    ?@ò‚?'lB;¢√d>Íg>¨⁄øKÅ≠9 ,Åµb,˝WÔ          åë‡    (“@    π⁄‡ﬁ≠ÏæÔﬁ≠Ä (ﬁ≠æÔ   
-BALL::Bond      π⁄‡    π⁄‡                                                                                ﬁ≠Ï          BALL::NamedProperty     ‘J‡      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     ‘K      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     ‘K0      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     ‘KX       InRing     ﬁ≠Ï   BALL::NamedProperty     ‘KÄ      
-MMFF94SBMB  ﬁ≠Ï   BALL::NamedProperty     ‘K®      	MMFF94RBL   ?ˆƒõ•„S¯ﬁ≠Ï    ¨L†    ™–           ﬁ≠ÏæÔﬁ≠Ä Lﬁ≠æÔ   
-BALL::Atom      ™–    ™–            ©Í–    §00    4`                                        NNx jﬁﬁ≠Ï          BALL::NamedProperty     r      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     s      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     s@       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     sh      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     sê       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     s∏       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     s‡      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     t      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     t0       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     tX       InRing     ﬁ≠Ï   BALL::NamedProperty     tÄ       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     t®      InitialCharge       ﬁ≠Ï   C       ?7
-=       C      C=ON   @c£·?∂*^<:(P>Ï]ø◊käæ†•^≠¢3-˝`¢-"∂q          √Ä    ∫”`    π⁄‡ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Bond      ∫”`    ∫”`                                                                                ﬁ≠Ï          BALL::NamedProperty     ∫‘–      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     ∫‘¯      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     ∫’       MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     ∫’H       InRing     ﬁ≠Ï   BALL::NamedProperty     ∫’p      	MMFF94RBL   ?ıÁlãCïÅﬁ≠Ï    ™–    ´`           ﬁ≠ÏæÔﬁ≠Ä Lﬁ≠æÔ   
-BALL::Atom      ´`    ´`            ©Í–    èU0    7é∞                                        NNx j’ﬁ≠Ï          BALL::NamedProperty     Æi      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     Æi8      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     Æi`       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     Æià      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     Æi∞       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     Æiÿ       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     Æj       "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     Æj(      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ÆjP       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     Æjx       InRing     ﬁ≠Ï   BALL::NamedProperty     Æj†       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     Æj»      InitialCharge       ﬁ≠Ï   N       æ◊Y       N      NC=O   
-@À?"÷è=£;°>Á¯jæÇñØ>±≠ê4,Ba"-Ü≠          ∫”`    ∫`    tﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      t    t                                                                                ﬁ≠Ï          BALL::NamedProperty     ∫ŸÄ      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     ∫Ÿ®      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     ∫Ÿ–      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     ∫Ÿ¯      	MMFF94RBL   ?ˆ˘€"–Â`ﬁ≠Ï    π‘–    ´`           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Bond      ∫`    ∫`                                                                                ﬁ≠Ï          BALL::NamedProperty     ∫–      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     ∫¯      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     ∫       MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     ∫H       InRing     ﬁ≠Ï   BALL::NamedProperty     ∫p      	MMFF94RBL   ?ıÁlãCïÅﬁ≠Ï    ´`    4`           ﬁ≠ÏæÔﬁ≠Ä Lﬁ≠æÔ   
-BALL::Atom      4`    4`            ©Í–    ™–    ¡r‡                                        NNx j‡ﬁ≠Ï          BALL::NamedProperty     ∆ƒp      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     ∆ƒò      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     ∆ƒ¿       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     ∆ƒË      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     ∆≈       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     ∆≈8       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     ∆≈`      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     ∆≈à      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ∆≈∞       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     ∆≈ÿ       InRing     ﬁ≠Ï   BALL::NamedProperty     ∆∆        
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     ∆∆(      InitialCharge       ﬁ≠Ï   C       ?0£◊       C      CONN   @õ©øE§K= ùg>˝›>B.R>G:9-uæ,mZ{)0ñ          ©HP     Õ@    ∫`ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Bond       Õ@     Õ@                                                                                ﬁ≠Ï          BALL::NamedProperty      Œê      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty      Œ∏      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty      Œ‡      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty      œ       InRing     ﬁ≠Ï   BALL::NamedProperty      œ0      	MMFF94RBL   ?ıÁlãCïÅﬁ≠Ï    4`    2P           ﬁ≠ÏæÔﬁ≠Ä Lﬁ≠æÔ   
-BALL::Atom      2P    2P            ©Í–    ¶ÅP    èU0                                        NNx j–ﬁ≠Ï          BALL::NamedProperty     ;ê       MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     ;ê(      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     ;êP       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     ;êx      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     ;ê†       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     ;ê»       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     ;ê      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     ;ë      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ;ë@       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     ;ëh       InRing     ﬁ≠Ï   BALL::NamedProperty     ;ëê       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     ;ë∏      InitialCharge       ﬁ≠Ï   N       æÿ†ê       N      NC=O   
-@f4ø∏	º›Û>äú,>d:UæPÜV,Hµ"≠Yù-€	          %u†     Õ@    Ø†ﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      Ø†    Ø†                                                                                ﬁ≠Ï          BALL::NamedProperty     Ø!      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     Ø!8      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     Ø!`      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     Ø!à      	MMFF94RBL   ?ˆ˘€"–Â`ﬁ≠Ï    '9     2P           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Bond      %u†    %u†                                                                                ﬁ≠Ï          BALL::NamedProperty     %w      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     %w8      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     %w`      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     %wà       InRing     ﬁ≠Ï   BALL::NamedProperty     %w∞      	MMFF94RBL   ?ˆìtºjﬁ≠Ï    §00    2P           ﬁ≠ÏæÔﬁ≠Ä Lﬁ≠æÔ   
-BALL::Atom      èU0    èU0            ©Í–    2P    ´`                                        NNx j”ﬁ≠Ï          BALL::NamedProperty     ƒ∞      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     ƒÿ      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     ≈        MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     ≈(      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     ≈P       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     ≈x       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     ≈†      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     ≈»      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     ≈       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     ∆       InRing     ﬁ≠Ï   BALL::NamedProperty     ∆@       
-IsAromatic     ﬁ≠Ï   BALL::NamedProperty     ∆h      InitialCharge       ﬁ≠Ï   N       =B¯8       N      NPYL   '@¬Ö?ÇwÃ:”˙ë?o=ÕºïøÄÌ,óF6´‚m≠8Ã          åë‡    π¶     ΩŸ†ﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      ΩŸ†    ΩŸ†                                                                                ﬁ≠Ï          BALL::NamedProperty     Ω€      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     Ω€8      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     Ω€`      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     Ω€à      	MMFF94RBL   ?˜∏QÎÖﬁ≠Ï    +ü    èU0           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Bond      π¶     π¶                                                                                 ﬁ≠Ï          BALL::NamedProperty     (G@      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     (Gh      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     (Gê      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     (G∏       InRing     ﬁ≠Ï   BALL::NamedProperty     (G‡      	MMFF94RBL   ?ı“Ò©˚Ámﬁ≠Ï    ¡r‡    èU0           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Bond      åë‡    åë‡                                                                                ﬁ≠Ï          BALL::NamedProperty     åì0      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     åìX      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     åìÄ      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     åì®       InRing     ﬁ≠Ï   BALL::NamedProperty     åì–      	MMFF94RBL   ?ı“Ò©˚Ámﬁ≠Ï    ¨L†    èU0           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      ¶ÅP    ¶ÅP            ©Í–    ®Ë∞    2P                                        NNx jŒﬁ≠Ï          BALL::NamedProperty     Àòp      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     Àòò      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     Àò¿       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     ÀòË      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     Àô       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     Àô8       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     Àô`      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     Àôà      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     Àô∞       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     Àôÿ       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     Àö       InitialCharge       ﬁ≠Ï   O       øÎÖ       O      O=CN   ?¶eÎø±‰Ø={8Â>∫<? Ä´>◊PÛ,ê≈x-•ƒÆ2%          ©HPﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      ©HP    ©HP                                                                                ﬁ≠Ï          BALL::NamedProperty     ¨ò–      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     ¨ò¯      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     ¨ô       MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     ¨ôH      	MMFF94RBL   ?ÛçOﬂ;dZﬁ≠Ï    4`    ¶ÅP           ﬁ≠ÏæÔﬁ≠Ä ﬁ≠æÔ   
-BALL::Atom      ®Ë∞    ®Ë∞            ©Í–            ¶ÅP                                        NNx jÃﬁ≠Ï          BALL::NamedProperty     4ëP      MOLFile::MASS_DIFFERENCE    ﬁ≠Ï   BALL::NamedProperty     4ëx      MOLFile::HYDROGEN_COUNT     ﬁ≠Ï   BALL::NamedProperty     4ë†       MOLFile::STEREO_CARE_BOX    ﬁ≠Ï   BALL::NamedProperty     4ë»      MOLFile::ATOM_VALENCE       ﬁ≠Ï   BALL::NamedProperty     4ë       MOLFile::H0_DESIGNATOR      ﬁ≠Ï   BALL::NamedProperty     4í       MOLFile::REACTION_COMPONENT_TYPE    ﬁ≠Ï   BALL::NamedProperty     4í@      "MOLFile::REACTION_COMPONENT_NUMBER      ﬁ≠Ï   BALL::NamedProperty     4íh      MOLFile::INVERSION_RETENTION    ﬁ≠Ï   BALL::NamedProperty     4íê       MOLFile::ATOM_EXACT_CHANGE      ﬁ≠Ï   BALL::NamedProperty     4í∏       
-IsAromatic      ﬁ≠Ï   BALL::NamedProperty     4í‡      InitialCharge       ﬁ≠Ï   O       øÎÖ       O      O=CN   @càÖ@)ñìΩ•∏>≥æ÷ø;•='b≈≠∂Å¥--ì˛-64          √Äﬁ≠ÏæÔﬁ≠Ä ∏ﬁ≠æÔ   
-BALL::Bond      √Ä    √Ä                                                                                ﬁ≠Ï          BALL::NamedProperty     ƒ      MOLFile::STEREO     ﬁ≠Ï   BALL::NamedProperty     ≈      MOLFile::TOPOLOGY       ﬁ≠Ï   BALL::NamedProperty     ≈@      MOLFile::REACTING_CENTER_STATUS     ﬁ≠Ï   BALL::NamedProperty     ≈h      	MMFF94RBL   ?ÛçOﬂ;dZﬁ≠Ï    ™–    ®Ë∞           ﬁ≠ÏæÔﬁ≠Ä  æÔﬁ≠

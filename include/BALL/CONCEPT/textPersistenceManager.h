@@ -19,9 +19,7 @@ namespace BALL
 			its objects in a human-readable text format.
 			This is slow and objects get <b>  huge </b>, but the format is clear and
 			comprehensible - the ideal format to debug persistence-related programs.
-			For production use, the XDRPersistenceManager is preferred.
-			@see	XDRPersistenceManager
-			
+
 			\ingroup  Persistence
 	*/
 	class BALL_EXPORT TextPersistenceManager

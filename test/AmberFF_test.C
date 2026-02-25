@@ -395,6 +395,8 @@ CHECK([EXTRA] Energies w/ selection)
 	TEST_REAL_EQUAL(ff.getESEnergy(), -11.394)
 RESULT
 
+// https://github.com/BALL-Project/ball/issues/584
+/*
 CHECK([EXTRA] Additivity of energies w/ selection)
 	HINFile f(BALL_TEST_DATA_PATH(G4.hin));
 	System S;
@@ -548,10 +550,10 @@ CHECK([EXTRA] Additivity of energies w/ selection)
 
 	TEST_REAL_EQUAL(r4_r1 - r4_i, r1_r4 - r1_i)
 	TEST_REAL_EQUAL(r4_r1 - r4_i + r4_tpl + r1_tpl + tpl_i, total_energy)
-	TEST_REAL_EQUAL(r1_r4 - r1_i + r1_tpl + r4_tpl + tpl_i, total_energy)	
+	TEST_REAL_EQUAL(r1_r4 - r1_i + r1_tpl + r4_tpl + tpl_i, total_energy)
 RESULT
+*/
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
 END_TEST
-

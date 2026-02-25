@@ -31,11 +31,6 @@ namespace BALL
 {
 	class DockingAlgorithm;
 
-	namespace VIEW
-	{
-		class DockRLDialog;
-	}
-
 	class ScoringFunction;
 
 	class BALL_EXPORT Constraint
@@ -135,7 +130,6 @@ namespace BALL
 			bool scale_by_size_;
 
 			friend class BALL::DockingAlgorithm;
-			friend class BALL::VIEW::DockRLDialog;
 	};
 
 	/** PharmacophoreConstraint allow to define specific intermolecular interactions that should exist between receptor and ligand.\n
@@ -191,7 +185,6 @@ namespace BALL
 			unsigned int gridSetID_;
 
 			friend class BALL::DockingAlgorithm;
-			friend class BALL::VIEW::DockRLDialog;
 	};
 }
 

@@ -30,12 +30,6 @@ INCLUDE(include/BALL/MOLMEC/sources.cmake)
 INCLUDE(source/NMR/sources.cmake)
 INCLUDE(include/BALL/NMR/sources.cmake)
 
-INCLUDE(source/PLUGIN/sources.cmake)
-INCLUDE(include/BALL/PLUGIN/sources.cmake)
-
-INCLUDE(source/PYTHON/sources.cmake)
-INCLUDE(include/BALL/PYTHON/sources.cmake)
-
 INCLUDE(source/QSAR/sources.cmake)
 INCLUDE(include/BALL/QSAR/sources.cmake)
 
