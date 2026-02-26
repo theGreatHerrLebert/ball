@@ -8,7 +8,7 @@ using namespace std;
 
 extern int ExpressionParserlex();
 extern void ExpressionParsererror(char const* s)
-	throw(Exception::ParseError);
+	noexcept(false);
 
 %}
 %union {
@@ -123,7 +123,7 @@ something:
 
 %%
 void ExpressionParsererror(char const* s)
-	throw(Exception::ParseError)
+	noexcept(false)
 {
 	throw Exception::ParseError(__FILE__, 0, 
 															ExpressionParser::state.buffer, 

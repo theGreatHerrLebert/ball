@@ -10,6 +10,7 @@
 
 namespace BALL 
 {
+	using std::streampos;
 
 	SDFile::SDFile()
 		:	MOLFile()
