@@ -23,7 +23,7 @@
 #endif
 
 #define BALL_DEFAULT_MUTEX_TYPE QMutex
-#define BALL_DEFAULT_MUTEXLOCKER_TYPE QMutexLocker
+#define BALL_DEFAULT_MUTEXLOCKER_TYPE QMutexLocker<QMutex>
 #define BALL_DEFAULT_READWRITELOCK_TYPE QReadWriteLock
 #define BALL_DEFAULT_READLOCKER_TYPE QReadLocker
 #define BALL_DEFAULT_WRITELOCKER_TYPE QWriteLocker
@@ -42,7 +42,7 @@ namespace BALL
 		: public MutexType
 	{
 		public:
-			TMutex(bool is_recursive = false)
+			TMutex()
 				: MutexType()
 			{}
 	};
@@ -52,8 +52,8 @@ namespace BALL
 		: public QMutex
 	{
 		public:
-			TMutex(bool is_recursive = false)
-				: QMutex( is_recursive ? Recursive : NonRecursive )
+			TMutex()
+				: QMutex()
 			{
 			}
 	};
