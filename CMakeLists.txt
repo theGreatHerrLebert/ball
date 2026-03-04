@@ -9,7 +9,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.10.0 FATAL_ERROR)
 
 CMAKE_POLICY(SET CMP0043 NEW)
 CMAKE_POLICY(SET CMP0048 NEW)
-CMAKE_POLICY(SET CMP0167 OLD)
+CMAKE_POLICY(SET CMP0167 NEW)
 
 IF(POLICY CMP0071)
 	CMAKE_POLICY(SET CMP0071 NEW)
@@ -198,7 +198,7 @@ ENDIF()
 ## replace any variables in config.h.in with current values
 SET(CONFIGURED_CONFIG_H ${PROJECT_BINARY_DIR}/include/BALL/CONFIG/config.h)
 CONFIGURE_FILE(cmake/config.h.in ${CONFIGURED_CONFIG_H})
-	
+
 ## build a config.h file for our tests to not disturb the rest of BALL
 CONFIGURE_FILE(cmake/BALLTestConfig.h.in ${PROJECT_BINARY_DIR}/test/BALLTestConfig.h)
 
@@ -217,7 +217,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BALL_PROJECT_COMPILE_FLAGS}")
 ADD_DEFINITIONS("${BALL_PROJECT_COMPILE_DEFNS}")
 
 
-## are we building a shared or static lib?! (BOTH within 
+## are we building a shared or static lib?! (BOTH within
 ## the same BUILD-tree is NOT possible currently!!)
 SET(BUILD_SHARED_LIBS TRUE)
 
