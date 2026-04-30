@@ -74,10 +74,11 @@ build-dir          = "build/{wheel_tag}"
 wheel.packages     = []
 wheel.install-dir  = "ball"
 
-# CTest target lives next to the binding; running it from a wheel
-# install would require pytest + the smoke fixture, neither of which
-# pip install drags along by default. Keep wheel install lean.
-ctest.skip-tests   = true
+# scikit-build-core does not invoke ctest as part of the wheel build,
+# so there is no separate skip-tests knob to set here. Test targets
+# the parent CMakeLists registers (the python_smoke target in
+# python/CMakeLists.txt) are simply not built unless the consumer
+# runs ctest manually after install.
 
 [tool.scikit-build.cmake.define]
 BALL_BUILD_PYTHON  = "ON"
