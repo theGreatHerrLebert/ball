@@ -25,10 +25,15 @@ namespace {
 // Read a PDB file into a freshly-allocated System. Throws on failure
 // rather than silently returning an empty system — empty inputs would
 // surface as confusing energy=0 results in the bindings.
+//
+// PDBFile::open returns void (overriding File::open's bool return), so
+// success has to be probed via is_open()/good() rather than a return
+// value. read() does return bool.
 std::unique_ptr<System> load_pdb(const std::string& path) {
     auto sys = std::make_unique<System>();
     PDBFile f;
-    if (!f.open(path)) {
+    f.open(path);
+    if (!f.isOpen()) {
         throw std::runtime_error("BALL: cannot open PDB file: " + path);
     }
     if (!f.read(*sys)) {
