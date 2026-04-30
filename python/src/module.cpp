@@ -30,6 +30,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cstdlib>
+#include <dlfcn.h>
 #include <filesystem>
 #include <sstream>
 
@@ -64,6 +66,63 @@ namespace py = pybind11;
 using namespace BALL;
 
 namespace {
+
+// Locate the wheel-bundled BALL data tree and set BALL_DATA_PATH if
+// the user has not already set it.
+//
+// Why this is necessary: scikit-build-core installs BALL's data
+// directory (Fragments.db, parameter INI files, atom-typing
+// templates, radii sets, ...) under share/BALL/ in the wheel. At
+// runtime libBALL.so resolves data files via Path::find(), which
+// consults BALL_DATA_PATH first. cibuildwheel-built wheels fix the
+// data path to the build container's layout, which does not exist
+// on the consumer machine; without overriding BALL_DATA_PATH every
+// data-dependent call (AmberFF::setup, FragmentDB construction,
+// CharmmFF, RMSDMinimizer, ...) fails with the opaque
+// "BALL: std::exception" because libBALL never finds Fragments.db.
+//
+// Strategy: at module-init time, dladdr the address of an in-module
+// symbol to recover this .so's filesystem path; the wheel layout
+// puts ball.cpython-*.so at <site-packages>/ and share/BALL/ as a
+// sibling at <site-packages>/share/BALL/, so the data dir is one
+// directory up from the .so. Probe for the canonical sentinel file
+// (fragments/Fragments.db) to confirm the layout before touching
+// the env. If the user has pre-set BALL_DATA_PATH, leave it alone.
+//
+// The helper is a free function rather than a side-effect at static
+// init so its execution order is deterministic — it runs as the
+// first statement of PYBIND11_MODULE, before any m.def() body
+// could plausibly trigger a BALL data lookup. Using a static
+// initializer would risk firing before pybind11's own init,
+// depending on link order.
+void set_ball_data_path_if_unset() {
+    if (std::getenv("BALL_DATA_PATH") != nullptr) {
+        return;
+    }
+    // Take the address of THIS function — it is guaranteed to live
+    // in the ball.cpython-*.so we want to locate. dladdr fills
+    // dli_fname with the .so's filesystem path.
+    Dl_info info;
+    if (dladdr(reinterpret_cast<void*>(&set_ball_data_path_if_unset), &info) == 0
+        || info.dli_fname == nullptr) {
+        return;
+    }
+    auto so_path = std::filesystem::path(info.dli_fname);
+    auto candidate = so_path.parent_path() / "share" / "BALL";
+    auto sentinel = candidate / "fragments" / "Fragments.db";
+    std::error_code ec;
+    if (!std::filesystem::is_regular_file(sentinel, ec)) {
+        // Wheel layout not as expected. Could be a development
+        // install where share/BALL/ lives elsewhere; user must set
+        // BALL_DATA_PATH explicitly in that case.
+        return;
+    }
+    // setenv writes into the process environment; the third arg=0
+    // means do not overwrite, but we already returned early above
+    // when the env was set, so 1 (overwrite) is equivalent and
+    // matches the function's intent.
+    setenv("BALL_DATA_PATH", candidate.c_str(), 1);
+}
 
 // pybind11's default exception translator turns bare C++ exceptions
 // into Python RuntimeError("std::exception") — losing the message.
@@ -852,6 +911,13 @@ py::dict rmsd(const std::string& pdb_a,
 }  // namespace
 
 PYBIND11_MODULE(ball, m) {
+    // Locate the bundled BALL data tree and set BALL_DATA_PATH if the
+    // user has not already done so. Must run before any m.def() body
+    // that could trigger a BALL data lookup. See the helper's comment
+    // for why this matters and why it is a free function rather than
+    // a static initializer.
+    set_ball_data_path_if_unset();
+
     m.doc() =
         "Minimal Python bindings for BALL force-field evaluation.\n"
         "\n"

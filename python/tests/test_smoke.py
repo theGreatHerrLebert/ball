@@ -57,6 +57,34 @@ def test_module_loads():
     assert callable(ball.charmm_energy)
 
 
+def test_ball_data_path_auto_discovery():
+    """AmberFF setup succeeds without the user pre-setting BALL_DATA_PATH.
+
+    Regression guard for the in-binding BALL_DATA_PATH discovery: at
+    PYBIND11_MODULE init time, the binding dladdrs its own .so to find
+    the wheel-bundled share/BALL/ tree and setenv()s BALL_DATA_PATH if
+    the user has not already set it. Without that, every data-dependent
+    BALL call (FragmentDB construction, AmberFF::setup, RMSDMinimizer,
+    ...) fails with the opaque "BALL: std::exception" because libBALL
+    cannot find Fragments.db / parameter INIs.
+
+    Note: Python's os.environ is a snapshot at process start and
+    does NOT reflect the C-side setenv. The proof that the env was
+    set is that amber_energy actually succeeds — without
+    BALL_DATA_PATH, AmberFF::setup throws and the call here would
+    raise RuntimeError("BALL: std::exception") before producing a
+    finite total.
+    """
+    pdb = _resolve_crambin_pdb()
+    e = ball.amber_energy(str(pdb))
+    assert math.isfinite(e["total"]), (
+        "amber_energy returned non-finite total — AmberFF::setup probably "
+        "could not find BALL data dir; check the dladdr-based discovery "
+        "in module.cpp"
+    )
+    assert e["n_atoms"] >= 327, "PDB load lost atoms"
+
+
 def test_amber_energy_returns_finite_components():
     """AMBER on crambin produces finite, non-zero energies for every component.
 
