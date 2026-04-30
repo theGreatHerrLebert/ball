@@ -922,3 +922,16 @@ ENDIF()
 # Generate CTags for BALL project
 ######################################################
 INCLUDE(BALLCTags)
+
+# ---------------------------------------------------------------------
+# Optional Python bindings (pybind11). See python/README.md.
+#
+# Off by default — enable with -DBALL_BUILD_PYTHON=ON. The subdirectory
+# fetches pybind11 via FetchContent, so a regular BALL build that
+# leaves this option off has no new dependencies. CTest gains a
+# `python_smoke` target when the option is on.
+# ---------------------------------------------------------------------
+OPTION(BALL_BUILD_PYTHON "Build the pybind11 Python bindings under python/" OFF)
+IF(BALL_BUILD_PYTHON)
+    ADD_SUBDIRECTORY(python)
+ENDIF()
