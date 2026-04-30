@@ -58,7 +58,14 @@ def test_module_loads():
 
 
 def test_amber_energy_returns_finite_components():
-    """AMBER on crambin produces finite, non-zero energies for every component."""
+    """AMBER on crambin produces finite, non-zero energies for every component.
+
+    The non-zero check on bend and torsion is load-bearing: BALL's
+    force-field components silently zero out terms when atom triplets/
+    quadruplets cannot match the parameter table. A regression that
+    skips name normalisation, bond construction, or hydrogen placement
+    on the input PDB shows up exactly as bend = 0 / torsion = 0 here.
+    """
     pdb = _resolve_crambin_pdb()
     e = ball.amber_energy(str(pdb))
 
@@ -70,21 +77,37 @@ def test_amber_energy_returns_finite_components():
         f"missing keys: {expected_keys - set(e.keys())}"
     )
 
-    assert e["n_atoms"] > 0, "PDB load reported zero atoms"
+    # n_atoms after add_hydrogens=True is the heavy-atom count plus
+    # placed hydrogens; on crambin (327 heavy atoms) the all-atom
+    # AMBER FF lands around 600+. A zero or near-zero count signals
+    # the PDB load itself failed.
+    assert e["n_atoms"] >= 327, "PDB load lost atoms"
 
     for k in ("bond_stretch", "angle_bend", "torsion", "nonbonded", "total"):
         v = e[k]
         assert isinstance(v, float), f"{k}: expected float, got {type(v)}"
         assert math.isfinite(v), f"{k}: non-finite value {v!r}"
 
+    for k in ("bond_stretch", "angle_bend", "torsion"):
+        assert abs(e[k]) > 1.0, (
+            f"{k} is near-zero ({e[k]} kJ/mol) — preprocessing chain may "
+            f"have skipped name normalisation, bond build, or H placement"
+        )
+
 
 def test_charmm_eef1_returns_finite_components():
-    """CHARMM+EEF1 on crambin produces a finite solvation term."""
+    """CHARMM+EEF1 on crambin: every component populates non-trivially.
+
+    Splits proper from improper torsion (BALL's CharmmFF::getTorsionEnergy
+    returns the sum, which previously masked proper torsion always being 0
+    on heavy-atom-only inputs).
+    """
     pdb = _resolve_crambin_pdb()
     e = ball.charmm_energy(str(pdb), use_eef1=True)
 
     expected_keys = {
-        "bond_stretch", "angle_bend", "torsion", "improper_torsion",
+        "bond_stretch", "angle_bend",
+        "proper_torsion", "improper_torsion", "torsion",
         "vdw", "nonbonded", "solvation", "total", "n_atoms", "use_eef1",
     }
     assert expected_keys.issubset(e.keys()), (
@@ -92,11 +115,39 @@ def test_charmm_eef1_returns_finite_components():
     )
 
     assert e["use_eef1"] is True
-    assert math.isfinite(e["solvation"])
-    # EEF1 solvation on a folded protein should be non-zero — a zero
-    # would mean the EEF1 toggle silently failed to engage.
-    assert e["solvation"] != 0.0, (
-        "EEF1 solvation reported as 0.0 — option may not have applied"
+    for k in ("bond_stretch", "angle_bend", "proper_torsion",
+              "improper_torsion", "vdw", "nonbonded", "solvation", "total"):
+        assert math.isfinite(e[k]), f"{k}: non-finite value {e[k]!r}"
+
+    # The torsion key is the documented sum of proper + improper.
+    assert e["torsion"] == pytest.approx(
+        e["proper_torsion"] + e["improper_torsion"], rel=1e-9
+    ), "torsion key drifted from proper+improper sum"
+
+    # EEF1 solvation on a folded protein should be non-zero AND
+    # negative (favorable solvation in a folded state). A zero would
+    # mean the EEF1 toggle silently failed to engage; a positive
+    # value would mean the FF saw an unfolded conformation, which
+    # is wrong for crambin.
+    assert e["solvation"] < 0.0, (
+        f"EEF1 solvation reported as {e['solvation']} — should be negative on a folded protein"
+    )
+
+    # Both proper and improper torsion should be non-trivial on a
+    # protein. Improper specifically catches the previous bug where
+    # only impropers fired and they masked as the total torsion.
+    assert abs(e["proper_torsion"]) > 1.0, (
+        "proper_torsion is near-zero — preprocessing chain may have skipped H placement"
+    )
+    assert abs(e["improper_torsion"]) > 1.0, (
+        "improper_torsion is near-zero — CharmmImproperTorsion setup may have failed"
+    )
+
+    # Folded crambin under CHARMM19+EEF1 should report a negative total
+    # energy (favorable). If this flips positive, something is very
+    # wrong with the FF assignment.
+    assert e["total"] < 0.0, (
+        f"CHARMM+EEF1 total energy on folded crambin should be negative, got {e['total']}"
     )
 
 
@@ -111,10 +162,36 @@ def test_charmm_no_eef1_zeroes_solvation():
 
     # Bonded components should agree to floating-point precision —
     # EEF1 only adds a solvation term, doesn't alter bonded math.
-    for k in ("bond_stretch", "angle_bend", "torsion", "improper_torsion"):
+    for k in ("bond_stretch", "angle_bend",
+              "proper_torsion", "improper_torsion"):
         assert no_eef1[k] == pytest.approx(with_eef1[k], rel=1e-9), (
             f"{k} drifted between EEF1 on/off; EEF1 should not affect bonded"
         )
+
+
+def test_disable_preprocessing_surfaces_zero_bend():
+    """Without preprocessing, bend and torsion zero out — the previous bug.
+
+    This is a regression guard: if a future BALL change starts auto-running
+    name normalisation / bond building / H placement during setup(), this
+    test will start passing the inverted assertion (bend != 0) and we
+    should re-evaluate whether the preprocessing flags still belong on the
+    binding surface or can become no-ops.
+    """
+    pdb = _resolve_crambin_pdb()
+    e = ball.amber_energy(
+        str(pdb),
+        normalize_names=False,
+        build_bonds=False,
+        add_hydrogens=False,
+    )
+    # On the heavy-atom-only crambin, no preprocessing -> no bonds
+    # built -> CharmmBend / AmberBend can't find triplets -> bend = 0.
+    assert e["angle_bend"] == pytest.approx(0.0, abs=1e-9), (
+        "angle_bend non-zero without preprocessing — BALL's setup may have "
+        "started doing the preprocessing itself, in which case the "
+        "preprocessing flags on the binding may no longer be needed"
+    )
 
 
 def test_load_failure_raises():
