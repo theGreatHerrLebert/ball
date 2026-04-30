@@ -55,12 +55,14 @@ jobs:
 
       - name: Install system dependencies
         # Qt6 + Boost + Eigen + FFTW are BALL's hard deps (the zomball
-        # branch's modernization commits explicitly target Qt6).
+        # branch's modernization commits explicitly target Qt6). Package
+        # names follow Ubuntu 22.04 (jammy) — `qt6-base-dev` not
+        # `libqt6base-dev`, the latter does not exist on jammy.
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
               build-essential cmake \
-              libqt6base-dev libqt6core5compat6-dev qt6-tools-dev qt6-tools-dev-tools \
+              qt6-base-dev libqt6core5compat6-dev qt6-tools-dev qt6-tools-dev-tools \
               libboost-all-dev \
               libeigen3-dev \
               libfftw3-dev
