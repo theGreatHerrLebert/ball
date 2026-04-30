@@ -52,6 +52,17 @@ set_target_properties(ball_py PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python"
 )
 
+# Install rule for the wheel build (scikit-build-core / pyproject.toml).
+# Without an explicit install() rule, scikit-build-core has nothing to
+# copy into the wheel and `import ball` after `pip install` fails with
+# ModuleNotFoundError. DESTINATION "." puts the .so at the wheel's
+# top level so the module is directly importable without a wrapping
+# package directory.
+install(
+    TARGETS ball_py
+    LIBRARY DESTINATION .
+)
+
 # Sanity helper. Lets a contributor verify the wheel/import path with:
 #   ctest -R python_smoke
 # once the build completes. Skips silently when pytest is not on PATH.
