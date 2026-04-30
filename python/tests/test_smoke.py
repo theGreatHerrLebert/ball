@@ -268,3 +268,96 @@ def test_add_hydrogens_writes_pdb(tmp_path):
     assert 200 <= result["n_hydrogens_added"] <= 400, (
         f"unexpected H count {result['n_hydrogens_added']}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Analysis surface — sasa, build_bonds, atom_typer, minimize_energy,
+# system_info. Added in v0.1.0a2.
+# ---------------------------------------------------------------------------
+
+def test_system_info_shape():
+    """system_info enumerates atoms / residues / chains."""
+    pdb = _resolve_crambin_pdb()
+    info = ball.system_info(str(pdb))
+    assert info["n_atoms"] > 0
+    assert info["n_residues"] >= 40  # crambin = 46 residues
+    assert info["n_chains"] >= 1
+    assert isinstance(info["chain_ids"], list)
+    assert all(isinstance(c, str) and c for c in info["chain_ids"])
+
+
+def test_build_bonds_counts():
+    """build_bonds infers bonds geometrically and reports the count."""
+    pdb = _resolve_crambin_pdb()
+    info = ball.build_bonds(str(pdb))
+    assert info["n_atoms"] > 0
+    # On crambin's heavy-atom-only set (327 atoms, ~46 residues),
+    # geometric inference yields ~330 bonds (backbone + sidechain).
+    # The exact number depends on the bond-length cutoff but should
+    # be in the same ballpark as the atom count.
+    assert info["n_bonds_built"] > 100
+    assert info["n_bonds_built"] < 1500
+
+
+def test_sasa_total_and_per_atom():
+    """sasa produces non-zero total area and a per-atom dict."""
+    pdb = _resolve_crambin_pdb()
+    s = ball.sasa(str(pdb))
+    assert s["total_area"] > 0.0, "SASA returned 0 — radii assignment may have failed"
+    assert s["total_volume"] > 0.0
+    assert s["n_atoms"] > 0
+    # Crambin total SASA is ~3000 A^2 with PARSE radii.
+    assert 2000.0 < s["total_area"] < 5000.0, (
+        f"SASA total {s['total_area']} A^2 outside plausible range for crambin"
+    )
+    assert isinstance(s["per_atom"], dict)
+    assert len(s["per_atom"]) > 0
+    # Every per-atom area is non-negative; at least some are non-zero.
+    nonzero_count = sum(1 for v in s["per_atom"].values() if v > 0)
+    assert nonzero_count > 50, "almost no atoms have non-zero SASA"
+
+
+def test_atom_typer_assigns_charges():
+    """atom_typer returns one entry per atom with type + charge + element."""
+    pdb = _resolve_crambin_pdb()
+    types = ball.atom_typer(str(pdb))
+    assert isinstance(types, list)
+    assert len(types) > 0
+    for entry in types[:5]:
+        assert {"atom", "type_name", "charge", "element"} == entry.keys()
+        assert ":" in entry["atom"]
+        assert isinstance(entry["charge"], float)
+        assert isinstance(entry["element"], str) and entry["element"]
+    # Most atoms should have non-empty type names; allow a small fraction
+    # of misses for terminus residues.
+    typed_count = sum(1 for t in types if t["type_name"])
+    assert typed_count >= 0.8 * len(types), (
+        f"only {typed_count}/{len(types)} atoms got AMBER type names"
+    )
+
+
+def test_minimize_energy_drops_energy(tmp_path):
+    """minimize_energy actually iterates and produces an energy drop."""
+    pdb = _resolve_crambin_pdb()
+    out_path = tmp_path / "crambin_min.pdb"
+    result = ball.minimize_energy(str(pdb), str(out_path), max_iter=50)
+    expected_keys = {
+        "ff", "method", "max_iter", "iterations", "converged",
+        "initial_energy", "final_energy", "energy_drop",
+        "pdb_out", "n_atoms",
+    }
+    assert expected_keys.issubset(result.keys())
+
+    # The minimizer must have actually iterated. Defaulting to 0
+    # iterations was the earlier silent-failure mode.
+    assert result["iterations"] > 0, (
+        "minimizer ran zero iterations — likely a setMaxNumberOfIterations "
+        "vs minimize(steps=) bug"
+    )
+    # Energy must drop on a raw clashy PDB (initial energy is huge).
+    assert result["energy_drop"] > 0, (
+        f"energy did not drop: initial={result['initial_energy']}, "
+        f"final={result['final_energy']}"
+    )
+    # PDB written.
+    assert out_path.is_file()
