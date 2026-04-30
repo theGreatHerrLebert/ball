@@ -97,7 +97,18 @@ jobs:
           # Repair: bundle libBALL.so + Qt6 + Boost into the wheel
           # so end users do not need them at install time. auditwheel
           # walks the .so's NEEDED list and pulls referenced libs.
+          #
+          # libBALL.so lives in scikit-build-core's per-wheel build
+          # dir (`build/{wheel_tag}/lib`); auditwheel does not search
+          # there by default, so the bare `auditwheel repair` aborts
+          # with "required library libBALL.so.1.5 could not be
+          # located" even though the file exists. Prepend every such
+          # directory under /project/build to LD_LIBRARY_PATH at
+          # repair time so auditwheel can resolve the wheel's NEEDED
+          # list and bundle the deps under ball.libs/.
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            BUILD_LIB_DIRS=$(find /project/build -type d -name lib 2>/dev/null | tr '\n' ':') &&
+            LD_LIBRARY_PATH="${BUILD_LIB_DIRS}${LD_LIBRARY_PATH}"
             auditwheel repair -w {dest_dir} {wheel}
           # Smoke each wheel on the manylinux runner before upload.
           CIBW_TEST_REQUIRES: pytest
