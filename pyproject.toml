@@ -16,7 +16,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "ball-py"
-version = "0.1.0a0"
+version = "0.1.0a4"
 description = "Python bindings for BALL — Biochemical ALgorithms Library"
 readme = "python/README.md"
 requires-python = ">=3.11"

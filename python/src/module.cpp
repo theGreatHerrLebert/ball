@@ -2,7 +2,7 @@
 // a downstream consumer (e.g. proteon's EVIDENT oracle suite) wants
 // to compare BALL against on a per-PDB basis.
 //
-// Surface today (v0.1.0a3):
+// Surface today (v0.1.0a4):
 //   amber_energy            single-point AMBER force-field energy
 //   charmm_energy           single-point CHARMM force-field energy (EEF1 toggle)
 //   mmff94_energy           single-point MMFF94 force-field energy (small-molecule FF)
