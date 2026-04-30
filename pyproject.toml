@@ -77,7 +77,14 @@ cmake.version      = ">=3.30"
 cmake.build-type   = "Release"
 build-dir          = "build/{wheel_tag}"
 wheel.packages     = []
-wheel.install-dir  = "ball"
+# Leave wheel.install-dir at its default (top-level site-packages).
+# Setting it to "ball" placed the extension at
+# site-packages/ball/ball.cpython-3X-...so, where `import ball`
+# finds the *directory* and not the extension module — yielding
+# AttributeError on every binding access. The pybind11 module is
+# already named `ball` via OUTPUT_NAME in python/CMakeLists.txt and
+# PYBIND11_MODULE(ball, ...) in module.cpp, so the .so installs as
+# `site-packages/ball.cpython-3X-...so` — directly importable.
 
 # scikit-build-core does not invoke ctest as part of the wheel build,
 # so there is no separate skip-tests knob to set here. Test targets
