@@ -198,3 +198,73 @@ def test_load_failure_raises():
     """A nonexistent PDB path raises rather than returning empty energies."""
     with pytest.raises(RuntimeError, match="cannot open|failed to parse"):
         ball.amber_energy("/nonexistent/path/to/no.pdb")
+
+
+# ---------------------------------------------------------------------------
+# Analysis surface — hbonds, secondary_structure, add_hydrogens_to_pdb
+# Added in v0.1.0a1. Smoke-level only: shape and order-of-magnitude sanity.
+# Numerical pinning lives downstream in proteon's oracle layer.
+# ---------------------------------------------------------------------------
+
+def test_hbonds_shape():
+    """hbonds returns a list of {donor, acceptor, length} dicts."""
+    pdb = _resolve_crambin_pdb()
+    bonds = ball.hbonds(str(pdb))
+    assert isinstance(bonds, list)
+    # Crambin (46 residues) has roughly 25–30 backbone hydrogen bonds —
+    # an order-of-magnitude check guards against the processor not
+    # actually running.
+    assert 10 <= len(bonds) <= 60, f"unexpected H-bond count {len(bonds)}"
+    sample = bonds[0]
+    assert {"donor", "acceptor", "length"}.issubset(sample.keys())
+    # atom_key format: "<chain>:<residue><id>:<atom>"
+    assert ":" in sample["donor"]
+    assert ":" in sample["acceptor"]
+    assert 2.0 < sample["length"] < 5.0, (
+        f"H-bond length {sample['length']} outside plausible range"
+    )
+
+
+def test_secondary_structure_shape():
+    """secondary_structure returns one assignment per residue with valid SS letters."""
+    pdb = _resolve_crambin_pdb()
+    result = ball.secondary_structure(str(pdb))
+    assert "assignments" in result
+    assert "n_residues" in result
+    assert result["n_residues"] == len(result["assignments"])
+    # Crambin has 46 residues; allow some tolerance for terminus
+    # handling differences.
+    assert 40 <= result["n_residues"] <= 50
+
+    valid_letters = {"H", "E", "T", "C", "-"}
+    for entry in result["assignments"]:
+        assert {"residue", "ss"} == entry.keys()
+        assert entry["ss"] in valid_letters, (
+            f"unexpected SS letter {entry['ss']!r} for {entry['residue']}"
+        )
+
+    # Crambin has both helix and strand content; assert that the
+    # processor produced a non-trivial mix rather than all-coil.
+    counts = {letter: 0 for letter in valid_letters}
+    for entry in result["assignments"]:
+        counts[entry["ss"]] += 1
+    assert counts["H"] > 0, "no helix assigned — processor may not have run"
+    assert counts["E"] > 0, "no strand assigned — processor may not have run"
+
+
+def test_add_hydrogens_writes_pdb(tmp_path):
+    """add_hydrogens_to_pdb writes a hydrogenated PDB and reports counts."""
+    pdb = _resolve_crambin_pdb()
+    out_path = tmp_path / "crambin_h.pdb"
+    result = ball.add_hydrogens_to_pdb(str(pdb), str(out_path))
+
+    assert out_path.is_file(), "output PDB was not written"
+    assert result["pdb_out"] == str(out_path)
+    assert result["n_atoms_in"] > 0
+    assert result["n_hydrogens_added"] > 0
+    assert result["n_atoms_out"] == result["n_atoms_in"] + result["n_hydrogens_added"]
+    # Crambin has 327 heavy atoms; expect ~300 hydrogens for an
+    # all-atom force field.
+    assert 200 <= result["n_hydrogens_added"] <= 400, (
+        f"unexpected H count {result['n_hydrogens_added']}"
+    )

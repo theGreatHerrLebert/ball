@@ -1,26 +1,57 @@
-// Minimal Python bindings for BALL force-field evaluation.
+// Python bindings for BALL — analysis surface that mirrors the things
+// a downstream consumer (e.g. proteon's EVIDENT oracle suite) wants
+// to compare BALL against on a per-PDB basis.
 //
-// Surface intentionally narrow — just enough to live-regenerate
-// per-component AMBER and CHARMM-EEF1 energy values from a PDB on the
-// proteon EVIDENT manifest's forcefield_amber_ball claim, and to
-// enable a future forcefield_charmm19_ball claim that closes the gap
-// documented in proteon/evident/claims/forcefield_charmm19_internal.yaml.
+// Surface today (v0.1.0a1):
+//   amber_energy            single-point AMBER force-field energy
+//   charmm_energy           single-point CHARMM force-field energy (EEF1 toggle)
+//   hbonds                  hydrogen bond list (HBondProcessor)
+//   secondary_structure     per-residue SS assignment (SecondaryStructureProcessor)
+//   add_hydrogens_to_pdb    write a hydrogenated PDB (AddHydrogenProcessor)
 //
-// Out of scope here: minimization, dynamics, NMR, QSAR, docking,
-// trajectory I/O. Those can land later if a proteon claim needs them.
+// Deferred to v0.2 (each needs more setup than the surface budget):
+//   sasa                    NumericalSAS reads atom.getRadius() per atom;
+//                           PDB-loaded atoms have radius=0, and AmberFF
+//                           stores radii in its parameter table not on
+//                           the atoms themselves. Needs a proper
+//                           radiusRuleProcessor pass before SASA can
+//                           land. Until then, proteon's SASA claim
+//                           uses Biopython + FreeSASA as oracles.
+//   gb_energy               GeneralizedBornModel needs scaling-factor INI
+//   minimize_energy         per-step minimizer — option-rich
+//   build_bonds             bond inference oracle
+//   peptide_from_sequence   generative fixture builder
+//   atom_typer              FF atom-type assignment
+//   system_info             atom/residue/chain enumeration
+//
+// Each binding is a "process and report" function: takes a path,
+// returns a structured Python dict/list, raises RuntimeError with the
+// underlying BALL message on failure. State-bearing class bindings
+// (PySystem, PyAtom, etc.) are deferred — most oracle comparisons
+// don't need them.
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include <filesystem>
+#include <sstream>
 
 #include <BALL/COMMON/exception.h>
 #include <BALL/FORMAT/PDBFile.h>
 #include <BALL/KERNEL/system.h>
+#include <BALL/KERNEL/atom.h>
+#include <BALL/KERNEL/atomIterator.h>
+#include <BALL/KERNEL/residue.h>
+#include <BALL/KERNEL/residueIterator.h>
+#include <BALL/KERNEL/chain.h>
+#include <BALL/KERNEL/chainIterator.h>
+#include <BALL/KERNEL/secondaryStructure.h>
 #include <BALL/MOLMEC/AMBER/amber.h>
 #include <BALL/MOLMEC/CHARMM/charmm.h>
 #include <BALL/STRUCTURE/fragmentDB.h>
 #include <BALL/STRUCTURE/addHydrogenProcessor.h>
+#include <BALL/STRUCTURE/HBondProcessor.h>
+#include <BALL/STRUCTURE/secondaryStructureProcessor.h>
 
 namespace py = pybind11;
 using namespace BALL;
@@ -134,6 +165,173 @@ void apply_cutoff(FF& ff, double nonbonded_cutoff) {
     ff.options[FF::Option::VDW_CUTOFF]       = std::to_string(nonbonded_cutoff);
     ff.options[FF::Option::ELECTROSTATIC_CUTOFF] = std::to_string(nonbonded_cutoff);
 }
+
+// ---------------------------------------------------------------------------
+// Helpers — atom identity for HBond / SS / SASA outputs
+// ---------------------------------------------------------------------------
+
+// Render a stable atom identifier so a downstream consumer can join
+// against the same atom in another tool's output. Format:
+//   "<chain>:<residue_name><residue_id>:<atom_name>"
+// Matches the convention proteon uses for cross-tool joins.
+std::string atom_key(const Atom& atom) {
+    std::ostringstream out;
+    const auto* residue = atom.getResidue();
+    if (residue != nullptr) {
+        const auto* chain = residue->getChain();
+        if (chain != nullptr) {
+            out << chain->getName() << ":";
+        }
+        out << residue->getName() << residue->getID() << ":";
+    }
+    out << atom.getName();
+    return out.str();
+}
+
+std::string residue_key(const Residue& residue) {
+    std::ostringstream out;
+    const auto* chain = residue.getChain();
+    if (chain != nullptr) {
+        out << chain->getName() << ":";
+    }
+    out << residue.getName() << residue.getID();
+    return out.str();
+}
+
+// ---------------------------------------------------------------------------
+// hbonds — HBondProcessor wrapper
+// ---------------------------------------------------------------------------
+
+py::list hbonds(const std::string& pdb_path,
+                bool normalize_names,
+                bool build_bonds,
+                bool add_hydrogens) {
+    return translate_ball_exceptions([&] {
+        auto sys = load_pdb(pdb_path, normalize_names, build_bonds, add_hydrogens);
+        HBondProcessor hbp;
+        sys->apply(hbp);
+        auto bonds = hbp.getHBonds();
+
+        py::list out;
+        for (auto& h : bonds) {
+            const Atom* donor = h.getDonor();
+            const Atom* acceptor = h.getAcceptor();
+            if (donor == nullptr || acceptor == nullptr) continue;
+            py::dict entry;
+            entry["donor"] = atom_key(*donor);
+            entry["acceptor"] = atom_key(*acceptor);
+            entry["length"] = h.getLength();
+            out.append(entry);
+        }
+        return out;
+    });
+}
+
+// ---------------------------------------------------------------------------
+// secondary_structure — SecondaryStructureProcessor wrapper
+// ---------------------------------------------------------------------------
+
+// Translate BALL's SecondaryStructure::Type enum to a one-letter code
+// matching the DSSP convention. BALL's vocabulary is coarser
+// (HELIX / STRAND / TURN / COIL / UNKNOWN) than DSSP's 8-class
+// alphabet; map to the 3-class reduction (H / E / C / T).
+const char* ss_type_letter(SecondaryStructure::Type t) {
+    switch (t) {
+        case SecondaryStructure::HELIX:   return "H";
+        case SecondaryStructure::STRAND:  return "E";
+        case SecondaryStructure::TURN:    return "T";
+        case SecondaryStructure::COIL:    return "C";
+        default:                          return "-";
+    }
+}
+
+py::dict secondary_structure(const std::string& pdb_path,
+                             bool normalize_names,
+                             bool build_bonds,
+                             bool add_hydrogens) {
+    return translate_ball_exceptions([&] {
+        auto sys = load_pdb(pdb_path, normalize_names, build_bonds, add_hydrogens);
+        SecondaryStructureProcessor proc;
+        sys->apply(proc);
+
+        // Walk residues in order; emit (residue_key, ss_letter) pairs.
+        py::list assignments;
+        for (auto rit = sys->beginResidue(); +rit; ++rit) {
+            const Residue& r = *rit;
+            const SecondaryStructure* ss = r.getSecondaryStructure();
+            const char* letter = ss != nullptr
+                ? ss_type_letter(ss->getType())
+                : "-";
+            py::dict entry;
+            entry["residue"] = residue_key(r);
+            entry["ss"] = std::string(letter);
+            assignments.append(entry);
+        }
+
+        py::dict d;
+        d["assignments"] = assignments;
+        d["n_residues"] = py::len(assignments);
+        return d;
+    });
+}
+
+// ---------------------------------------------------------------------------
+// add_hydrogens — write a hydrogenated PDB
+// ---------------------------------------------------------------------------
+
+py::dict add_hydrogens_to_pdb(const std::string& pdb_in,
+                              const std::string& pdb_out,
+                              bool normalize_names,
+                              bool build_bonds) {
+    return translate_ball_exceptions([&] {
+        // Load with H-placement deferred so we can run the processor
+        // explicitly and report how many hydrogens were placed.
+        auto sys = load_pdb(pdb_in, normalize_names, build_bonds, /*add_hydrogens=*/false);
+        AddHydrogenProcessor hp;
+        sys->apply(hp);
+
+        // Write the result. PDBFile::write is the inverse of open+read;
+        // create the parent dir if needed so a fresh dest path works
+        // without prep.
+        auto out_path = std::filesystem::path(pdb_out);
+        if (out_path.has_parent_path()) {
+            std::filesystem::create_directories(out_path.parent_path());
+        }
+        PDBFile out;
+        out.open(pdb_out, std::ios::out);
+        if (!out.isOpen()) {
+            throw std::runtime_error("BALL: cannot open output PDB: " + pdb_out);
+        }
+        if (!out.write(*sys)) {
+            out.close();
+            throw std::runtime_error("BALL: failed to write PDB: " + pdb_out);
+        }
+        out.close();
+
+        py::dict d;
+        d["pdb_out"] = pdb_out;
+        d["n_atoms_in"] = sys->countAtoms() - hp.getNumberOfAddedHydrogens();
+        d["n_hydrogens_added"] = hp.getNumberOfAddedHydrogens();
+        d["n_atoms_out"] = sys->countAtoms();
+        return d;
+    });
+}
+
+// gb_energy — Generalized-Born solvation
+//
+// TODO(v0.2): GeneralizedBornModel needs scaling factors via an INI
+// file (`setScalingFactorFile`) and explicit solute / solvent
+// dielectric constants before `setup(*sys)` will succeed. The
+// straight-through pattern that works for AmberFF / CharmmFF /
+// NumericalSAS is not enough here. Defer until either:
+//   - a default GB INI ships in BALL's data tree and we can locate
+//     it via Path::find(), or
+//   - this binding grows a `gb_options=` kwarg taking a dict of
+//     scaling factors keyed by atom type.
+//
+// Workaround for proteon's gb_obc claim: use the existing
+// charmm_energy with use_eef1=true. EEF1 is BALL's preferred
+// implicit-solvation model and is fully wired through CharmmFF.
 
 py::dict amber_energy(const std::string& pdb_path,
                       double nonbonded_cutoff,
@@ -252,4 +450,47 @@ PYBIND11_MODULE(ball, m) {
           "BALL's standard PDB preprocessing: see amber_energy for details.\n"
           "CHARMM19 is a polar-H force field; non-polar Hs are absorbed into\n"
           "united-carbon types and their presence is harmless when present.");
+
+    m.def("hbonds",
+          &hbonds,
+          py::arg("pdb_path"),
+          py::arg("normalize_names") = true,
+          py::arg("build_bonds")     = true,
+          py::arg("add_hydrogens")   = true,
+          "List hydrogen bonds via HBondProcessor's Kabsch-Sander method.\n"
+          "\n"
+          "Returns a list of dicts, each with: donor, acceptor (atom keys\n"
+          "as '<chain>:<residue><id>:<atom_name>'), length (donor-acceptor\n"
+          "distance in A).");
+
+    m.def("secondary_structure",
+          &secondary_structure,
+          py::arg("pdb_path"),
+          py::arg("normalize_names") = true,
+          py::arg("build_bonds")     = true,
+          py::arg("add_hydrogens")   = true,
+          "Assign secondary structure per residue via\n"
+          "SecondaryStructureProcessor.\n"
+          "\n"
+          "Returns a dict with assignments (list of {residue, ss}) and\n"
+          "n_residues. SS letters use the DSSP 3-class reduction:\n"
+          "H = helix, E = strand, T = turn, C = coil, '-' = unassigned.");
+
+    m.def("add_hydrogens_to_pdb",
+          &add_hydrogens_to_pdb,
+          py::arg("pdb_in"),
+          py::arg("pdb_out"),
+          py::arg("normalize_names") = true,
+          py::arg("build_bonds")     = true,
+          "Read pdb_in, place hydrogens via AddHydrogenProcessor, write\n"
+          "the hydrogenated structure to pdb_out.\n"
+          "\n"
+          "Returns a dict with: pdb_out, n_atoms_in (heavy-atom count),\n"
+          "n_hydrogens_added, n_atoms_out (total).");
+
+    // gb_energy: deferred to v0.2 — see TODO in source. Until then,
+    // proteon's gb_obc claim should compare proteon vs OpenMM and use
+    // ball.charmm_energy(use_eef1=True) as the third comparator for the
+    // implicit-solvation story (BALL's EEF1 is the same idea as OBC
+    // GB: a per-atom solvation correction at NoCutoff).
 }
