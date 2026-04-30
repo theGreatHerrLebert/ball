@@ -1,0 +1,115 @@
+name: Build wheels
+
+# Build distributable Python wheels for ball-py via cibuildwheel.
+# Runs on PR to validate the wheel build; on push to default branch
+# uploads the wheels as workflow artifacts; on tag push (v*) uploads
+# the same wheels to PyPI as a release.
+#
+# This is the slow workflow — full BALL C++ compile inside a
+# manylinux2014 container per Python version. Roughly 30–45 min per
+# matrix cell. python-smoke.yml is the fast feedback path; this is
+# the publication path.
+#
+# Maintainer note: PyPI publishing uses Trusted Publishing (OIDC), so
+# no API token secret is needed in the repo. The publishing step
+# below assumes the project is registered at
+#   https://pypi.org/manage/account/publishing/
+# with this repo / workflow as a trusted publisher. If that has not
+# been set up, the upload step is a no-op until it is.
+
+on:
+  pull_request:
+    paths:
+      - "python/**"
+      - "source/**"
+      - "include/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+      - "pyproject.toml"
+      - ".github/workflows/build-wheels.yml"
+  push:
+    branches: [zomball, master]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-wheels:
+    name: Build wheels (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04]
+        # macos / windows can join later once the manylinux story is
+        # stable; BALL's Qt6 + Boost + Eigen dependency chain is
+        # heavier on those runners and is not v0.
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python (host, for cibuildwheel)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.21
+        env:
+          # Build wheels for the supported Python range. cp310-cp313
+          # matches pyproject.toml's requires-python = ">=3.10" and
+          # the smoke matrix above.
+          CIBW_BUILD: "cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64"
+          # manylinux2014 ships gcc-10; force gcc-13 + libstdc++-13
+          # via the toolset PPA inside the container (libcifpp's
+          # C++20 <format> needs libstdc++-13).
+          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
+          # System deps inside the container — Qt6 / Boost / Eigen /
+          # FFTW are not in the manylinux image by default.
+          CIBW_BEFORE_ALL_LINUX: |
+            yum install -y epel-release
+            yum install -y \
+                qt6-qtbase-devel qt6-qt5compat-devel \
+                boost-devel \
+                eigen3-devel \
+                fftw-devel
+          # Repair: bundle libBALL.so + Qt6 + Boost into the wheel
+          # so end users do not need them at install time. auditwheel
+          # walks the .so's NEEDED list and pulls referenced libs.
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            auditwheel repair -w {dest_dir} {wheel}
+          # Smoke each wheel on the manylinux runner before upload.
+          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_COMMAND: >
+            python -c "import ball; print(ball.amber_energy.__doc__[:80])"
+
+      - name: Upload wheels as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: ./wheelhouse/*.whl
+
+  publish:
+    name: Publish to PyPI
+    needs: build-wheels
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-22.04
+    environment: pypi-publish
+    permissions:
+      # Trusted publishing — no PyPI token needed in the repo
+      # secrets, the OIDC flow proves identity to PyPI.
+      id-token: write
+    steps:
+      - name: Download all wheel artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
