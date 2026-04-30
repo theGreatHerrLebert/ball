@@ -89,7 +89,8 @@ jobs:
                 qt6-qtbase-devel qt6-qt5compat-devel \
                 boost-devel \
                 eigen3-devel \
-                fftw-devel
+                fftw-devel \
+                flex bison
           # Repair: bundle libBALL.so + Qt6 + Boost into the wheel
           # so end users do not need them at install time. auditwheel
           # walks the .so's NEEDED list and pulls referenced libs.
