@@ -68,7 +68,13 @@ test = ["pytest>=7"]
 # the wheel-repair tools (auditwheel / delocate / delvewheel) bundle
 # the right .so files when CI builds wheels for distribution.
 cmake.source-dir   = "."
-cmake.version      = ">=3.18"
+# CMake 3.30+ — BALL's top-level CMakeLists.txt requires it. AlmaLinux 9
+# (the manylinux_2_34 base for the wheel build) ships 3.26.5; with
+# scikit-build-core seeing cmake.version >= 3.30 it will fall back to
+# installing the cmake PyPI package (binary distribution), bypassing
+# the system cmake automatically. Local builds with a newer system
+# cmake stay on the system one.
+cmake.version      = ">=3.30"
 cmake.build-type   = "Release"
 build-dir          = "build/{wheel_tag}"
 wheel.packages     = []
