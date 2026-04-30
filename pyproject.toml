@@ -19,7 +19,7 @@ name = "ball-py"
 version = "0.1.0a0"
 description = "Python bindings for BALL — Biochemical ALgorithms Library"
 readme = "python/README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { text = "LGPL-2.1-or-later" }
 authors = [
     { name = "BALL Project contributors" },
@@ -43,7 +43,6 @@ classifiers = [
     "Operating System :: MacOS",
     "Programming Language :: C++",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
