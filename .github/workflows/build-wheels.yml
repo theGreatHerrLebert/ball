@@ -70,7 +70,14 @@ jobs:
           # on consumer systems, i.e. Ubuntu 22.04+ / Debian 12+ /
           # RHEL 9+ / Fedora 36+. Older distros fall back to building
           # from source via pyproject.toml + scikit-build-core.
-          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_34"
+          #
+          # Spelled out as a full quay.io image path because the bare
+          # `manylinux_2_34` alias is not recognised by cibuildwheel
+          # 2.21 (pinned in `uses:` above); it was added in a later
+          # release. Either bump the pin or carry the explicit path —
+          # we carry the path so the cibuildwheel version stays
+          # deliberate.
+          CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux_2_34_x86_64:latest"
           # System deps inside the container — Qt6 / Boost / Eigen /
           # FFTW are not in the manylinux image by default. CRB
           # (CodeReady Builder, the EL9 equivalent of bookworm
