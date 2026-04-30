@@ -53,13 +53,24 @@ set_target_properties(ball_py PROPERTIES
 )
 
 # Install rule for the wheel build (scikit-build-core / pyproject.toml).
-# Without an explicit install() rule, scikit-build-core has nothing to
-# copy into the wheel and `import ball` after `pip install` fails with
-# ModuleNotFoundError. DESTINATION "." puts the .so at the wheel's
-# top level so the module is directly importable without a wrapping
-# package directory.
+#
+# Both targets install to the wheel root:
+#
+# - ball_py provides the importable extension module
+#   `ball.cpython-3X-*.so` — without this, `import ball` after
+#   `pip install` fails with ModuleNotFoundError.
+# - BALL provides `libBALL.so.1.5`, the shared library the extension
+#   links against. Without it in the wheel, `auditwheel repair`
+#   aborts with "Cannot repair wheel, because required library
+#   `libBALL.so.1.5` could not be located" — the build-tree path is
+#   not on auditwheel's search path, so the only durable fix is to
+#   install the library into the wheel itself.
+#
+# auditwheel then resolves transitive dependencies (Qt6, Boost, ...)
+# the normal way and bundles them under `ball.libs/` in the
+# repaired wheel; libBALL gets relocated alongside.
 install(
-    TARGETS ball_py
+    TARGETS ball_py BALL
     LIBRARY DESTINATION .
 )
 
