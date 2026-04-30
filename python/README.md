@@ -39,8 +39,22 @@ cmake -DBALL_BUILD_PYTHON=ON ..
 cmake --build . -j
 
 # ball.cpython-3X-x86_64-linux-gnu.so lands in build/python/.
-PYTHONPATH=build/python python -c 'import ball; print(ball.amber_energy.__doc__)'
+# At runtime the bindings need three env vars set:
+#   PYTHONPATH       — find the .so
+#   LD_LIBRARY_PATH  — find libBALL.so
+#   BALL_DATA_PATH   — find the force-field parameter files
+#                      (Amber/, CHARMM/, MMFF94/, ... — these live
+#                       at the repo's `data/` directory)
+PYTHONPATH=build/python \
+LD_LIBRARY_PATH=build/lib \
+BALL_DATA_PATH=$(pwd)/../data \
+    python -c 'import ball; print(ball.amber_energy.__doc__)'
 ```
+
+The wheel build (`pip install .` via scikit-build-core, see
+[`pyproject.toml`](../pyproject.toml)) bundles the data files into
+the wheel and resolves `BALL_DATA_PATH` at install time, so end
+users of the published wheel do not set env vars manually.
 
 The pybind11 dependency is fetched via CMake `FetchContent` at
 configure time (pinned to `v2.13.6`); no system pybind11 install
@@ -64,17 +78,38 @@ The smoke tests look for a `1crn.pdb` fixture in this order:
 
 Tests skip rather than fail when no fixture is locatable.
 
+## Known issues
+
+These are component-level mapping bugs in the current bindings, not
+pipeline issues. The Python-side smoke test catches them via
+`pytest.approx`-style assertions in proteon's oracle test layer; here
+they are documented for whoever picks up the next iteration:
+
+- **`angle_bend = 0` on both AMBER and CHARMM.** Real bend terms on
+  crambin should be tens of kJ/mol. Likely an option flag at
+  `setup()` that gates bend-term registration; the binding currently
+  passes only the cutoff options.
+- **CHARMM `torsion == improper_torsion`.** Both report 39.7 kJ/mol
+  on crambin in current testing — they should differ. Either
+  `getTorsionEnergy()` already includes impropers (in which case the
+  dict key is misleading) or one of the getters is reading the wrong
+  component sum. Needs a quick read of BALL's CHARMM force-field
+  initialisation to confirm.
+
 ## Out of scope (for now)
 
 - Minimization, dynamics, Monte Carlo
 - NMR, QSAR, docking
 - Trajectory I/O (DCD, XTC)
 - Force-field parameter introspection
-- pip-installable wheel build (`pyproject.toml` + scikit-build-core)
+- Class-level bindings (e.g. `ball.System`, `ball.Atom`); the current
+  binding is functional only
 
 These can land later if a downstream consumer needs them. The current
 binding is sized to one job — sourcing oracle energies for proteon —
-and stays narrow on purpose.
+and stays narrow on purpose. New bindings ship through the same wheel
+pipeline (`pyproject.toml` → scikit-build-core → cibuildwheel CI) so
+adding them is a small per-PR cost.
 
 ## Why pybind11 and not the original SIP bindings
 
