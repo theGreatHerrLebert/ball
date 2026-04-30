@@ -28,8 +28,11 @@ namespace BALL
 
 		void PCRModel::calculateEigenvectors(const Eigen::MatrixXd& data, double frac_var, Eigen::MatrixXd& output)
 		{
-			Eigen::JacobiSVD<Eigen::MatrixXd> svd;
-			svd.compute(data, Eigen::ComputeThinV);
+			// Eigen 3.4 dropped the 2-arg compute(matrix, options) overload;
+			// the decomposition options now live on the constructor or as a
+			// template parameter. Pass ComputeThinV via the runtime ctor so
+			// the call shape stays close to the original.
+			Eigen::JacobiSVD<Eigen::MatrixXd> svd(data, Eigen::ComputeThinV);
 
 			// find the smallest singular vector that should be taken into account
 			// complete variance == sum of all eigen-values == sum of squared singular values
