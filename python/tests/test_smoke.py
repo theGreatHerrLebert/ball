@@ -151,6 +151,51 @@ def test_charmm_eef1_returns_finite_components():
     )
 
 
+def test_mmff94_energy_either_runs_or_fails_cleanly():
+    """MMFF94 on crambin: either finite components, or a clean RuntimeError.
+
+    MMFF94 is a small-molecule force field; its atom typer is known to
+    struggle with polypeptide backbones. Accept both outcomes so the
+    smoke test passes regardless of how BALL's MMFF94 implementation
+    happens to type proteins on this fixture — the binding's job is
+    to expose the function and translate exceptions, not to guarantee
+    coverage of a use case the FF wasn't designed for.
+
+    Override BALL_TEST_LIGAND with a small-molecule PDB to exercise the
+    happy path on a real ligand fixture; otherwise we use crambin and
+    relax the success path.
+    """
+    ligand_env = os.environ.get("BALL_TEST_LIGAND")
+    if ligand_env and pathlib.Path(ligand_env).is_file():
+        pdb = pathlib.Path(ligand_env)
+        # On a real ligand, MMFF94 must succeed.
+        e = ball.mmff94_energy(str(pdb))
+        for k in ("stretch", "bend", "stretch_bend", "torsion", "plane",
+                  "vdw", "electrostatic", "nonbonded", "total"):
+            assert math.isfinite(e[k]), f"{k}: non-finite value {e[k]!r}"
+        # nonbonded should equal vdw + electrostatic to floating-point
+        # precision (BALL's split-vs-sum invariant).
+        assert e["nonbonded"] == pytest.approx(
+            e["vdw"] + e["electrostatic"], rel=1e-6, abs=1e-6
+        )
+        return
+
+    pdb = _resolve_crambin_pdb()
+    try:
+        e = ball.mmff94_energy(str(pdb))
+    except RuntimeError as exc:
+        # The documented failure mode — surface the error string so a
+        # silent regression doesn't hide behind it.
+        assert "MMFF94" in str(exc), (
+            f"unexpected RuntimeError text: {exc}"
+        )
+        return
+    # If MMFF94 *did* type the protein, the components must be finite.
+    for k in ("stretch", "bend", "stretch_bend", "torsion", "plane",
+              "vdw", "electrostatic", "nonbonded", "total"):
+        assert math.isfinite(e[k]), f"{k}: non-finite value {e[k]!r}"
+
+
 def test_charmm_no_eef1_zeroes_solvation():
     """Disabling EEF1 produces zero solvation; bonded terms unaffected."""
     pdb = _resolve_crambin_pdb()
@@ -334,6 +379,69 @@ def test_atom_typer_assigns_charges():
     assert typed_count >= 0.8 * len(types), (
         f"only {typed_count}/{len(types)} atoms got AMBER type names"
     )
+
+
+def test_rmsd_self_is_zero():
+    """RMSD(crambin, crambin) ≈ 0 across all pairing modes.
+
+    Both with and without superposition, comparing a structure to itself
+    must yield zero (modulo numerical noise from the Kabsch eigenvalue
+    solve). A non-zero RMSD here would indicate either AtomBijection
+    paired wrong atoms (e.g. shifted by one) or RMSDMinimizer's transform
+    solver is mis-applying.
+    """
+    pdb = _resolve_crambin_pdb()
+    for mode in ("ca", "backbone", "name", "all"):
+        for superpose in (True, False):
+            r = ball.rmsd(str(pdb), str(pdb), atoms=mode, superpose=superpose)
+            assert r["rmsd"] == pytest.approx(0.0, abs=1e-4), (
+                f"RMSD self-comparison non-zero in mode={mode}, "
+                f"superpose={superpose}: {r['rmsd']}"
+            )
+            assert r["atoms"] == mode
+            assert r["superpose"] is superpose
+            assert r["n_matched"] >= 3, (
+                f"only {r['n_matched']} atoms paired in mode={mode}"
+            )
+            assert r["n_atoms_a"] == r["n_atoms_b"]
+
+
+def test_rmsd_after_minimization_is_nonzero(tmp_path):
+    """RMSD(crambin, minimized_crambin) is positive but small.
+
+    Minimizing crambin moves atoms by < ~3 A on average — large enough
+    to be unmistakably non-zero but small enough that any double-digit
+    result indicates the bijection paired wrong atoms or the structure
+    was silently corrupted.
+    """
+    pdb = _resolve_crambin_pdb()
+    minimized = tmp_path / "crambin_min.pdb"
+    ball.minimize_energy(str(pdb), str(minimized), max_iter=20)
+
+    # CA-RMSD is the canonical metric; superpose=True removes any
+    # rigid-body drift introduced by the minimizer's coordinate frame.
+    r = ball.rmsd(str(pdb), str(minimized), atoms="ca", superpose=True)
+    assert r["rmsd"] > 0.0, "RMSD between original and minimized is exactly 0"
+    assert r["rmsd"] < 5.0, (
+        f"CA-RMSD after 20 minimization steps is {r['rmsd']} A — far larger "
+        f"than expected, suggests either atom-pairing failure or structural "
+        f"corruption"
+    )
+
+    # Without superposition the RMSD must be >= the superposed value
+    # (Kabsch is a minimum over all rigid motions).
+    r_noalign = ball.rmsd(str(pdb), str(minimized), atoms="ca", superpose=False)
+    assert r_noalign["rmsd"] >= r["rmsd"] - 1e-9, (
+        f"non-superposed RMSD ({r_noalign['rmsd']}) is smaller than "
+        f"Kabsch-aligned RMSD ({r['rmsd']}) — Kabsch should be the minimum"
+    )
+
+
+def test_rmsd_unknown_mode_raises():
+    """Unknown atoms mode is rejected with a clear message."""
+    pdb = _resolve_crambin_pdb()
+    with pytest.raises(RuntimeError, match="unknown atoms mode"):
+        ball.rmsd(str(pdb), str(pdb), atoms="xyz")
 
 
 def test_minimize_energy_drops_energy(tmp_path):

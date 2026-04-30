@@ -2,9 +2,10 @@
 // a downstream consumer (e.g. proteon's EVIDENT oracle suite) wants
 // to compare BALL against on a per-PDB basis.
 //
-// Surface today (v0.1.0a2):
+// Surface today (v0.1.0a3):
 //   amber_energy            single-point AMBER force-field energy
 //   charmm_energy           single-point CHARMM force-field energy (EEF1 toggle)
+//   mmff94_energy           single-point MMFF94 force-field energy (small-molecule FF)
 //   hbonds                  hydrogen bond list (HBondProcessor)
 //   secondary_structure     per-residue SS assignment (SecondaryStructureProcessor)
 //   add_hydrogens_to_pdb    write a hydrogenated PDB (AddHydrogenProcessor)
@@ -13,6 +14,7 @@
 //   atom_typer              per-atom AMBER type + charge enumeration
 //   minimize_energy         conjugate-gradient or steepest-descent
 //   system_info             atom/residue/chain counts and chain ids
+//   rmsd                    Kabsch-aligned RMSD between two PDBs
 //
 // Deferred to v0.3 (each needs more setup than the surface budget):
 //   gb_energy               GeneralizedBornModel needs scaling-factor INI
@@ -44,6 +46,7 @@
 #include <BALL/KERNEL/PTE.h>
 #include <BALL/MOLMEC/AMBER/amber.h>
 #include <BALL/MOLMEC/CHARMM/charmm.h>
+#include <BALL/MOLMEC/MMFF94/MMFF94.h>
 #include <BALL/STRUCTURE/fragmentDB.h>
 #include <BALL/STRUCTURE/addHydrogenProcessor.h>
 #include <BALL/MOLMEC/COMMON/forceField.h>
@@ -54,6 +57,8 @@
 #include <BALL/STRUCTURE/defaultProcessors.h>
 #include <BALL/STRUCTURE/numericalSAS.h>
 #include <BALL/STRUCTURE/secondaryStructureProcessor.h>
+#include <BALL/STRUCTURE/RMSDMinimizer.h>
+#include <BALL/STRUCTURE/atomBijection.h>
 
 namespace py = pybind11;
 using namespace BALL;
@@ -689,6 +694,161 @@ py::dict charmm_energy(const std::string& pdb_path,
     });
 }
 
+// ---------------------------------------------------------------------------
+// mmff94_energy — MMFF94 force-field single-point
+// ---------------------------------------------------------------------------
+//
+// MMFF94 is a small-molecule / drug-like organic force field — it was
+// designed for ligands, not polypeptides. On protein-only PDBs the
+// atom-typer will frequently bail out with TooManyErrors because the
+// peptide backbone uses bonding patterns MMFF94's typing rules don't
+// recognise. The binding still surfaces the function so the right
+// fixture (a parsed ligand: SDF→PDB or a small organic molecule) can
+// reach BALL's MMFF94 implementation as an oracle.
+//
+// Energy components surfaced (matching CharmmFF's split philosophy):
+//   stretch / bend / stretch_bend (cross term, MMFF94-specific) /
+//   torsion (proper + improper) / plane (out-of-plane bend) /
+//   vdw (vdW + H-bond) / electrostatic / nonbonded (vdw + es).
+//
+// The MMFF94 class itself is named just `MMFF94` rather than
+// `Mmff94FF` — confusingly close to the namespace, but it's the BALL
+// convention for this force field.
+
+py::dict mmff94_energy(const std::string& pdb_path,
+                       double nonbonded_cutoff,
+                       bool normalize_names,
+                       bool build_bonds,
+                       bool add_hydrogens) {
+    return translate_ball_exceptions([&] {
+        auto sys = load_pdb(pdb_path, normalize_names, build_bonds, add_hydrogens);
+        MMFF94 ff;
+        // MMFF94 shares the option-name vocabulary with AmberFF / CharmmFF
+        // for these three knobs, but it does NOT inherit from them, so
+        // the apply_cutoff template has to be specialised per-FF — easier
+        // to set the strings directly.
+        ff.options[MMFF94::Option::NONBONDED_CUTOFF]      = std::to_string(nonbonded_cutoff);
+        ff.options[MMFF94::Option::VDW_CUTOFF]            = std::to_string(nonbonded_cutoff);
+        ff.options[MMFF94::Option::ELECTROSTATIC_CUTOFF]  = std::to_string(nonbonded_cutoff);
+        if (!ff.setup(*sys)) {
+            throw std::runtime_error(
+                "BALL: MMFF94 setup failed (atom typing or charge assignment). "
+                "MMFF94 is a small-molecule force field; protein-only inputs "
+                "frequently fail here. Use AMBER96 or CHARMM19 for polypeptides."
+            );
+        }
+        ff.updateEnergy();
+        py::dict d;
+        d["stretch"]        = ff.getStretchEnergy();
+        d["bend"]           = ff.getBendEnergy();
+        d["stretch_bend"]   = ff.getStretchBendEnergy();
+        d["torsion"]        = ff.getTorsionEnergy();
+        d["plane"]          = ff.getPlaneEnergy();
+        d["vdw"]            = ff.getVdWEnergy();
+        d["electrostatic"]  = ff.getESEnergy();
+        d["nonbonded"]      = ff.getNonbondedEnergy();
+        d["total"]          = ff.getEnergy();
+        d["n_atoms"]        = sys->countAtoms();
+        return d;
+    });
+}
+
+// ---------------------------------------------------------------------------
+// rmsd — Kabsch-aligned RMSD between two PDBs
+// ---------------------------------------------------------------------------
+//
+// Wraps AtomBijection (atom-pairing) + RMSDMinimizer (Kabsch via the
+// Coutsalis et al. eigenvalue method). Closes a real gap on the
+// proteon side: proteon exposes `rmsd()` in its public Python API but
+// has no oracle today. With this binding, `proteon.geometry.rmsd` can
+// be cross-checked against `ball.rmsd` on identical fixtures.
+//
+// Pairing modes mirror BALL's AtomBijection methods:
+//   ca         — C-alpha atoms only, in residue order (default; the
+//                canonical structural-alignment metric for proteins)
+//   backbone   — CA + C + N + H + O atoms across all residues
+//   name       — fully-qualified <chain>:<residue>:<id>:<atom_name>
+//                match (strict; will pair only atoms present in both
+//                with the same name and residue context)
+//   all        — assignTrivial: pair atoms in iteration order, stop
+//                at the smaller of the two structures. Dangerous when
+//                the two PDBs have different atom counts/orders, but
+//                useful for "I know these are the same atoms in the
+//                same order" cases (e.g. before/after minimization).
+//
+// superpose toggles whether to apply the RMSD-optimal Kabsch transform
+// before measuring deviation. False → calculateRMSD (no superposition,
+// useful for "how far did the structure drift from its starting pose"
+// in trajectory analysis). True → minimum-RMSD over all rigid motions.
+
+py::dict rmsd(const std::string& pdb_a,
+              const std::string& pdb_b,
+              const std::string& atoms,
+              bool superpose,
+              bool normalize_names,
+              bool build_bonds,
+              bool add_hydrogens) {
+    return translate_ball_exceptions([&] {
+        // RMSD doesn't need bonds or hydrogens for the typical CA / backbone
+        // case, so the defaults at the binding boundary differ from the
+        // force-field bindings. Callers who DO want hydrogens included
+        // (e.g. when computing all-atom RMSD across two minimised structures)
+        // can flip add_hydrogens=true at the call site.
+        auto sys_a = load_pdb(pdb_a, normalize_names, build_bonds, add_hydrogens);
+        auto sys_b = load_pdb(pdb_b, normalize_names, build_bonds, add_hydrogens);
+
+        AtomBijection bijection;
+        Size matched = 0;
+        if (atoms == "ca") {
+            matched = bijection.assignCAlphaAtoms(*sys_a, *sys_b);
+        } else if (atoms == "backbone") {
+            matched = bijection.assignBackboneAtoms(*sys_a, *sys_b);
+        } else if (atoms == "name") {
+            matched = bijection.assignByName(*sys_a, *sys_b);
+        } else if (atoms == "all") {
+            matched = bijection.assignTrivial(*sys_a, *sys_b);
+        } else {
+            throw std::runtime_error(
+                "BALL: unknown atoms mode '" + atoms +
+                "'; valid: 'ca', 'backbone', 'name', 'all'"
+            );
+        }
+
+        // RMSDMinimizer::computeTransformation requires at least 3
+        // points to solve the eigenvalue problem; surface a clearer
+        // diagnostic than BALL's TooFewCoordinates exception.
+        if (matched < 3) {
+            throw std::runtime_error(
+                "BALL: only " + std::to_string(matched) +
+                " atoms paired between the two PDBs (need >= 3 for RMSD); "
+                "try a different atoms mode or check that both structures "
+                "represent the same molecule"
+            );
+        }
+
+        double rmsd_value = 0.0;
+        if (superpose) {
+            // computeTransformation returns (Matrix4x4 transform, double rmsd)
+            // — the rmsd field is the RMSD AFTER applying the optimal
+            // Kabsch transform, i.e. the canonical Kabsch RMSD.
+            auto result = RMSDMinimizer::computeTransformation(bijection);
+            rmsd_value = result.second;
+        } else {
+            // Direct RMSD over the bijection without rigid-body alignment.
+            rmsd_value = bijection.calculateRMSD();
+        }
+
+        py::dict d;
+        d["rmsd"]        = rmsd_value;
+        d["n_matched"]   = static_cast<std::size_t>(matched);
+        d["atoms"]       = atoms;
+        d["superpose"]   = superpose;
+        d["n_atoms_a"]   = sys_a->countAtoms();
+        d["n_atoms_b"]   = sys_b->countAtoms();
+        return d;
+    });
+}
+
 }  // namespace
 
 PYBIND11_MODULE(ball, m) {
@@ -746,6 +906,32 @@ PYBIND11_MODULE(ball, m) {
           "BALL's standard PDB preprocessing: see amber_energy for details.\n"
           "CHARMM19 is a polar-H force field; non-polar Hs are absorbed into\n"
           "united-carbon types and their presence is harmless when present.");
+
+    m.def("mmff94_energy",
+          &mmff94_energy,
+          py::arg("pdb_path"),
+          py::arg("nonbonded_cutoff") = 1e6,
+          py::arg("normalize_names") = true,
+          py::arg("build_bonds")     = true,
+          py::arg("add_hydrogens")   = true,
+          "Compute MMFF94 force-field energy components on the given PDB.\n"
+          "\n"
+          "MMFF94 is a small-molecule / drug-like organic force field. It\n"
+          "is the right oracle for ligand parity claims, NOT for proteins\n"
+          "— the atom-typer expects bonding patterns from organic\n"
+          "chemistry and frequently fails on polypeptide backbones with\n"
+          "'BALL: MMFF94 setup failed (atom typing or charge\n"
+          "assignment)'. Use amber_energy / charmm_energy for proteins.\n"
+          "\n"
+          "Returns a dict with keys: stretch, bend, stretch_bend,\n"
+          "torsion (proper + improper), plane (out-of-plane bend),\n"
+          "vdw (vdW + H-bond term), electrostatic, nonbonded\n"
+          "(vdw + electrostatic), total, n_atoms.\n"
+          "\n"
+          "stretch_bend is the MMFF94-specific cross term coupling bond\n"
+          "stretching and angle bending — absent in AMBER and CHARMM.\n"
+          "Surface it separately so consumers can verify it's not zero\n"
+          "when comparing component-by-component.");
 
     m.def("hbonds",
           &hbonds,
@@ -876,6 +1062,40 @@ PYBIND11_MODULE(ball, m) {
           "Cheap I/O parity check — divergence between BALL and\n"
           "another tool's counts on the same PDB is a load-side bug,\n"
           "not a force-field one.");
+
+    m.def("rmsd",
+          &rmsd,
+          py::arg("pdb_a"),
+          py::arg("pdb_b"),
+          py::arg("atoms") = "ca",
+          py::arg("superpose") = true,
+          py::arg("normalize_names") = true,
+          py::arg("build_bonds")     = false,
+          py::arg("add_hydrogens")   = false,
+          "Compute RMSD between two PDB structures via BALL's\n"
+          "RMSDMinimizer (Coutsalis et al. eigenvalue method).\n"
+          "\n"
+          "Returns a dict with: rmsd (Angstroms), n_matched (atom pairs\n"
+          "actually compared), atoms (pairing mode), superpose,\n"
+          "n_atoms_a, n_atoms_b.\n"
+          "\n"
+          "atoms: 'ca' (default; C-alpha only, residue-ordered),\n"
+          "       'backbone' (CA + C + N + H + O per residue),\n"
+          "       'name' (strict <chain>:<residue>:<id>:<atom> match),\n"
+          "       'all' (in-order pairing; assumes identical atom\n"
+          "              count/order, e.g. before/after minimization).\n"
+          "\n"
+          "superpose: when True (default), report the RMSD-optimal\n"
+          "Kabsch-aligned RMSD — the canonical structural-similarity\n"
+          "metric. When False, report RMSD without superposition\n"
+          "(useful for trajectory drift analysis where the absolute\n"
+          "frame matters).\n"
+          "\n"
+          "Defaults differ from the force-field bindings: build_bonds\n"
+          "and add_hydrogens default to False because RMSD on CA / backbone\n"
+          "doesn't need bond topology or hydrogens, and hydrogen placement\n"
+          "is a documented divergence axis between tools that would\n"
+          "silently inflate the reported RMSD.");
 
     // gb_energy: deferred to v0.3 — see TODO in source. Until then,
     // proteon's gb_obc claim should compare proteon vs OpenMM and use
