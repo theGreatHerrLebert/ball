@@ -95,7 +95,7 @@ ENDIF()
 #   CMake   3.21  — CMakePresets.json schema v3 + toolchainFile support
 #   Qt5     5.15  — the only maintained Qt5 release line; Homebrew + vcpkg both ship 5.15.x
 #   Boost   1.70  — config-mode BoostConfig.cmake is reliable from 1.70+
-#   Eigen3  3.4   — first Eigen with stable Eigen3Config.cmake (covers the 5.x line via range)
+#   Eigen3  3.4   — first Eigen with stable Eigen3Config.cmake (covers the 5.x line; see note at FIND_PACKAGE)
 #   TBB    2021.0 — first oneTBB release shipping TBBConfig.cmake / TBB::tbb target
 #   OpenBabel 3.0 — first OpenBabel shipping OpenBabel3Config.cmake
 ########################################################
@@ -345,7 +345,18 @@ IF(WIN32)
 	ENDIF()
 ENDIF()
 
-FIND_PACKAGE(Eigen3 3.4...6 REQUIRED NO_MODULE)
+# Note: do NOT use a version range (3.4...6) here. The version-range syntax requires
+# the Eigen3ConfigVersion.cmake to support range queries, but Ubuntu 22.04's system
+# libeigen3-dev (3.4.0) ships an older script that does not handle ranges and rejects
+# the upper bound. Instead, use NO version constraint in find_package and enforce the
+# floor via a cmake IF check. Homebrew's Eigen 5.x ships a modern ConfigVersion script
+# that handles both plain and range requests correctly, so this works on all platforms.
+FIND_PACKAGE(Eigen3 REQUIRED NO_MODULE)
+IF(Eigen3_VERSION VERSION_LESS "3.4")
+	MESSAGE(FATAL_ERROR "Eigen3 >= 3.4 required (found ${Eigen3_VERSION}). "
+		"Install a newer Eigen3 package.")
+ENDIF()
+MESSAGE(STATUS "Found Eigen3 ${Eigen3_VERSION} (config mode) — Eigen3::Eigen target")
 
 ## VIEW dependent packages
 IF (BALL_HAS_VIEW)
