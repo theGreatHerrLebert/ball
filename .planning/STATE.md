@@ -3,13 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-14T07:32:40.530Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-05-14T07:40:55.526Z"
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 5
-  completed_plans: 2
-  percent: 40
+  completed_plans: 3
+  percent: 60
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -23,11 +24,11 @@ progress:
 ## Current Position
 
 Phase: 2 (Rendering Port (4a)) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 **Phase:** 2
-**Plan:** 01 complete; next is 02
+**Plan:** 02 complete; next is 03
 **Status:** Executing Phase 2
-**Progress:** [████░░░░░░] 40%
+**Progress:** [██████░░░░] 60%
 
 ```
 Phase 1  [x]  Build Baseline
@@ -51,6 +52,7 @@ Phase 9  [ ]  CI & Tests
 | Milestone | v1.6 |
 | Phase 01-build-baseline P01 | 3min | 3 tasks | 9 files |
 | Phase 02-rendering-port-4a P01 | 3min | 2 tasks | 2 files |
+| Phase 02-rendering-port-4a P02 | 12min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -63,6 +65,7 @@ Phase 9  [ ]  CI & Tests
 - GSD Phase 2 (Rendering) is sequenced right after the build baseline because it only needs the working build, not the C++17 or dependency-overhaul phases.
 - [Phase 01-build-baseline]: CMake VERSION kept numeric (1.6.0); -dev pre-release marker carried as an inline comment
 - [Phase 02-rendering-port-4a]: A1 CONFIRMED: raytracer/BufferedRenderer worker path issues no GL — Plans 03/04 threading scope stays minimal (no QOffscreenSurface/shared context)
+- [Phase 02-rendering-port-4a]: GLRenderWindow rebased on QOpenGLWidget: compat-profile QSurfaceFormat, GL work in initializeGL/resizeGL/paintGL, manual swap deleted, QPainter text overlay, global context sharing in main()
 
 ### Todos
 
@@ -74,11 +77,11 @@ Phase 9  [ ]  CI & Tests
 
 ## Session Continuity
 
-**Last action:** Completed 02-01-PLAN.md — created the Wave 0 `check-no-legacy-gl-symbols.sh` grep gate (51 hits on the pre-port tree) and resolved Open Question A1 (`02-A1-FINDINGS.md`): A1 CONFIRMED, the raytracer worker thread issues no GL.
+**Last action:** Completed 02-02-PLAN.md — rebased `GLRenderWindow` from `QGLWidget` onto `QOpenGLWidget`: compat-profile `QSurfaceFormat`, GL work moved into `initializeGL`/`resizeGL`/`paintGL`, manual buffer-swap machinery (`safeBufferSwap`/`setAutoBufferSwap`) deleted, on-screen text reimplemented as a `QPainter` overlay, and global context sharing + default surface format wired into BALLView `main()`. `glRenderWindow.{h,C}` + `main.C` compile clean as TUs; remaining `make VIEW` errors are isolated to the not-yet-ported downstream files (`glOffscreenTarget.C`, `renderSetup.C`) — expected, handed to Plans 03/04.
 
-**Stopped at:** Completed 02-01-PLAN.md
+**Stopped at:** Completed 02-02-PLAN.md
 
-**Next action:** Execute 02-02-PLAN.md (Wave 1 continues).
+**Next action:** Execute 02-03-PLAN.md.
 
 **Notes:**
 
