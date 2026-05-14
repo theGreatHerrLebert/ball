@@ -61,15 +61,16 @@ jobs:
             smoke: true
             ccache_dir: ~/.cache/ccache
 
-          # ---- Windows — NON-BLOCKING placeholder (D-03) -------------------
-          # The proper vcpkg manifest is Phase 4. Until then this is a
-          # best-effort configure/build attempt; it is allowed to fail and must
-          # not block the overall check status. Flip `blocking: true` in Phase 4.
+          # ---- Windows — NON-BLOCKING (flip to blocking: true in Task 3) -------
+          # Phase 4: real vcpkg manifest + choco flex/bison provisioning.
+          # The build runs as a genuine pass/fail step (no noopfallback).
+          # `blocking: true` will be committed once the build is repeatably
+          # green (Task 3 of Plan 04-04).
           - os: windows-x64
             runner: windows-2022
             blocking: false
             smoke: false
-            ccache_dir: ~/.cache/ccache
+            ccache_dir: C:\Users\runneradmin\AppData\Local\ccache
 
     steps:
       - name: Checkout
@@ -171,23 +172,58 @@ jobs:
           cmake --build --preset ci-linux --target BALL VIEW BALLView -j$(nproc)
 
       # ======================================================================
-      # Windows — NON-BLOCKING best-effort placeholder (D-03).
-      # The proper vcpkg manifest lands in Phase 4; this job exists so it can
-      # flip to a required check then with a one-line matrix change. Do not
-      # over-invest here — it is allowed to fail.
+      # Windows — real vcpkg + choco provisioning (Phase 4 / Plan 04-04).
+      #
+      # Provisioning strategy:
+      #  1. vcpkg: GitHub windows-2022 runners ship vcpkg at C:\vcpkg with
+      #     VCPKG_ROOT pre-set; the windows-vcpkg preset toolchainFile picks it
+      #     up.  An actions/cache@v4 step keyed on the vcpkg.json hash avoids
+      #     rebuilding Qt5/Boost from source on every run (T-04-17 mitigation).
+      #  2. flex/bison: not vcpkg ports; provisioned via winflexbison3 (choco).
+      #     winflexbison3 installs win_flex.exe + win_bison.exe in
+      #     C:\ProgramData\chocolatey\bin\.  BALL's bison logic (CMakeLists.txt
+      #     lines 113-124) looks for BALL-bison.bat first (not present in this
+      #     repo) then falls through to FindBISON which searches the PATH/cache;
+      #     we set -DBISON_EXECUTABLE and -DFLEX_EXECUTABLE explicitly so the
+      #     IF(WIN32) FIND_PROGRAM doesn't shadow the cache values.
       # ======================================================================
-      - name: Best-effort configure + build (Windows — non-blocking)
+
+      - name: Cache vcpkg packages (Windows)
         if: matrix.os == 'windows-x64'
-        shell: bash
+        uses: actions/cache@v4
+        with:
+          path: C:\vcpkg\installed
+          key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ matrix.os }}-
+
+      - name: Install flex/bison (Windows — winflexbison3 via choco)
+        if: matrix.os == 'windows-x64'
+        shell: pwsh
         run: |
-          echo "Windows CI is a non-blocking placeholder until the Phase 4 vcpkg"
-          echo "manifest lands (D-03). Attempting a best-effort configure..."
-          mkdir -p build && cd build
-          # No dependency provisioning yet — this configure is expected to fail
-          # until Phase 4. continue-on-error keeps it from blocking the matrix.
-          cmake .. -DCMAKE_BUILD_TYPE=Release \
-            -DBALL_PYTHON_SUPPORT=OFF -DUSE_RTFACT=OFF -DBALL_HAS_VIEW=ON || true
-          cmake --build . --target BALL VIEW BALLView --config Release || true
+          choco install winflexbison3 -y
+          # Confirm executables are reachable
+          & "C:\ProgramData\chocolatey\bin\win_flex.exe" --version
+          & "C:\ProgramData\chocolatey\bin\win_bison.exe" --version
+
+      - name: Configure (Windows)
+        if: matrix.os == 'windows-x64'
+        shell: pwsh
+        run: |
+          # D-07: ci-windows preset inherits windows-vcpkg (vcpkg toolchainFile,
+          # VCPKG_TARGET_TRIPLET=x64-windows, USE_LPSOLVE=OFF, BALL_HAS_OPENBABEL=OFF,
+          # ccache) and installs vcpkg.json deps at configure time.
+          # win_bison.exe / win_flex.exe from winflexbison3 are passed explicitly
+          # because FindBISON/FindFLEX search for 'bison'/'flex' by default.
+          cmake --preset ci-windows `
+            -DBISON_EXECUTABLE="C:/ProgramData/chocolatey/bin/win_bison.exe" `
+            -DFLEX_EXECUTABLE="C:/ProgramData/chocolatey/bin/win_flex.exe"
+
+      - name: Build (Windows)
+        if: matrix.os == 'windows-x64'
+        shell: pwsh
+        run: |
+          cmake --build --preset ci-windows --target BALL VIEW BALLView --config Release
 
       # ======================================================================
       # Render smoke check (D-08) — macOS native, Linux under xvfb + software
