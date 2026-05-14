@@ -30,7 +30,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   3. The CMake `PROJECT` version declaration reads `1.6.0-dev`
   4. `BUILD-macos.md` exists and walks a new contributor through dependency install and the build/run flow
 **Plans**: 1 plan
-- [ ] 01-01-PLAN.md — Commit the 8 toolchain patches, bump version to 1.6.0-dev, write BUILD-macos.md, verify rebuild
+- [x] 01-01-PLAN.md — Commit the 8 toolchain patches, bump version to 1.6.0-dev, write BUILD-macos.md, verify rebuild
 
 ### Phase 2: Rendering Port (4a)
 **Goal**: BALLView's embedded 3D scene renders molecules again on all three platforms by moving off the removed-in-Qt6 `QGLWidget`. This is the immediate execution priority and the highest-risk area.

@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-14T07:02:45.154Z"
+last_updated: "2026-05-14T07:06:56.588Z"
 progress:
   total_phases: 9
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 1
-  completed_plans: 0
-  percent: 0
+  completed_plans: 1
+  percent: 100
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -18,17 +18,19 @@ progress:
 
 **Core Value:** BALLView must build and visibly render molecules on macOS, Linux, and Windows from current, supported dependencies — the 3D scene working cross-platform is the non-negotiable outcome.
 
-**Current Focus:** Phase 1 — Build Baseline (then Phase 2, the immediate-priority rendering port).
+**Current Focus:** Phase 01 — build-baseline
 
 ## Current Position
 
+Phase: 01 (build-baseline) — COMPLETE
+Plan: 1 of 1 complete
 **Phase:** 1 — Build Baseline
-**Plan:** None yet
-**Status:** Ready to execute
-**Progress:** `[ ]` 0/9 phases complete
+**Plan:** 01-01 — complete
+**Status:** Phase 01 complete; ready for Phase 02
+**Progress:** [██████████] 100% (Phase 01)
 
 ```
-Phase 1  [ ]  Build Baseline
+Phase 1  [x]  Build Baseline
 Phase 2  [ ]  Rendering Port (4a)  <- immediate execution priority
 Phase 3  [ ]  Language Modernization
 Phase 4  [ ]  Dependency System Overhaul
@@ -43,10 +45,11 @@ Phase 9  [ ]  CI & Tests
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 0/9 |
-| Plans complete | 0 |
+| Phases complete | 1/9 |
+| Plans complete | 1 |
 | Requirements mapped | 27/27 |
 | Milestone | v1.6 |
+| Phase 01-build-baseline P01 | 3min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -57,6 +60,7 @@ Phase 9  [ ]  CI & Tests
 - Phase 4a threading: hybrid model — interactive GL on the GUI thread via `paintGL()`, raytracer stays a CPU-buffer worker thread.
 - C++14 is a load-bearing bridge until GSD Phase 3 (Language Modernization) removes it.
 - GSD Phase 2 (Rendering) is sequenced right after the build baseline because it only needs the working build, not the C++17 or dependency-overhaul phases.
+- [Phase 01-build-baseline]: CMake VERSION kept numeric (1.6.0); -dev pre-release marker carried as an inline comment
 
 ### Todos
 
@@ -68,9 +72,9 @@ Phase 9  [ ]  CI & Tests
 
 ## Session Continuity
 
-**Last action:** Roadmap and STATE initialized from PROJECT.md, REQUIREMENTS.md (v1.6), and the human-authored ROADMAP-1.6.md.
+**Last action:** Completed 01-01-PLAN.md — committed the 8 toolchain patches in 3 logical commits, bumped project version to 1.6.0-dev, added BUILD-macos.md, verified a clean reconfigure + `make BALL`.
 
-**Next action:** Plan Phase 1 via `/gsd-plan-phase 1`.
+**Next action:** Plan Phase 2 (Rendering Port / 4a) via `/gsd-plan-phase 2`.
 
 **Notes:**
 

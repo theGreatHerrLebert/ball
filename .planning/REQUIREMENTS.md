@@ -9,10 +9,10 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 
 ### Build Baseline
 
-- [ ] **BUILD-01**: BALL/VIEW/BALLView configure and build on macOS (Apple Silicon) from Homebrew dependencies with a documented command
-- [ ] **BUILD-02**: The 8 modern-toolchain patches are committed to the repo with clear messages
-- [ ] **BUILD-03**: Project version is bumped to 1.6.0-dev in the CMake project declaration
-- [ ] **BUILD-04**: A `BUILD-macos.md` documents the dependency install and build/run flow
+- [x] **BUILD-01**: BALL/VIEW/BALLView configure and build on macOS (Apple Silicon) from Homebrew dependencies with a documented command
+- [x] **BUILD-02**: The 8 modern-toolchain patches are committed to the repo with clear messages
+- [x] **BUILD-03**: Project version is bumped to 1.6.0-dev in the CMake project declaration
+- [x] **BUILD-04**: A `BUILD-macos.md` documents the dependency install and build/run flow
 
 ### Language Modernization
 
@@ -85,10 +85,10 @@ Updated during roadmap creation. GSD phase numbers are sequential; they correspo
 
 | Requirement | GSD Phase | Status |
 |-------------|-----------|--------|
-| BUILD-01 | Phase 1 — Build Baseline | Pending |
-| BUILD-02 | Phase 1 — Build Baseline | Pending |
-| BUILD-03 | Phase 1 — Build Baseline | Pending |
-| BUILD-04 | Phase 1 — Build Baseline | Pending |
+| BUILD-01 | Phase 1 — Build Baseline | Complete |
+| BUILD-02 | Phase 1 — Build Baseline | Complete |
+| BUILD-03 | Phase 1 — Build Baseline | Complete |
+| BUILD-04 | Phase 1 — Build Baseline | Complete |
 | RENDER-01 | Phase 2 — Rendering Port (4a) | Pending |
 | RENDER-02 | Phase 2 — Rendering Port (4a) | Pending |
 | RENDER-03 | Phase 2 — Rendering Port (4a) | Pending |
