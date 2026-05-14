@@ -20,6 +20,7 @@
 #endif
 
 #include <QtWidgets/QApplication>
+#include <QtGui/QOpenGLContext>
 
 namespace BALL
 {
@@ -190,12 +191,10 @@ namespace BALL
 
 			//renderToBuffer_();
 
-			render_mutex_.lock();
-
+			// No manual buffer swap: QOpenGLWidget swaps automatically after
+			// paintGL(). A repaint is requested instead.
 			if (gl_target_)
-				gl_target_->safeBufferSwap();
-
-			render_mutex_.unlock();
+				gl_target_->update();
 		}
 
 		void RenderSetup::updateCamera(const Camera* camera)
@@ -268,8 +267,14 @@ namespace BALL
 
 		void RenderSetup::makeCurrent()
 		{
-			if (gl_target_ && 
-				   (QGLContext::currentContext() != gl_target_->context()))
+			// GUI-thread-only helper. QOpenGLWidget's context and default
+			// framebuffer are affine to the GUI thread, so makeCurrent() may
+			// only be called from there. Every caller of this method runs on
+			// the GUI thread (init/resize/exportPNG/grid/texture/picking setup,
+			// all driven from Scene event handlers). The raytracer worker loop
+			// in run() never calls this -- it issues no GL (see 02-A1-FINDINGS).
+			if (gl_target_ &&
+				   (QOpenGLContext::currentContext() != gl_target_->context()))
 				gl_target_->makeCurrent();
 			else
 				target->prepareRendering();
@@ -306,6 +311,9 @@ namespace BALL
 			{
 				t.start();
 				// NOTE: GLRenderers currently *have* to render in the GUI thread!
+				// This worker loop only drives non-GL renderers (the raytracer,
+				// a pure CPU-buffer producer). It must never touch the
+				// QOpenGLWidget's GL context -- that is GUI-thread-affine.
 				if (!gl_renderer_)
 					renderToBuffer_();
 				t.stop();
@@ -412,7 +420,7 @@ namespace BALL
 				render_mutex_.lock();
 
 				makeCurrent();
-				QImage image(gl_target_->grabFrameBuffer(true));
+				QImage image(gl_target_->grabFramebuffer());
 
 				render_mutex_.unlock();
 
