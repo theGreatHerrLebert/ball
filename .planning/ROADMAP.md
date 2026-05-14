@@ -226,6 +226,20 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
+### Phase 999.4: Config shadows compiled color defaults (BACKLOG)
+
+**Goal:** Stop the persisted `~/.BALLView` config from silently overriding the compiled-in element/residue color defaults.
+**The problem (found 2026-05-14):** BALLView persists the full element/residue color tables in `~/.BALLView` (`Elements=` / `ResidueNameColors=` lines). On startup the saved map is applied over the compiled `ElementColorProcessor`/`ResidueNameColorProcessor` defaults — so editing the default tables in source and rebuilding has **no visible effect** if any config exists. Worse, the saved map can be stale or partial: a real case had indices 0-20 (incl. C/N/O/P/S) all `ffffffff` white. The only workaround today is deleting `~/.BALLView`.
+**Fix options (decide when promoted):**
+  - Version/checksum the color block — on a schema/version mismatch, fall back to compiled defaults instead of applying a stale map.
+  - A real "reset element/residue colors to defaults" action in Preferences that re-pulls the compiled table.
+  - Persist only colors the user actually customized (a diff/override set), not the whole table — so new compiled defaults show through for untouched elements.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
 ---
 *Roadmap created: 2026-05-14*
 *Mirrors `/Users/kohlbach/Claude/BALL/ROADMAP-1.6.md` (phases 1, 2, 3, 4a, 4b, 5, 6, 7, 8). Revised 2026-05-14 after Codex adversarial review — cheap fixes applied; structural changes (early CI phase, Phase 5 split, diagnostics requirement, feature matrix) pending a deliberate roadmap revision.*
