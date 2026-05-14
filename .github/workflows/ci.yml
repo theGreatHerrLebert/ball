@@ -1,0 +1,253 @@
+name: CI
+
+# Phase 02.2 — early 3-OS build + render-smoke regression net.
+# Triggers (D-10): push + pull_request on the milestone branches ONLY — not all
+# branches (keeps CI noise down). `master` is the eventual merge target;
+# `v1.6-modernization` is the active milestone branch.
+on:
+  push:
+    branches: [master, v1.6-modernization]
+  pull_request:
+    branches: [master, v1.6-modernization]
+
+# Read-only token: this workflow only builds + checks, it never writes back.
+permissions:
+  contents: read
+
+# One in-flight run per ref — a newer push cancels the older run so pushes
+# don't pile up on the hosted runners.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # --------------------------------------------------------------------------
+  # build — the 3-OS Release matrix (D-07, D-11).
+  #
+  # Single job, `strategy.matrix.include` with one entry per OS. Every per-OS
+  # specific (runner label, dep-install command, configure command, build
+  # command, whether the job blocks, whether the smoke check runs) lives IN the
+  # matrix entry — nothing is scattered into `if:` chains across steps. Adding a
+  # future axis (e.g. the `ui_v2` axis) is a matter of adding `include:` entries,
+  # not rewriting the job (D-11).
+  # --------------------------------------------------------------------------
+  build:
+    name: build (${{ matrix.os }})
+    runs-on: ${{ matrix.runner }}
+    # D-03: the Windows job is non-blocking. `continue-on-error` is driven off a
+    # matrix field so macOS/Linux stay blocking and Windows flips to required in
+    # Phase 4 with a one-line matrix change (`blocking: true`).
+    continue-on-error: ${{ !matrix.blocking }}
+    strategy:
+      # Don't let one OS failing cancel the others — we want the full picture.
+      fail-fast: false
+      matrix:
+        include:
+          # ---- macOS (Apple Silicon) — blocking ----------------------------
+          # Mirrors BUILD-macos.md verbatim: the Homebrew dep line, the cmake
+          # configure invocation, and the `make BALL VIEW BALLView` target set.
+          - os: macos-arm64
+            runner: macos-14
+            blocking: true
+            smoke: true
+            ccache_dir: ~/Library/Caches/ccache
+
+          # ---- Linux (Ubuntu) — blocking -----------------------------------
+          # apt equivalents of the Homebrew set + xvfb/software-Mesa for the
+          # headless render smoke check (D-08).
+          - os: linux-x64
+            runner: ubuntu-22.04
+            blocking: true
+            smoke: true
+            ccache_dir: ~/.cache/ccache
+
+          # ---- Windows — NON-BLOCKING placeholder (D-03) -------------------
+          # The proper vcpkg manifest is Phase 4. Until then this is a
+          # best-effort configure/build attempt; it is allowed to fail and must
+          # not block the overall check status. Flip `blocking: true` in Phase 4.
+          - os: windows-x64
+            runner: windows-2022
+            blocking: false
+            smoke: false
+            ccache_dir: ~/.cache/ccache
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------------------------
+      # ccache (D-06, D-11) — warm the compiler cache across runs. The configure
+      # steps below wire CMAKE_<LANG>_COMPILER_LAUNCHER=ccache.
+      # ----------------------------------------------------------------------
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ matrix.ccache_dir }}
+          key: ccache-${{ matrix.os }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ matrix.os }}-
+
+      # ======================================================================
+      # macOS — Homebrew deps + the verbatim BUILD-macos.md flow.
+      # ======================================================================
+      - name: Cache Homebrew downloads (macOS)
+        if: matrix.os == 'macos-arm64'
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: brew-${{ matrix.os }}-${{ hashFiles('.github/workflows/ci.yml') }}
+          restore-keys: |
+            brew-${{ matrix.os }}-
+
+      - name: Install dependencies (macOS / Homebrew)
+        if: matrix.os == 'macos-arm64'
+        run: |
+          # D-06: the verbatim BUILD-macos.md dependency line + ccache.
+          brew install qt@5 boost eigen fftw tbb glew open-babel lp_solve libsvm flex bison
+          brew install ccache
+
+      - name: Configure (macOS)
+        if: matrix.os == 'macos-arm64'
+        run: |
+          # D-07: verbatim BUILD-macos.md configure. bison/flex are keg-only so
+          # their bin dirs go on PATH; ccache is wired via the launcher vars.
+          mkdir -p build && cd build
+          export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:$PATH"
+          cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;/opt/homebrew" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBISON_EXECUTABLE=/opt/homebrew/opt/bison/bin/bison \
+            -DFLEX_EXECUTABLE=/opt/homebrew/opt/flex/bin/flex \
+            -DBALL_PYTHON_SUPPORT=OFF -DUSE_RTFACT=OFF -DBALL_HAS_VIEW=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build (macOS)
+        if: matrix.os == 'macos-arm64'
+        run: |
+          # D-07: the BUILD-macos.md target set, Release.
+          cd build
+          make BALL VIEW BALLView -j$(sysctl -n hw.ncpu)
+
+      # ======================================================================
+      # Linux — apt deps + the BUILD-macos.md flow adapted to Linux paths.
+      # ======================================================================
+      - name: Cache apt archives (Linux)
+        if: matrix.os == 'linux-x64'
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-${{ matrix.os }}-${{ hashFiles('.github/workflows/ci.yml') }}
+          restore-keys: |
+            apt-${{ matrix.os }}-
+
+      - name: Install dependencies (Linux / apt)
+        if: matrix.os == 'linux-x64'
+        run: |
+          # D-06: apt equivalents of the Homebrew set, + build tooling + ccache,
+          # + xvfb/software-Mesa for the headless render smoke check (D-08).
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake make g++ ccache \
+            qtbase5-dev qtbase5-dev-tools libqt5opengl5-dev qttools5-dev \
+            libboost-all-dev libeigen3-dev libfftw3-dev libtbb-dev libglew-dev \
+            libopenbabel-dev liblpsolve55-dev libsvm-dev flex bison \
+            xvfb mesa-utils libgl1-mesa-dri
+
+      - name: Configure (Linux)
+        if: matrix.os == 'linux-x64'
+        run: |
+          # D-07: same configure shape as macOS, Linux paths. No Homebrew
+          # CMAKE_PREFIX_PATH (apt installs into the system prefix); bison/flex
+          # come from /usr/bin. ccache wired via the launcher vars.
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBISON_EXECUTABLE=/usr/bin/bison \
+            -DFLEX_EXECUTABLE=/usr/bin/flex \
+            -DBALL_PYTHON_SUPPORT=OFF -DUSE_RTFACT=OFF -DBALL_HAS_VIEW=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build (Linux)
+        if: matrix.os == 'linux-x64'
+        run: |
+          # D-07: the BUILD-macos.md target set, Release.
+          cd build
+          make BALL VIEW BALLView -j$(nproc)
+
+      # ======================================================================
+      # Windows — NON-BLOCKING best-effort placeholder (D-03).
+      # The proper vcpkg manifest lands in Phase 4; this job exists so it can
+      # flip to a required check then with a one-line matrix change. Do not
+      # over-invest here — it is allowed to fail.
+      # ======================================================================
+      - name: Best-effort configure + build (Windows — non-blocking)
+        if: matrix.os == 'windows-x64'
+        shell: bash
+        run: |
+          echo "Windows CI is a non-blocking placeholder until the Phase 4 vcpkg"
+          echo "manifest lands (D-03). Attempting a best-effort configure..."
+          mkdir -p build && cd build
+          # No dependency provisioning yet — this configure is expected to fail
+          # until Phase 4. continue-on-error keeps it from blocking the matrix.
+          cmake .. -DCMAKE_BUILD_TYPE=Release \
+            -DBALL_PYTHON_SUPPORT=OFF -DUSE_RTFACT=OFF -DBALL_HAS_VIEW=ON || true
+          cmake --build . --target BALL VIEW BALLView --config Release || true
+
+      # ======================================================================
+      # Render smoke check (D-08) — macOS native, Linux under xvfb + software
+      # Mesa. Gated on the `matrix.smoke` field so a future matrix axis cannot
+      # accidentally enable/disable it. Blocking on macOS + Linux: a blank or
+      # missing PNG fails the job.
+      # ======================================================================
+      - name: Render smoke check (macOS — native)
+        if: matrix.smoke && matrix.os == 'macos-arm64'
+        run: |
+          # Plan 01 script: autodetects the built BALLView, drives the existing
+          # Scene::exportPNG() path headless, asserts a non-blank PNG + the
+          # DIAG-01 BALLVIEW_GL_DIAG oracle line. No runner prefix on macOS.
+          bash .planning/phases/02.2-ci-and-build-smoke-matrix/scripts/render-smoke-check.sh
+
+      - name: Render smoke check (Linux — xvfb + software Mesa)
+        if: matrix.smoke && matrix.os == 'linux-x64'
+        env:
+          # D-08: software Mesa/llvmpipe — fully supports the compat profile
+          # BALLView's fixed-function GL 2.1 path needs.
+          LIBGL_ALWAYS_SOFTWARE: 1
+          # Plan 01 script honors this prefix; it does not hardcode xvfb.
+          BALLVIEW_SMOKE_RUNNER: xvfb-run -a
+        run: |
+          bash .planning/phases/02.2-ci-and-build-smoke-matrix/scripts/render-smoke-check.sh
+
+      # On a smoke-check failure, upload the (blank) PNG + captured BALLView log
+      # so the failure can be debugged without re-running CI. The Plan 01 script
+      # leaves both in a temp dir on failure (D-05 debugging intent).
+      - name: Upload render-smoke artifacts on failure
+        if: failure() && matrix.smoke
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-smoke-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/ballview-smoke.*
+            /tmp/ballview-smoke.*
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # --------------------------------------------------------------------------
+  # lint — the legacy-Qt-GL-symbol grep gate (Phase 2 carry-over).
+  #
+  # Its own lightweight job: it needs no build, so a fast standalone job is
+  # cleaner than a per-OS step. Blocking/required — a legacy symbol regression
+  # fails CI. The script takes the repo root as $1 and exits 0/1.
+  # --------------------------------------------------------------------------
+  lint:
+    name: lint (legacy-GL grep gate)
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Legacy Qt GL symbol grep gate
+        run: |
+          bash .planning/phases/02-rendering-port-4a/scripts/check-no-legacy-gl-symbols.sh "$GITHUB_WORKSPACE"
