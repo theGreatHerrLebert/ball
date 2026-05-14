@@ -31,6 +31,8 @@
 #include <BALL/VIEW/RENDERING/RENDERERS/STLRenderer.h>
 #include <BALL/VIEW/RENDERING/RENDERERS/tilingRenderer.h>
 #include <BALL/VIEW/RENDERING/glOffscreenTarget.h>
+#include <BALL/VIEW/RENDERING/rendererFactory.h>
+#include <BALL/VIEW/RENDERING/renderSurface.h>
 
 #include <BALL/VIEW/PRIMITIVES/simpleBox.h>
 #include <BALL/VIEW/PRIMITIVES/box.h>
@@ -131,7 +133,7 @@ namespace BALL
 				rb_(new QRubberBand(QRubberBand::Rectangle, this)),
 				stage_(new Stage),
 				renderers_(),
-				gl_renderer_(new GLRenderer),
+				gl_renderer_(static_cast<GLRenderer*>(RendererFactory::makeRenderer(RendererFactory::Kind::OpenGL_Fixed))),
 #ifdef BALL_HAS_RTFACT
 				rt_renderer_(new t_RaytracingRenderer()),
 #endif
@@ -147,7 +149,7 @@ namespace BALL
 				show_fps_(false),
 				toolbar_view_controls_(new QToolBar(tr("3D View Controls"))),
 				toolbar_edit_controls_(new QToolBar(tr("Edit Controls"))),
-				main_display_(new GLRenderWindow(this)),
+				main_display_(static_cast<GLRenderWindow*>(RendererFactory::makeSurface(RendererFactory::Kind::OpenGL_Fixed, this))),
 				main_renderer_(0),
 				stereo_left_eye_(-1),
 				stereo_right_eye_(-1),
@@ -436,15 +438,19 @@ namespace BALL
 			for (Position i=0; i<renderers_.size(); ++i)
 			{
 				renderers_[i]->init();
-				GLRenderWindow* gt = dynamic_cast<GLRenderWindow*>(renderers_[i]->target);
-				if (gt)
+				// Route through the RenderSurface interface instead of naming the
+				// concrete GLRenderWindow type; the QWidget to install the filter
+				// on is reached via the surface's opaque native handle.
+				RenderSurface* surface = dynamic_cast<RenderSurface*>(renderers_[i]->target);
+				if (surface)
 				{
 					// NOTE: do NOT ignoreEvents(true) here. In the QGLWidget era
 					// the Scene drove all rendering and the GL widget had to be
 					// kept passive. With QOpenGLWidget the widget's own paintGL()
 					// IS the render path and must run — see GLRenderWindow::
 					// paintGL() and Scene::eventFilter().
-					gt->installEventFilter(this);
+					if (QObject* surface_obj = static_cast<QObject*>(surface->nativeHandle()))
+						surface_obj->installEventFilter(this);
 				}
 			}
 
@@ -569,7 +575,10 @@ namespace BALL
 		{
 			for (Position i=0; i<renderers_.size(); ++i)
 			{
-				if (static_cast<QObject*>(dynamic_cast<GLRenderWindow*>(renderers_[i]->target)) != object)
+				// Match the event's object against the surface's native QObject,
+				// reached through the RenderSurface interface (no concrete type).
+				RenderSurface* surface = dynamic_cast<RenderSurface*>(renderers_[i]->target);
+				if (!surface || static_cast<QObject*>(surface->nativeHandle()) != object)
 					continue;
 
 				bool filter_out = false;
@@ -791,9 +800,12 @@ namespace BALL
 		{
 			for (size_t i=0; i<renderers_.size(); ++i)
 			{
-                if (RTTI::isKindOf<GLRenderWindow>(renderers_[i]->target))
+				// setDownsamplingFactor() is now on the RenderSurface interface
+				// (no-op default for surfaces that do not support it), so no
+				// concrete-type check or cast is needed.
+				if (RenderSurface* surface = dynamic_cast<RenderSurface*>(renderers_[i]->target))
 				{
-					static_cast<GLRenderWindow*>(renderers_[i]->target)->setDownsamplingFactor(ds_factor);
+					surface->setDownsamplingFactor(ds_factor);
 					renderers_[i]->resize(renderers_[i]->renderer->getWidth(), renderers_[i]->renderer->getHeight());
 				}
 			}
@@ -1121,8 +1133,10 @@ namespace BALL
 			// TODO: Fog in other renderers!
 			for (Position i=0; i<renderers_.size(); ++i)
 			{
+				// setFogIntensity() is now on the Renderer base (no-op default
+				// for backends without fog), so the concrete-type cast is gone.
 				if (renderers_[i]->getRendererType() == RenderSetup::OPENGL_RENDERER)
-					dynamic_cast<GLRenderer*>(renderers_[i]->renderer)->setFogIntensity((float)stage_->getFogIntensity());
+					renderers_[i]->renderer->setFogIntensity((float)stage_->getFogIntensity());
 			}
 
 			updateGL();
@@ -1621,7 +1635,9 @@ namespace BALL
 			// Buffered renderers (raytracer) still hand off their freshly
 			// produced CPU pixel buffer to the target here; paintGL() then
 			// blits it as a texture.
-            if (!RTTI::isKindOf<GLRenderer>(renderer->renderer))
+            // Branch on the renderer type via the existing type-free enum
+            // (RenderSetup::getRendererType()) instead of an RTTI type-check.
+            if (renderer->getRendererType() != RenderSetup::OPENGL_RENDERER)
 				renderer->target->refresh();
 
 			renderer->setBufferReady(true);
@@ -1673,9 +1689,11 @@ namespace BALL
 			// find out if all renderers are ready
 			if (renderer->isReadyToSwap())
 			{
-				// request a repaint of this renderer's target
-                if (RTTI::isKindOf<GLRenderWindow>(renderer->target))
-					static_cast<GLRenderWindow*>(renderer->target)->update();
+				// request a repaint of this renderer's target, reaching the
+				// QWidget through the RenderSurface interface's native handle
+				if (RenderSurface* surface = dynamic_cast<RenderSurface*>(renderer->target))
+					if (QWidget* w = static_cast<QWidget*>(surface->nativeHandle()))
+						w->update();
 
 				if (renderer->isContinuous() && (renderer->getTimeToLive() != 0))
 				{
@@ -1688,9 +1706,11 @@ namespace BALL
 						render_it != dependent_renderers.end(); ++render_it)
 				{
 					// request a repaint of each dependent renderer's target so the
-					// dependent images are presented together with this one
-                    if (RTTI::isKindOf<GLRenderWindow>((*render_it)->target))
-						static_cast<GLRenderWindow*>((*render_it)->target)->update();
+					// dependent images are presented together with this one,
+					// reaching the QWidget through the RenderSurface interface
+					if (RenderSurface* dep_surface = dynamic_cast<RenderSurface*>((*render_it)->target))
+						if (QWidget* dep_w = static_cast<QWidget*>(dep_surface->nativeHandle()))
+							dep_w->update();
 
 					if ((*render_it)->isContinuous() && ((*render_it)->getTimeToLive() != 0))
 					{
@@ -2174,7 +2194,7 @@ namespace BALL
 			// ok, we have to do this the hard way...
 
 			// What kind of renderer do we have to encapsulate?
-            if (RTTI::isKindOf<GLRenderer>(renderers_[main_renderer_]->renderer))
+            if (renderers_[main_renderer_]->getRendererType() == RenderSetup::OPENGL_RENDERER)
 			{
 				// it's a GLRenderer => use tiling
 				GLOffscreenTarget* new_widget = new GLOffscreenTarget(main_display_, filename);
@@ -2182,7 +2202,7 @@ namespace BALL
 				new_widget->resize(width(), height());
 				new_widget->prepareRendering();
 
-				GLRenderer* gr = new GLRenderer;
+				GLRenderer* gr = static_cast<GLRenderer*>(RendererFactory::makeRenderer(RendererFactory::Kind::OpenGL_Fixed));
 				gr->init(*this);
 				gr->enableVertexBuffers(want_to_use_vertex_buffer_);
 				gr->setSize(width(), height());
