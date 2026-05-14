@@ -639,7 +639,6 @@ namespace BALL
 					/*
 					*/
 					struct greater_
-						: public binary_function<const CTPNode*, const CTPNode*, bool>
 					{
 
 						bool operator () (const CTPNode* a, const CTPNode* b) const
