@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
-status: executing
-stopped_at: Phase 02.2 complete (CI green on all 4 jobs); Phase 3 ready to plan
-last_updated: "2026-05-14T12:55:00.000Z"
+status: planning
+stopped_at: Phase 3 context gathered
+last_updated: "2026-05-14T13:01:20.710Z"
 progress:
   total_phases: 16
   completed_phases: 4
@@ -104,7 +104,7 @@ tool's decimal-phase bug; 05.1 depends on Phase 5. The real next phase is **Phas
 
 **Last action:** Phase 02.2 (CI and build-smoke matrix) marked COMPLETE — gsd-verifier passed 10/10, `phase complete 02.2` run. CI run 25859952862 (`1959d9b`) is fully green (build macos/linux/windows + lint); render-smoke ran & passed on macOS and Linux. Pushed branch `v1.6-modernization` is at `1959d9b`.
 
-**Stopped at:** Phase 02.2 complete; Phase 3 ready to plan.
+**Stopped at:** Phase 3 context gathered
 
 **Next action:** Phase 3 — Language Modernization (`/gsd-discuss-phase 3` or `/gsd-plan-phase 3`). Move the codebase to C++17, remove C++17-removed constructs (`std::unary_function`/`bind2nd`/etc. across the 7 known files), and bump `CMAKE_CXX_STANDARD` 14→17 (the mechanism is already in CMakeLists.txt from the Phase 02.2 CI fix — Phase 3 just bumps the value and removes the legacy raw `-std=` lines from `BALLCompilerSpecific.cmake`). CI (Phase 02.2) is now the regression net for this work.
 
