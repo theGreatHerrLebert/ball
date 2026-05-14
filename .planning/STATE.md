@@ -1,3 +1,17 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: executing
+last_updated: "2026-05-14T07:02:45.154Z"
+progress:
+  total_phases: 9
+  completed_phases: 0
+  total_plans: 1
+  completed_plans: 0
+  percent: 0
+---
+
 # STATE: BALLView 1.6 Modernization
 
 ## Project Reference
@@ -10,7 +24,7 @@
 
 **Phase:** 1 — Build Baseline
 **Plan:** None yet
-**Status:** Roadmap created, awaiting phase planning
+**Status:** Ready to execute
 **Progress:** `[ ]` 0/9 phases complete
 
 ```
@@ -37,6 +51,7 @@ Phase 9  [ ]  CI & Tests
 ## Accumulated Context
 
 ### Decisions
+
 - Abandon `ball_contrib`; build against Homebrew/system deps (macOS/Linux) and vcpkg (Windows). Already proven on macOS Tahoe.
 - Phase 4a (GSD Phase 2): `QOpenGLWidget` + compatibility profile, deferring Qt 6 and the pipeline rewrite to Phase 4b (GSD Phase 5). Smallest change that restores rendering on all 3 OSes.
 - Phase 4a threading: hybrid model — interactive GL on the GUI thread via `paintGL()`, raytracer stays a CPU-buffer worker thread.
@@ -44,9 +59,11 @@ Phase 9  [ ]  CI & Tests
 - GSD Phase 2 (Rendering) is sequenced right after the build baseline because it only needs the working build, not the C++17 or dependency-overhaul phases.
 
 ### Todos
+
 - None yet (roadmap just created).
 
 ### Blockers
+
 - None. The known blank-3D-scene blocker is the target of Phase 2, not an obstacle to planning.
 
 ## Session Continuity
@@ -56,6 +73,7 @@ Phase 9  [ ]  CI & Tests
 **Next action:** Plan Phase 1 via `/gsd-plan-phase 1`.
 
 **Notes:**
+
 - GSD phase numbers are sequential (1-9); they map to ROADMAP-1.6.md phases 1, 4a, 2, 3, 4b, 5, 6, 7, 8 respectively. The reorder reflects that the rendering port (4a) is the immediate priority and only depends on the build baseline.
 - 8 modern-toolchain patches are applied locally but uncommitted — Phase 1 commits them.
 

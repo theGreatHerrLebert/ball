@@ -4,7 +4,7 @@
 **Granularity:** standard
 **Core Value:** BALLView must build and visibly render molecules on macOS, Linux, and Windows from current, supported dependencies.
 
-This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6.md`. Phase 4a (rendering port) is broken out as its own dedicated GSD phase because it is the immediate execution priority — restoring the blank 3D scene. It is sequenced right after the build baseline because it only needs the working build that already exists, not the C++17 or dependency-overhaul work.
+This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6.md`. Phase 4a (rendering port) is broken out as its own dedicated GSD phase because it is the immediate execution priority â restoring the blank 3D scene. It is sequenced right after the build baseline because it only needs the working build that already exists, not the C++17 or dependency-overhaul work.
 
 ## Phases
 
@@ -21,7 +21,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 ## Phase Details
 
 ### Phase 1: Build Baseline
-**Goal**: The modern-toolchain build is reproducible, committed, versioned, and documented — a clean starting point for all later work.
+**Goal**: The modern-toolchain build is reproducible, committed, versioned, and documented â a clean starting point for all later work.
 **Depends on**: Nothing (first phase)
 **Requirements**: BUILD-01, BUILD-02, BUILD-03, BUILD-04
 **Success Criteria** (what must be TRUE):
@@ -29,7 +29,8 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   2. The 8 modern-toolchain patches are committed to the repo with clear, descriptive messages
   3. The CMake `PROJECT` version declaration reads `1.6.0-dev`
   4. `BUILD-macos.md` exists and walks a new contributor through dependency install and the build/run flow
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 01-01-PLAN.md — Commit the 8 toolchain patches, bump version to 1.6.0-dev, write BUILD-macos.md, verify rebuild
 
 ### Phase 2: Rendering Port (4a)
 **Goal**: BALLView's embedded 3D scene renders molecules again on all three platforms by moving off the removed-in-Qt6 `QGLWidget`. This is the immediate execution priority and the highest-risk area.
@@ -37,7 +38,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 **Requirements**: RENDER-01, RENDER-02, RENDER-03, RENDER-04, RENDER-05, RENDER-06, RENDER-07, RENDER-08
 **Success Criteria** (what must be TRUE):
   1. BALLView displays a molecule in the embedded 3D scene on macOS, Linux, and Windows
-  2. The scene widget renders inside the main window — no detached/mis-sized native window
+  2. The scene widget renders inside the main window â no detached/mis-sized native window
   3. The user can rotate, zoom, pick, and select in the scene with mouse and keyboard
   4. The raytracer renderer still produces output via its CPU pixel-buffer path, and on-screen text appears via a `QPainter` overlay
   5. `RenderSetup`, `scene.C`, `glOffscreenTarget.C`, `glRenderer.C`, and `glRenderWindow.{h,C}` compile with zero `QGLWidget`/`QGLContext`/`QGLFormat` references
@@ -116,7 +117,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Build Baseline | 0/0 | Not started | - |
+| 1. Build Baseline | 0/1 | Planned | - |
 | 2. Rendering Port (4a) | 0/0 | Not started | - |
 | 3. Language Modernization | 0/0 | Not started | - |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
