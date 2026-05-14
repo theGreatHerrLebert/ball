@@ -7,10 +7,17 @@ updated: 2026-05-14
 
 ## Current Focus
 
-hypothesis: CONFIRMED — HiDPI mismatch. GLRenderer::glViewport uploaded logical pixels (857x577) into a device-pixel QOpenGLWidget FBO (1714x1154 at dpr=2), so the scene rendered into only the bottom-left quarter of the framebuffer.
-test: instrumentation printed active viewport vs FBO size at renderToBuffer time
-expecting: viewport != FBO size — confirmed (857x577 viewport in 1714x1154 FBO)
-next_action: user visual recheck
+hypothesis: CONFIRMED (2nd root cause) — GL render path still followed the QGLWidget
+  "render anywhere, then present" model. GLRenderWindow::paintGL() was NEVER invoked by
+  Qt (Scene::eventFilter swallowed QEvent::Paint; Scene::init + RenderSetup::run set
+  ignoreEvents(true)). The GL scene was drawn from Scene::handleRenderToBufferFinishedEvent_
+  — an event handler — into a QOpenGLWidget FBO that is only valid/current inside paintGL().
+test: BALL_VIEW_DEBUG instrumentation counted paintGL/renderToBuffer invocations and FBO
+  binding; before fix GLRenderWindow::paintGL ran 0x while Scene::paintGL ran 1233x.
+expecting: GLRenderWindow::paintGL runs, GLRenderer::renderToBuffer runs inside it into
+  fbo=1, exactly one clear+draw per frame — CONFIRMED (14 paintGL = 14 renderToBuffer,
+  all fbo=1, viewport stable at 2160x1154, 0 GL errors, 0 exceptions).
+next_action: user visual recheck of the three symptoms
 
 ## Symptoms
 
@@ -47,37 +54,93 @@ started: after QGLWidget->QOpenGLWidget port (GSD Phase 2)
 - timestamp: 2026-05-14
   checked: post-fix instrumentation
   found: logical=857x577 pixel_ratio=2 glViewport=1714x1154 — viewport now matches FBO exactly; frustum aspect 1.485 correct; 0 GL errors, 0 exceptions; 0x0 resize no longer produces NaN frustum
-  implication: fix verified at log level; awaiting user visual confirmation
+  implication: HiDPI fix (commit 81d1145) verified at log level; user confirmed it WORKED (molecule correctly sized + centered)
+
+# ---- Second investigation: three remaining visual bugs ----
+
+- timestamp: 2026-05-14
+  checked: user visual recheck after 81d1145
+  found: (1) ball-and-stick bonds render as flat horizontally-banded blocks (z-fighting look), (2) window empty until first mouse rotate, (3) resize blanks the scene
+  implication: not projection (size/centering fine) — points at the present/compositing model, all three likely one root cause
+
+- timestamp: 2026-05-14
+  checked: GLRenderWindow::paintGL (only called refresh() — the raytracer CPU-buffer texture-blit), Scene::handleRenderToBufferFinishedEvent_ (called renderer->renderToBuffer() for GLRenderer, i.e. drew the scene from an EVENT HANDLER), GLRenderer::renderToBuffer (does its own glClear + glDrawBuffer(GL_BACK) + depth-tested draw straight into the bound FBO; never writes m_pixels)
+  found: GL scene was being drawn outside paintGL(); paintGL() then blitted the stale/empty m_pixels texture on top with depth-test disabled
+  implication: classic QGLWidget->QOpenGLWidget porting bug — QOpenGLWidget's default FBO is only valid/current inside paintGL()
+
+- timestamp: 2026-05-14
+  checked: instrumented Scene::paintGL, Scene::handleRenderToBufferFinishedEvent_, GLRenderWindow::paintGL, GLRenderer::renderToBuffer with BALL_VIEW_DEBUG; headless smoke run
+  found: Scene::paintGL ran 1233x, handleRenderToBufferFinishedEvent_ 1231x, but GLRenderWindow::paintGL ran 0x and GLRenderer::renderToBuffer ran 0x
+  implication: ROOT CAUSE — GLRenderWindow::paintGL() is NEVER invoked by Qt. Scene::eventFilter swallows the GL widget's QEvent::Paint (filter_out=true) and Scene::init()+RenderSetup::run() set ignoreEvents(true). The widget is a fully passive surface; the scene only ever reached the FBO via the out-of-paintGL event-handler draw, whose result QOpenGLWidget treats as undefined. Empty-until-rotate, blank-on-resize and banding all follow.
+
+- timestamp: 2026-05-14
+  checked: post-fix instrumentation, headless smoke run
+  found: GLRenderWindow::paintGL ran 14x, each immediately followed by exactly one GLRenderer::renderToBuffer clear+draw into fbo=1 (the QOpenGLWidget default FBO); viewport stabilised at 2160x1154 (dpr=2); ignore_events_=0; 0 GL errors, 0 exceptions; Scene::paintGL spin dropped from 1233 to ~11
+  implication: fix verified at log level — single clear+draw per frame, drawn in the only place the FBO is valid; awaiting user visual recheck
 
 ## Resolution
 
 root_cause: |
-  QGLWidget->QOpenGLWidget port. QOpenGLWidget's default framebuffer is
-  device-pixel sized (Retina dpr=2 => 2x logical). GLRenderer::setSize() and
-  setupStereo() upload glViewport() using width_/height_ which are LOGICAL
-  pixels (from Scene::width()/height()). Result: the scene was rendered into
-  only the bottom-left quarter of the device-pixel framebuffer, and
-  QOpenGLWidget then composited the whole FBO — producing the grossly
-  mis-projected/oversized geometry. A transient 0x0 resize also left a NaN
-  frustum (harmless because a real resize follows, but cleaned up too).
+  TWO root causes from the QGLWidget->QOpenGLWidget port, fixed in two commits.
+
+  (1) HiDPI viewport mismatch [commit 81d1145, user-confirmed FIXED]:
+  QOpenGLWidget's default framebuffer is device-pixel sized (Retina dpr=2 =>
+  2x logical). GLRenderer::setSize()/setupStereo() uploaded glViewport() in
+  logical pixels, so the scene rendered into only the bottom-left quarter of
+  the FBO -> grossly mis-projected/oversized geometry.
+
+  (2) GL render path still used the QGLWidget "render anywhere, then present"
+  model [this commit]: GLRenderWindow::paintGL() was NEVER invoked by Qt --
+  Scene::eventFilter() swallowed the GL widget's QEvent::Paint, and
+  Scene::init() + RenderSetup::run() set ignoreEvents(true), making the widget
+  a fully passive surface. The GL scene was instead drawn from
+  Scene::handleRenderToBufferFinishedEvent_ (an event handler) via
+  GLRenderer::renderToBuffer(), which does its own glClear + glDrawBuffer +
+  depth-tested draw straight into the bound FBO. QOpenGLWidget's default FBO
+  is only valid/current INSIDE paintGL(); rendered anywhere else its contents
+  are undefined. paintGL() then ran refresh() and blitted the stale/empty
+  m_pixels CPU texture (the raytracer path) on top with depth-test disabled.
+  This produced all three symptoms: empty window until an interaction forced
+  a repaint, blank-on-resize, and z-fighting/banding from the stale blit
+  composited over the undefined FBO.
 fix: |
-  Added GLRenderer::pixel_ratio_ (default 1.0) + setPixelRatio()/getPixelRatio().
-  RenderSetup::resize() sets it from gl_target_->devicePixelRatioF() before
-  calling renderer->setSize(). The pixel_ratio_ factor is applied ONLY at the
-  three GL coordinate-space sites: the two glViewport() uploads (setSize,
-  setupStereo) and gluPickMatrix() in pickObjects1() so picking still lines up.
-  width_/height_ and all viewport-to-3D math stay logical, so mapViewportTo3D
-  and getWidth/getHeight are unchanged. Added a width<1||height<1 guard in
-  setSize() to skip the degenerate 0x0 resize. On non-HiDPI displays
-  devicePixelRatioF()==1.0 so the change is a no-op — platform-independent.
+  Commit 1 (81d1145): GLRenderer::pixel_ratio_ — see prior notes.
+
+  Commit 2 (this commit) — render the GL scene INSIDE paintGL():
+  - GLRenderWindow gains a non-owning RenderSetup* (setRenderSetup()).
+    RenderSetup registers itself in init() and resize().
+  - GLRenderWindow::paintGL(): if a GLRenderer drives the window, call
+    render_setup_->renderToBuffer() here (GLRenderer::renderToBuffer already
+    does its own glClear(COLOR|DEPTH) + depth-tested draw) — the only place
+    QOpenGLWidget guarantees a valid, current default FBO. Buffered/raytracer
+    renderers keep the existing refresh() texture-blit branch.
+  - Scene::handleRenderToBufferFinishedEvent_: for a GLRenderer, no longer
+    renders into the FBO from the event handler — it just lets the existing
+    update() request schedule the real paintGL(). Raytracer path unchanged
+    (still does the CPU-buffer handoff via refresh()).
+  - Scene::eventFilter: stop swallowing QEvent::Paint AND QEvent::Resize for
+    the GL window, so GLRenderWindow::paintGL()/resizeGL() actually run and
+    the QOpenGLWidget recreates its FBO on resize.
+  - Scene::init() + RenderSetup::run(): stop calling ignoreEvents(true) for a
+    GL-renderer-driven window (run() still does for a non-GL raytracer
+    worker, where the window is a passive blit surface).
+  Raytracer path and platform-independence preserved (devicePixelRatioF()==1
+  and the refresh() branch untouched on non-HiDPI / raytracer setups).
 verification: |
-  Headless smoke test: final state logical=857x577 pixel_ratio=2
-  glViewport=1714x1154 (matches FBO exactly), frustum aspect 1.485 correct
-  and non-degenerate, 0 GL errors, 0 exceptions, demo peptide builds cleanly.
-  Production binary (instrumentation removed) re-run: 0 errors/exceptions.
-  Awaiting user visual confirmation that the RQI tripeptide now renders as a
-  correctly-sized, centered ball-and-stick molecule.
+  Commit 1: see prior notes; user confirmed the molecule is correctly sized
+  and centered.
+  Commit 2: BALL_VIEW_DEBUG instrumentation, headless smoke test.
+  Before fix: GLRenderWindow::paintGL ran 0x, GLRenderer::renderToBuffer 0x,
+  Scene::paintGL spun 1233x. After fix: GLRenderWindow::paintGL ran 14x, each
+  followed by exactly one GLRenderer::renderToBuffer clear+draw into fbo=1
+  (the QOpenGLWidget default FBO), viewport stable at 2160x1154 (dpr=2),
+  ignore_events_=0, 0 GL errors, 0 exceptions, Scene::paintGL spin down to
+  ~11. Production binary (instrumentation removed) re-run: alive 14s, 0
+  exceptions, 0 GL errors. Awaiting user visual recheck of the three symptoms.
 files_changed:
   - include/BALL/VIEW/RENDERING/RENDERERS/glRenderer.h
   - source/VIEW/RENDERING/RENDERERS/glRenderer.C
   - source/VIEW/RENDERING/renderSetup.C
+  - include/BALL/VIEW/RENDERING/glRenderWindow.h
+  - source/VIEW/RENDERING/glRenderWindow.C
+  - source/VIEW/WIDGETS/scene.C
