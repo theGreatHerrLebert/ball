@@ -22,10 +22,10 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 
 ### Dependency System
 
-- [ ] **DEPS-01**: `ball_contrib` is removed from the build path; CMake finds dependencies via system/Homebrew packages
+- [x] **DEPS-01**: `ball_contrib` is removed from the build path; CMake finds dependencies via system/Homebrew packages
 - [ ] **DEPS-02**: A vcpkg manifest provides the Windows dependency set
-- [ ] **DEPS-03**: Stale bundled `Find*.cmake` modules (Boost, TBB, Eigen3, OpenBabel) are replaced with config-mode `find_package` where upstream provides it
-- [ ] **DEPS-04**: Minimum dependency versions are pinned and documented
+- [x] **DEPS-03**: Stale bundled `Find*.cmake` modules (Boost, TBB, Eigen3, OpenBabel) are replaced with config-mode `find_package` where upstream provides it
+- [x] **DEPS-04**: Minimum dependency versions are pinned and documented
 - [ ] **DEPS-05**: A `CMakePresets.json` provides stable configure presets for macOS-Homebrew, Linux-system, Windows-vcpkg, and CI
 - [ ] **FEAT-01**: A feature matrix classifies every optional dependency as required / optional / removed / deferred and states what each one's absence disables (see the "Feature Matrix" section below)
 
@@ -155,10 +155,10 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | LANG-01 | Phase 3 — Language Modernization | Complete |
 | LANG-02 | Phase 3 — Language Modernization | Complete |
 | LANG-03 | Phase 3 — Language Modernization | Complete |
-| DEPS-01 | Phase 4 — Dependency System Overhaul | Pending |
+| DEPS-01 | Phase 4 — Dependency System Overhaul | Complete |
 | DEPS-02 | Phase 4 — Dependency System Overhaul | Pending |
-| DEPS-03 | Phase 4 — Dependency System Overhaul | Pending |
-| DEPS-04 | Phase 4 — Dependency System Overhaul | Pending |
+| DEPS-03 | Phase 4 — Dependency System Overhaul | Complete |
+| DEPS-04 | Phase 4 — Dependency System Overhaul | Complete |
 | DEPS-05 | Phase 4 — Dependency System Overhaul | Pending |
 | FEAT-01 | Phase 4 — Dependency System Overhaul | Pending |
 | CONFIG-01 | Phase 4.1 — Config Color-Defaults Fix | Pending |

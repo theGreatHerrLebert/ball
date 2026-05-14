@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
 status: executing
-stopped_at: 04-01 Task 2 complete; paused at Task 3 checkpoint (OpenBabel LGPL decision)
-last_updated: "2026-05-14T15:24:07.986Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-05-14T15:28:43.083Z"
 progress:
   total_phases: 17
   completed_phases: 5
   total_plans: 17
-  completed_plans: 13
-  percent: 76
+  completed_plans: 14
+  percent: 82
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -28,7 +28,7 @@ Plan: 1 of 4
 **Phase:** 4 — Dependency System Overhaul
 **Plan:** Not started
 **Status:** Executing Phase 04
-**Progress:** Phases 1, 2, 02.1, 02.2, 3 complete
+**Progress:** [████████░░] 82%
 
 ```
 Phase 1     [x]  Build Baseline
@@ -65,6 +65,7 @@ roadmap/STATE after any gsd-tools phase op.
 | Phase 03-language-modernization P01 | 83 | 3 tasks | 7 files |
 | Phase 03 P02 | 5min | 3 tasks | 2 files |
 | Phase 03 P03 | ~20min | 2 tasks | 3 files |
+| Phase 04 P04-01 | 120 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ roadmap/STATE after any gsd-tools phase op.
 - [Phase 04-dependency-system-overhaul]: Eigen3 version range 3.4...6 used (not plain 3.4) because Homebrew ships Eigen 5.0.1 which uses a version compatibility schema where 3.4 would only match 3.4.x but not 5.x
 - [Phase 04-dependency-system-overhaul]: QT_NO_KEYWORDS enabled (was commented out) to prevent Qt emit/signals macros clashing with TBB oneAPI tbb::detail::d1::event::emit() method — required for TBB config-mode to build
 - [Phase 04-dependency-system-overhaul]: OpenBabel BALL_HAS_OPENBABEL activation deferred to Plan 03 — config-mode find_package(OpenBabel3) is in place but enabling compilation requires the 2.x→3.x API port first
+- [Phase 04-dependency-system-overhaul]: OpenBabel stays GPL-gated: FIND_PACKAGE(OpenBabel3) remains inside IF(BALL_LICENSE_GPL); Plan 04-03 must verify the 2.x→3.x port via -DBALL_LICENSE=GPL configure, not the default LGPL build
+- [Phase 04-dependency-system-overhaul]: BALL_HAS_OPENBABEL activation deferred to Plan 04-03: config-mode OpenBabel3 finder in place but compilation requires the 2.x→3.x API port first
 
 ### Roadmap Evolution
 
@@ -124,7 +127,7 @@ roadmap/STATE after any gsd-tools phase op.
 
 **Last action:** Phase 3 (Language Modernization) marked COMPLETE — all 3 plans executed, code review clean (0 critical / 1 pre-existing warning), gsd-verifier passed 3/3 must-haves, `phase complete 03` run. CI run 25862456769 (`446cf10`) is fully green (build macos/linux/windows + lint); render-smoke passed on macOS and Linux. Branch `v1.6-modernization` is at `446cf10` + planning-doc commits.
 
-**Stopped at:** 04-01 Task 2 complete; paused at Task 3 checkpoint (OpenBabel LGPL decision)
+**Stopped at:** Completed 04-01-PLAN.md
 
 **Next action:** Phase 4 — Dependency System Overhaul (`/gsd-discuss-phase 4` or `/gsd-plan-phase 4`). Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix. CI (Phase 02.2) remains the regression net.
 
