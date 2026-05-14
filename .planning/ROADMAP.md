@@ -173,7 +173,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 | 1. Build Baseline | 1/1 | Complete | 2026-05-14 |
 | 2. Rendering Port (4a) | 4/4 | Complete — human-verified on macOS (RENDER-08 Linux/Windows carry-forward) | 2026-05-14 |
 | 02.1 Renderer boundary extraction | 3/3 | Complete    | 2026-05-14 |
-| 02.2 CI and build-smoke matrix | 2/2 | Complete   | 2026-05-14 |
+| 02.2 CI and build-smoke matrix | 2/2 | Complete    | 2026-05-14 |
 | 3. Language Modernization | 0/0 | Not started | - |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
 | 5. Qt 6 Migration (4b) | 0/0 | Not started | - |

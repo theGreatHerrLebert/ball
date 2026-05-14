@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
 status: executing
-stopped_at: 02.2-02 Tasks 1-2 done; PAUSED at Task 3 checkpoint (post-push CI-green human-verify)
-last_updated: "2026-05-14T12:10:00.000Z"
+stopped_at: Phase 02.2 complete (CI green on all 4 jobs); Phase 3 ready to plan
+last_updated: "2026-05-14T12:55:00.000Z"
 progress:
   total_phases: 16
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 10
-  completed_plans: 9
-  percent: 90
+  completed_plans: 10
+  percent: 100
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -19,46 +19,46 @@ progress:
 
 **Core Value:** BALLView must build and visibly render molecules on macOS, Linux, and Windows from current, supported dependencies — the 3D scene working cross-platform is the non-negotiable outcome.
 
-**Current Focus:** Phase 02.2 — CI and build-smoke matrix
+**Current Focus:** Phase 3 — Language Modernization (next to plan)
 
 ## Current Position
 
-Phase: 02.2 (CI and build-smoke matrix) — EXECUTING
-Plan: 2 of 2
-**Phase:** 02.2
-**Plan:** 02.2-01 complete; 02.2-02 Tasks 1-2 done, PAUSED at Task 3 checkpoint
-**Status:** Executing Phase 02.2 — awaiting post-push CI-green human-verify
-**Progress:** [█████████░] 90%
+**Phase:** 3 — Language Modernization
+**Plan:** Not started
+**Status:** Ready to plan (`/gsd-discuss-phase 3` or `/gsd-plan-phase 3`)
+**Progress:** Phases 1, 2, 02.1, 02.2 complete
 
 ```
 Phase 1     [x]  Build Baseline
-Phase 2     [x]  Rendering Port (4a)  — human-verified on macOS
-Phase 02.1  [ ]  Renderer boundary extraction  <- NEXT
-Phase 3     [ ]  Language Modernization
+Phase 2     [x]  Rendering Port (4a)        — human-verified on macOS
+Phase 02.1  [x]  Renderer boundary extraction
+Phase 02.2  [x]  CI and build-smoke matrix  — CI green on all 4 jobs
+Phase 3     [ ]  Language Modernization     <- NEXT
 Phase 4     [ ]  Dependency System Overhaul
-Phase 5     [ ]  Qt 6 (4b)  (flagged oversized — split pending)
+Phase 5     [ ]  Qt 6 Migration (4b)
+Phase 05.1  [ ]  Renderer backend decision spike  (depends on Phase 5)
 Phase 6     [ ]  Python Bindings
-Phase 8     [ ]  macOS Packaging
-Phase 9     [ ]  CI & Tests
+Phase 8     [ ]  Packaging & Distribution
+Phase 9     [ ]  Test Suite Triage
 (Phase 7 Networking → backlog 999.3)
 ```
+
+NOTE: gsd-tools `phase complete 02.2` reported `next_phase: 05.1` — that is the
+tool's decimal-phase bug; 05.1 depends on Phase 5. The real next phase is **Phase 3**.
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 2/11 (incl. 02.1; excl. backlog) |
-| Plans complete | 6 |
-| Requirements | 30 active + NET-01 deferred |
+| Phases complete | 4 (1, 2, 02.1, 02.2) of 11 active (excl. backlog) |
+| Plans complete | 10 |
+| Requirements | 37 active + NET-01 deferred |
 | Milestone | v1.6 |
 | Phase 01-build-baseline P01 | 3min | 3 tasks | 9 files |
-| Phase 02-rendering-port-4a P01 | 3min | 2 tasks | 2 files |
-| Phase 02-rendering-port-4a P02 | 12min | 2 tasks | 3 files |
-| Phase 02-rendering-port-4a P03 | 9min | 2 tasks | 4 files |
-| Phase 02-rendering-port-4a P04 | ~4h (incl. 3 debug rounds + human verify) | 3 tasks | 7 files |
-| Phase 02.1-renderer-boundary-extraction P01 | 6min | 2 tasks | 7 files |
-| Phase 02.1 P02 | 8min | 2 tasks | 2 files |
-| Phase 02.2 P01 | 25min | 2 tasks | 3 files |
+| Phase 02-rendering-port-4a P01-04 | ~4.5h (incl. 3 debug rounds + human verify) | 9 tasks | 16 files |
+| Phase 02.1-renderer-boundary-extraction P01-03 | ~20min + human verify | 7 tasks | ~12 files |
+| Phase 02.2-ci-and-build-smoke-matrix P01 | 25min | 2 tasks | 3 files |
+| Phase 02.2-ci-and-build-smoke-matrix P02 | ~3h (incl. 2 CI bring-up iterations) | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -80,7 +80,9 @@ Phase 9     [ ]  CI & Tests
 - [Phase 02.2]: DIAG-01: BALLVIEW_GL_DIAG single-line stdout diagnostic emitted from GLRenderWindow::initializeGL(); fbo_size is pre-layout so the smoke check uses the line's presence + live gl_version as the GL-context oracle, not exact dimensions
 - [Phase 02.2]: Render smoke check uses the D-09 fallback (fixed PDB data/structures/bpti.pdb) + a minimal -export-png main.C flag; the auto-demo peptide is restored ~/.BALLView session state, not a deterministic CI input
 - [Phase 02.2]: Plan 02.2-02: `.github/workflows/ci.yml` — single `build` job, strategy.matrix.include per OS (extensible without rewrite, D-11); macOS mirrors BUILD-macos.md verbatim, Linux apt+xvfb/software-Mesa, Windows non-blocking via matrix-driven `continue-on-error: ${{ !matrix.blocking }}` (D-03). Standalone blocking `lint` job runs the legacy-GL grep gate.
-- [Phase 02.2]: KNOWN ISSUE (deferred-items.md): the legacy-GL grep gate exits 1 on the current tree — 1 real `#include <QtOpenGL/qgl.h>` in glDisplayList.h + 6 false-positive comment matches. The wired `lint` job WILL be red on first CI run; resolution is a Phase-2 follow-up (out of scope for the CI workflow plan).
+- [Phase 02.2]: The `lint`-will-be-red finding was RESOLVED during CI bring-up: `glDisplayList.h` ported off `QtOpenGL/qgl.h` → `QtGui/qopengl.h` (`da043c1`), and the grep gate now skips comment-only lines (`4c91600`). The legacy-GL lint job is genuinely green.
+- [Phase 02.2]: CI bring-up took 2 iterations after the workflow landed. (1) macOS build red — C++ standard was a late raw `-std=` flag, so AppleClang 15 ran feature-detection sub-C++14 and Eigen rejected the build → fixed with `CMAKE_CXX_STANDARD 14` set early in CMakeLists.txt (`3ac3f24`, a LANG-03 down payment). (2) Linux link red — Ubuntu's `liblpsolve55.a` is non-PIC, can't link into shared libBALL → dropped lp_solve on Linux + `-DUSE_LPSOLVE=OFF` (`1959d9b`); lp_solve is optional, macOS keeps it.
+- [Phase 02.2]: COMPLETE — CI run 25859952862 (`1959d9b`) all 4 jobs green: build macos/linux/windows + lint. Render-smoke ran & passed on macOS AND Linux (BALLView headless-rendered a non-blank PNG on each) — real cross-platform render validation, substantially de-risks RENDER-08. Even Windows built clean (non-blocking; closer to "required" than expected).
 
 ### Roadmap Evolution
 
@@ -100,17 +102,20 @@ Phase 9     [ ]  CI & Tests
 
 ## Session Continuity
 
-**Last action:** Plan 02.1-03 Tasks 1-2 executed and committed (5498a48 factory, 0784585 scene.C routing). `make BALL VIEW BALLView -j8` builds clean, fully-linked BALLView.app. Grep gate passes: zero `new GLRenderWindow`/`dynamic_cast<GLRenderWindow|GLRenderer>`/`RTTI::isKindOf<GLRenderWindow|GLRenderer>` in scene.C's non-deferred paths; ~9 deferred-stereo 3-arg-ctor + 8 new GLRenderer residuals all confirmed inside guard-deferred stereo/multi-display methods.
+**Last action:** Phase 02.2 (CI and build-smoke matrix) marked COMPLETE — gsd-verifier passed 10/10, `phase complete 02.2` run. CI run 25859952862 (`1959d9b`) is fully green (build macos/linux/windows + lint); render-smoke ran & passed on macOS and Linux. Pushed branch `v1.6-modernization` is at `1959d9b`.
 
-**Stopped at:** Completed 02.2-01-PLAN.md
+**Stopped at:** Phase 02.2 complete; Phase 3 ready to plan.
 
-**Next action:** Human verifies BALLView renders identically to post-Phase-2 (launch `build/BALLView.app/Contents/MacOS/BALLView`, load demo molecule, confirm embedded scene + representation + rotate/zoom/pick + clean startup log). On "approved", a continuation agent creates `02.1-03-SUMMARY.md`, completes STATE/ROADMAP/REQUIREMENTS updates, and the final metadata commit.
+**Next action:** Phase 3 — Language Modernization (`/gsd-discuss-phase 3` or `/gsd-plan-phase 3`). Move the codebase to C++17, remove C++17-removed constructs (`std::unary_function`/`bind2nd`/etc. across the 7 known files), and bump `CMAKE_CXX_STANDARD` 14→17 (the mechanism is already in CMakeLists.txt from the Phase 02.2 CI fix — Phase 3 just bumps the value and removes the legacy raw `-std=` lines from `BALLCompilerSpecific.cmake`). CI (Phase 02.2) is now the regression net for this work.
 
 **Notes:**
 
-- Phase 02.1 plans: 01 → `RenderSurface` interface + `makeCurrent` body behind `beginFrame/endFrame` (ARCH-01); 02 → additive batched `renderRepresentations_()`/`capabilities()` non-pure default fan-out (ARCH-03); 03 → `RendererFactory` + kill `new GLRenderWindow`/`dynamic_cast<GLRenderWindow|GLRenderer>` in scene.C + human-verify (ARCH-02, ARCH-04). The ~10 deferred-stereo `new GLRenderWindow` 3-arg sites are EXPECTED residuals (guard-deferred to Phase 5).
-- Build files: BALL uses per-directory `sources.cmake` (e.g. `source/VIEW/RENDERING/sources.cmake`), NOT `source/VIEW/CMakeLists.txt`. Headers are implicit, not listed.
-- A1 CONFIRMED (Phase 2): raytracer worker issues no GL — threading scope stays minimal. `TilingRenderer`'s GL path is GUI-thread-only.
+- CI ownership: I trigger + `gh run watch` CI myself after build-relevant pushes, diagnose failures from `gh`-fetched logs, fix, re-push, iterate to green. (See memory: feedback_ci_supervision.md.)
+- gsd-tools has a recurring decimal-phase bug — `phase complete` mis-marks/mis-reports decimal phases (it spuriously flipped 05.1 once; reported `next_phase: 05.1` wrongly). Hand-verify roadmap/STATE after gsd-tools phase ops.
+- Build files: BALL uses per-directory `sources.cmake`, NOT `source/VIEW/CMakeLists.txt`. Headers are implicit, not listed.
+- Renderer boundary (Phase 02.1) is in place: `RenderSurface`/`RendererFactory` + additive `Renderer::renderRepresentations_()`/`capabilities()`. Phase 5/05.1 backend swap is now contained — no scene.C edits.
+- A1 CONFIRMED (Phase 2): raytracer worker issues no GL. `TilingRenderer`'s GL path is GUI-thread-only.
+- Build/run: `BUILD-macos.md`. CI mirrors it. `~/.BALLView` was deleted (stale element-color cache shadowed compiled defaults — backlog 999.4).
 
 ---
 *State initialized: 2026-05-14*
