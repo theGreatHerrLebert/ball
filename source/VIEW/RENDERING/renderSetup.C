@@ -167,9 +167,19 @@ namespace BALL
 
 			if(!target->resize(width, height))
 			{
-				Log.error() << "Cannot resize window. Size " 
-										<< width  << " x " 
+				Log.error() << "Cannot resize window. Size "
+										<< width  << " x "
 										<< height << " is not supported" << std::endl;
+			}
+
+			// Keep the GL renderer's viewport in sync with the target's
+			// device-pixel framebuffer. On a HiDPI QOpenGLWidget the default
+			// framebuffer is devicePixelRatio times larger than the logical
+			// widget size; width/height here are logical. pixel_ratio is 1.0
+			// on non-HiDPI displays, so this is a no-op there.
+			if (gl_renderer_ && gl_target_)
+			{
+				gl_renderer_->setPixelRatio((float)gl_target_->devicePixelRatioF());
 			}
 
 			renderer->setSize(width, height);
