@@ -151,8 +151,15 @@ jobs:
             cmake make g++ ccache \
             qtbase5-dev qtbase5-dev-tools libqt5opengl5-dev qttools5-dev \
             libboost-all-dev libeigen3-dev libfftw3-dev libtbb-dev libglew-dev \
-            libopenbabel-dev liblpsolve55-dev libsvm-dev flex bison \
+            libopenbabel-dev libsvm-dev flex bison \
             xvfb mesa-utils libgl1-mesa-dri
+          # NOTE: liblpsolve55-dev is intentionally NOT installed. Ubuntu ships
+          # liblpsolve55.a built WITHOUT -fPIC, which cannot be linked into
+          # BALL's shared libBALL (ld: "relocation R_X86_64_PC32 ... can not be
+          # used when making a shared object"). lp_solve is an OPTIONAL feature
+          # (see the Feature Matrix in REQUIREMENTS.md) — Linux CI builds without
+          # it; macOS keeps it (Homebrew's lp_solve is fine). Phase 4 (FEAT-01)
+          # confirms the per-platform optional-dependency policy.
 
       - name: Configure (Linux)
         if: matrix.os == 'linux-x64'
@@ -166,6 +173,7 @@ jobs:
             -DBISON_EXECUTABLE=/usr/bin/bison \
             -DFLEX_EXECUTABLE=/usr/bin/flex \
             -DBALL_PYTHON_SUPPORT=OFF -DUSE_RTFACT=OFF -DBALL_HAS_VIEW=ON \
+            -DUSE_LPSOLVE=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
