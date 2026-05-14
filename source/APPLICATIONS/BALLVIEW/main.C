@@ -7,12 +7,16 @@
 #include <QtWidgets/QMessageBox>
 #include <QtCore/QTranslator>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QTimer>
 #include <QtGui/QSurfaceFormat>
 
 #include "mainframe.h"
 #include <BALL/SYSTEM/path.h>
 #include <BALL/SYSTEM/directory.h>
 #include <BALL/VIEW/RENDERING/glRenderWindow.h>
+#include <BALL/VIEW/WIDGETS/scene.h>
+
+#include <iostream>
 
 void logMessages(QtMsgType type, const QMessageLogContext& context, const QString& message)
 {
@@ -157,10 +161,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR cmd_line, int)
 
 	// =============== parsing command line arguments ==================================
 	// If there are additional command line arguments, interpret them as files to open or logging flag.
+	//
+	// -export-png <path> : headless render smoke-check trigger (Phase 02.2, DIAG-01
+	//   smoke check). After the molecule(s) given on the command line have loaded and
+	//   the Scene has had a few paint cycles, the Scene's existing exportPNG() path is
+	//   invoked to write a PNG of the rendered scene, and BALLView quits. This is the
+	//   non-invasive hook the render-smoke-check.sh script uses on every CI runner —
+	//   it reuses Scene::exportPNG(), it does not build a new GL test harness.
+	BALL::String export_png_path;
 	for (BALL::Index i = 1; i < argc; ++i)
 	{
 		BALL::String argument(argv[i]);
-		if (argument == "-l") 
+		if (argument == "-l")
 		{
 			mainframe.enableLoggingToFile();
 			continue;
@@ -170,8 +182,40 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR cmd_line, int)
 			// the kiosk mode has already been handled
 			continue;
 		}
+		else if (argument == "-export-png")
+		{
+			if (i + 1 < argc)
+			{
+				export_png_path = BALL::String(argv[++i]);
+			}
+			else
+			{
+				std::cerr << "BALLVIEW_SMOKE_ERROR -export-png requires a path argument" << std::endl;
+				return 2;
+			}
+			continue;
+		}
 
 		mainframe.openFile(argument);
+	}
+
+	// If -export-png was requested, schedule the headless export + quit once the
+	// event loop is running and the scene has had time to load and render.
+	if (export_png_path != "")
+	{
+		QTimer::singleShot(4000, &application, [&export_png_path, &application]() {
+			BALL::VIEW::Scene* scene = BALL::VIEW::Scene::getInstance(0);
+			if (scene == 0)
+			{
+				std::cerr << "BALLVIEW_SMOKE_ERROR no Scene instance available for -export-png" << std::endl;
+				application.exit(3);
+				return;
+			}
+			bool ok = scene->exportPNG(export_png_path);
+			std::cout << "BALLVIEW_SMOKE_EXPORT path=\"" << export_png_path << "\" ok="
+			          << (ok ? "1" : "0") << std::endl;
+			application.exit(ok ? 0 : 4);
+		});
 	}
 
 	// enable ending of program from python script
