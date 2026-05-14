@@ -15,7 +15,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 - [ ] **Phase 3: Language Modernization** - Move the codebase to C++17, remove C++17-removed constructs, set the standard via CMake
 - [ ] **Phase 4: Dependency System Overhaul** - Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix
 - [ ] **Phase 5: Qt 6 Migration** - Build against Qt 6 and replace deprecated VIEW APIs; keep the compat-profile GL path working *(split from the old oversized "Qt 6 + Pipeline")*
-- [ ] **Phase 05.1: Renderer backend decision spike** - Prototype GL-core vs QRhi behind the Phase 02.1 boundary; produce a recorded decision with macOS/Windows acceptance criteria *(de-risks the v2 PIPE-01 full rewrite)*
+- [x] **Phase 05.1: Renderer backend decision spike** - Prototype GL-core vs QRhi behind the Phase 02.1 boundary; produce a recorded decision with macOS/Windows acceptance criteria *(de-risks the v2 PIPE-01 full rewrite)* (completed 2026-05-14)
 - [ ] **Phase 6: Python Bindings** - Decide the binding generator via a vertical slice (5-10 core classes), then commit *(restructured per Codex review — was a single under-scoped criterion)*
 - [ ] ~~**Phase 7: Networking Rework**~~ - **Deferred to backlog 999.3** — not core value, the Asio code already compiles (Phase 1); the proper rework + test is 1.6.x polish
 - [ ] **Phase 8: Packaging & Distribution** - Notarizable macOS bundle (`data/` embedded, `macdeployqt`); documented build-from-source for Linux/Windows; license/distribution review
@@ -170,7 +170,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 |-------|----------------|--------|-----------|
 | 1. Build Baseline | 1/1 | Complete | 2026-05-14 |
 | 2. Rendering Port (4a) | 4/4 | Complete — human-verified on macOS (RENDER-08 Linux/Windows carry-forward) | 2026-05-14 |
-| 02.1 Renderer boundary extraction | 3/3 | Complete   | 2026-05-14 |
+| 02.1 Renderer boundary extraction | 3/3 | Complete    | 2026-05-14 |
 | 02.2 CI and build-smoke matrix | 0/0 | Not planned (inserted — Codex review) | - |
 | 3. Language Modernization | 0/0 | Not started | - |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |

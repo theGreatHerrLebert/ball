@@ -143,9 +143,9 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | RENDER-07 | Phase 2 — Rendering Port (4a) | Complete |
 | RENDER-08 | Phase 2 — Rendering Port (4a) | Carry-forward — Linux/Windows render verified via Phase 02.2 CI |
 | ARCH-01 | Phase 02.1 — Renderer boundary extraction | Complete |
-| ARCH-02 | Phase 02.1 — Renderer boundary extraction | Pending |
+| ARCH-02 | Phase 02.1 — Renderer boundary extraction | Complete |
 | ARCH-03 | Phase 02.1 — Renderer boundary extraction | Complete |
-| ARCH-04 | Phase 02.1 — Renderer boundary extraction | Pending |
+| ARCH-04 | Phase 02.1 — Renderer boundary extraction | Complete |
 | CI-01 | Phase 02.2 — CI and build-smoke matrix | Pending |
 | DIAG-01 | Phase 02.2 — CI and build-smoke matrix | Pending |
 | LANG-01 | Phase 3 — Language Modernization | Pending |
