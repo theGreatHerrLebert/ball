@@ -177,17 +177,20 @@ IF(${BALL_LICENSE_GPL})
 	ENDIF()
 
 
-ENDIF()
+	# OpenBabel (GPL-gated — dynamically linked optional dep; only searched in GPL builds).
+	# Decision: OpenBabel stays GPL-gated to avoid any licensing ambiguity in the default
+	# LGPL build (maintainer decision recorded in Plan 04-01 SUMMARY, 2026-05-14).
+	# Plan 04-03 verifies the 2.x→3.x C++ API port via a -DBALL_LICENSE=GPL configure.
+	# NOTE: BALL_HAS_OPENBABEL is not enabled here; the C++ API port from 2.x to 3.x is
+	# done in Plan 03. Once that port lands, this block sets BALL_HAS_OPENBABEL TRUE.
+	FIND_PACKAGE(OpenBabel3 3.0 CONFIG)
+	IF(OpenBabel3_FOUND)
+		# Port is Plan 03 — link and enable there; for now only detect.
+		MESSAGE(STATUS "Found OpenBabel ${OpenBabel3_VERSION} (config mode) — C++ port pending (Plan 03)")
+	ELSE()
+		MESSAGE(STATUS "OpenBabel not found — molecular file-format conversion disabled (optional dependency)")
+	ENDIF()
 
-# OpenBabel (optional dep — searched in default LGPL build; GPL gating removed per D-05).
-# NOTE: BALL_HAS_OPENBABEL is not enabled here; the C++ API port from 2.x to 3.x is
-# done in Plan 03. Once that port lands, this block sets BALL_HAS_OPENBABEL TRUE.
-FIND_PACKAGE(OpenBabel3 3.0 CONFIG)
-IF(OpenBabel3_FOUND)
-	# Port is Plan 03 — link and enable there; for now only detect.
-	MESSAGE(STATUS "Found OpenBabel ${OpenBabel3_VERSION} (config mode) — C++ port pending (Plan 03)")
-ELSE()
-	MESSAGE(STATUS "OpenBabel not found — molecular file-format conversion disabled (optional dependency)")
 ENDIF()
 
 
