@@ -26,130 +26,133 @@ namespace BALL
 		ElementColorProcessor::ElementColorProcessor()
 			: ColorProcessor()
 		{
+			// Default element colors taken from PyMOL (pymol-open-source,
+			// layer1/Color.cpp reg_named_color() table), converted from
+			// 0.0-1.0 float RGB to 0-255. Index 0 is the nomatch color;
+			// element 110 has no PyMOL definition and is left white.
 			const unsigned char color_values[111][3] =
 			{
 				{255, 255, 255},   // nomatch color 0
-				{255, 255, 255},   // HYDROGEN 1
-				{216, 255, 255},   // HELIUM 2
-				{205, 126, 255},   // LITHIUM 3
-				{196, 255, 000},   // BERYLLIUM 4
-				{255, 182, 182},   // BORON 5
-				{144, 144, 144},   // CARBON 6
-				{142, 142, 255},   // NITROGEN 7
-				{240, 000, 000},   // OXYGEN 8
+				{230, 230, 230},   // HYDROGEN 1
+				{217, 255, 255},   // HELIUM 2
+				{204, 128, 255},   // LITHIUM 3
+				{194, 255,   0},   // BERYLLIUM 4
+				{255, 181, 181},   // BORON 5
+				{ 51, 255,  51},   // CARBON 6
+				{ 51,  51, 255},   // NITROGEN 7
+				{255,  76,  76},   // OXYGEN 8
 				{179, 255, 255},   // FLUORINE 9
+				{179, 227, 245},   // NEON 10
 				//10
-				{175, 226, 244},   // NEON 10
-				{170,  93, 242},   // SODIUM 11
-				{137, 255, 000},   // MAGNESIUM 12
-				{209, 165, 165},   // ALUMINIUM 13    
-				{128, 154, 154},   // SILICON 14
-				{255, 128, 000},   // PHOSPHORUS 15
-				{255, 200,  40},   // SULPHUR 16
-				{ 26, 240,  26},   // CHLORINE 17
-				{128, 209, 228},   // ARGON 18
-				{142,  65, 211},   // POTASSIUM 19
+				{171,  92, 242},   // SODIUM 11
+				{138, 255,   0},   // MAGNESIUM 12
+				{191, 166, 166},   // ALUMINIUM 13
+				{240, 200, 160},   // SILICON 14
+				{255, 128,   0},   // PHOSPHORUS 15
+				{230, 198,  64},   // SULPHUR 16
+				{ 31, 240,  31},   // CHLORINE 17
+				{128, 209, 227},   // ARGON 18
+				{143,  64, 212},   // POTASSIUM 19
+				{ 61, 255,   0},   // CALCIUM 20
 				//20
-				{ 61, 255, 000},   // CALCIUM 20
-				{230, 230, 228},   // SCANDIUM 21
-				{191, 195, 198},   // TITANIUM 22
-				{167, 165, 172},   // VANADIUM 23
-				{137, 153, 198},   // CHROMIUM 24
-				{156, 123, 198},   // MANGANESE 25
-				{128, 123, 198},   // IRON 26
-				{ 93, 109, 255},   // COBALT 27
-				{ 93, 123, 195},   // NICKEL 28
-				{255, 123,  98},   // COPPER 29
-				//30                  
-				{124, 128, 175},   // ZINC 30
-				{195, 144, 144},   // GALLIUM 31
-				{102, 144, 144},   // GERMANIUM 32
-				{188, 128, 226},   // ARSENIC 33
-				{255, 161, 000},   // SELENIUM 34
-				{165,  33,  33},   // BROMINE 35
-				{ 93, 186, 209},   // KRYPTON 36
-				{112,  45, 177},   // RUBIDIUM 37
-				{000, 255, 000},   // STRONTIUM 38
-				{149, 253, 255},   // YTTRIUM 39
+				{230, 230, 230},   // SCANDIUM 21
+				{191, 194, 199},   // TITANIUM 22
+				{166, 166, 171},   // VANADIUM 23
+				{138, 153, 199},   // CHROMIUM 24
+				{156, 122, 199},   // MANGANESE 25
+				{224, 102,  51},   // IRON 26
+				{240, 144, 160},   // COBALT 27
+				{ 80, 208,  80},   // NICKEL 28
+				{200, 128,  51},   // COPPER 29
+				{125, 128, 176},   // ZINC 30
+				//30
+				{194, 143, 143},   // GALLIUM 31
+				{102, 143, 143},   // GERMANIUM 32
+				{189, 128, 227},   // ARSENIC 33
+				{255, 161,   0},   // SELENIUM 34
+				{166,  41,  41},   // BROMINE 35
+				{ 92, 184, 209},   // KRYPTON 36
+				{112,  46, 176},   // RUBIDIUM 37
+				{  0, 255,   0},   // STRONTIUM 38
+				{148, 255, 255},   // YTTRIUM 39
+				{148, 224, 224},   // ZIRCONIUM 40
 				//40
-				{149, 225, 225},   // ZIRCONIUM 40
-				{116, 195, 203},   // NIOBIUM 41
-				{ 84, 181, 182},   // MOLYBDENUM 42
-				{ 59, 158, 168},   // TECHNETIUM 43
-				{ 35, 142, 151},   // RUTHENIUM 44  
-				{ 10, 124, 140},   // RHODIUM 45
-				{000, 105, 133},   // PALLADIUM 46
-				{153, 198, 255},   // SILVER 47
-				{255, 216, 144},   // CADMIUM 48
-				{167, 117, 114},   // INDIUM 49
-				//50
+				{115, 194, 201},   // NIOBIUM 41
+				{ 84, 181, 181},   // MOLYBDENUM 42
+				{ 59, 158, 158},   // TECHNETIUM 43
+				{ 36, 143, 143},   // RUTHENIUM 44
+				{ 10, 125, 140},   // RHODIUM 45
+				{  0, 105, 133},   // PALLADIUM 46
+				{192, 192, 192},   // SILVER 47
+				{255, 217, 143},   // CADMIUM 48
+				{166, 117, 115},   // INDIUM 49
 				{102, 128, 128},   // TIN 50
-				{158, 100, 181},   // ANTIMONY 51
-				{212, 123,   0},   // TELLURIUM 52
-				{147, 000, 147},   // IODINE 53
-				{ 66, 158, 175},   // XENON 54
-				{ 86,  24, 142},   // CAESIUM 55
-				{  0, 203,   0},   // BARIUM 56
-				{112, 221, 255},   // LANTHANUM 57
-				{255, 255, 255},   // CERIUM 58   -----
-				{255, 255, 255},   // PRASEODYMIUM 59          
+				//50
+				{158,  99, 181},   // ANTIMONY 51
+				{212, 122,   0},   // TELLURIUM 52
+				{148,   0, 148},   // IODINE 53
+				{ 66, 158, 176},   // XENON 54
+				{ 87,  23, 143},   // CAESIUM 55
+				{  0, 201,   0},   // BARIUM 56
+				{112, 212, 255},   // LANTHANUM 57
+				{255, 255, 199},   // CERIUM 58
+				{217, 255, 199},   // PRASEODYMIUM 59
+				{199, 255, 199},   // NEODYMIUM 60
 				//60
-				{255, 255, 255},   // NEODYMIUM 60
-				{255, 255, 255},   // PROMETHIUM 61
-				{255, 255, 255},   // SAMARIUM 62
-				{255, 255, 255},   // EUROPIUM 63
-				{255, 255, 255},   // GADOLINIUM 64
-				{255, 255, 255},   // TERBIUM 65
-				{255, 255, 255},   // DYSPROSIUM 66
-				{255, 255, 255},   // HOLMIUM 67
-				{255, 255, 255},   // ERBIUM 68
-				{255, 255, 255},   // THULIUM 69
+				{163, 255, 199},   // PROMETHIUM 61
+				{143, 255, 199},   // SAMARIUM 62
+				{ 97, 255, 199},   // EUROPIUM 63
+				{ 69, 255, 199},   // GADOLINIUM 64
+				{ 48, 255, 199},   // TERBIUM 65
+				{ 31, 255, 199},   // DYSPROSIUM 66
+				{  0, 255, 156},   // HOLMIUM 67
+				{  0, 230, 117},   // ERBIUM 68
+				{  0, 212,  82},   // THULIUM 69
+				{  0, 191,  56},   // YTTERBIUM 70
 				//70
-				{255, 255, 255},   // YTTERBIUM 70
-				{255, 255, 255},   // LUTETIUM 71
-				{ 77, 193, 255},   // HAFNIUM 72
-				{ 77, 167, 255},   // TANTALUM 73
-				{ 38, 147, 214},   // TUNGSTEN 74         
-				{ 38, 126, 172},   // RHENIUM 75
-				{ 38, 103, 151},   // OSMIUM 76
-				{ 24,  84, 135},   // IRIDIUM 77
-				{ 24,  91, 144},   // PLATINUM 78
+				{  0, 171,  36},   // LUTETIUM 71
+				{ 77, 194, 255},   // HAFNIUM 72
+				{ 77, 166, 255},   // TANTALUM 73
+				{ 33, 148, 214},   // TUNGSTEN 74
+				{ 38, 125, 171},   // RHENIUM 75
+				{ 38, 102, 150},   // OSMIUM 76
+				{ 23,  84, 135},   // IRIDIUM 77
+				{208, 208, 224},   // PLATINUM 78
 				{255, 209,  35},   // GOLD 79
+				{184, 184, 208},   // MERCURY 80
 				//80
-				{181, 181, 195},   // MERCURY 80
-				{167,  84,  77},   // THALLIUM 81
-				{ 80,  89,  96},   // LEAD 82
+				{166,  84,  77},   // THALLIUM 81
+				{ 87,  89,  97},   // LEAD 82
 				{158,  79, 181},   // BISMUTH 83
-				{172,  93,   0},   // POLONIUM 84
-				{117,  79,  68},   // ASTATINE 85
-				{ 66, 131, 151},   // RADON 86
+				{171,  92,   0},   // POLONIUM 84
+				{117,  79,  69},   // ASTATINE 85
+				{ 66, 130, 150},   // RADON 86
 				{ 66,   0, 102},   // FRANCIUM 87
-				{  0, 124,   0},   // RADIUM 88       
-				{112, 170, 251},   // ACTINIUM 89
+				{  0, 125,   0},   // RADIUM 88
+				{112, 171, 250},   // ACTINIUM 89
+				{  0, 186, 255},   // THORIUM 90
 				//90
-				{255, 255, 255},   // THORIUM 90
-				{255, 255, 255},   // PROTACTINIUM 91
-				{255, 255, 255},   // URANIUM 92
-				{255, 255, 255},   // NEPTUNIUM 93
-				{255, 255, 255},   // PLUTONIUM 94
-				{255, 255, 255},   // AMERICIUM 95
-				{255, 255, 255},   // CURIUM 96
-				{255, 255, 255},   // BERKELIUM 97
-				{255, 255, 255},   // CALIFORNIUM 98
-				{255, 255, 255},   // EINSTEINIUM 99
+				{  0, 161, 255},   // PROTACTINIUM 91
+				{  0, 143, 255},   // URANIUM 92
+				{  0, 128, 255},   // NEPTUNIUM 93
+				{  0, 107, 255},   // PLUTONIUM 94
+				{ 84,  92, 242},   // AMERICIUM 95
+				{120,  92, 227},   // CURIUM 96
+				{138,  79, 227},   // BERKELIUM 97
+				{161,  54, 212},   // CALIFORNIUM 98
+				{179,  31, 212},   // EINSTEINIUM 99
+				{179,  31, 186},   // FERMIUM 100
 				//100
-				{255, 255, 255},   // FERMIUM 100
-				{255, 255, 255},   // MENDELEVIUM 101
-				{255, 255, 255},   // NOBELIUM 102
-				{255, 255, 255},   // LAWRENCIUM 103        
-				{255, 255, 255},   // RUTHERFORDIUM 104
-				{255, 255, 255},   // HAHNIUM 105
-				{255, 255, 255},   // SEABORGIUM 106
-				{255, 255, 255},   // BOHRIUM 107
-				{255, 255, 255},   // HASSIUM 108
-				{255, 255, 255},   // MEITNERIUM 109
-				{255, 255, 255}    // DUBNIUM 105
-				//110
+				{179,  13, 166},   // MENDELEVIUM 101
+				{189,  13, 135},   // NOBELIUM 102
+				{199,   0, 102},   // LAWRENCIUM 103
+				{204,   0,  89},   // RUTHERFORDIUM 104
+				{209,   0,  79},   // HAHNIUM 105
+				{217,   0,  69},   // SEABORGIUM 106
+				{224,   0,  56},   // BOHRIUM 107
+				{230,   0,  46},   // HASSIUM 108
+				{235,   0,  38},   // MEITNERIUM 109
+				{255, 255, 255}    // element 110 -- not defined by PyMOL, kept white
 			};                                       
 			
 			for (Size i = 0; i < BALL_VIEW_NUMBER_ELEMENTS; i++)
