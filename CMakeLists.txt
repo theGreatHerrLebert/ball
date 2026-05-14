@@ -27,6 +27,17 @@ PROJECT("BALL" VERSION 1.6.0) # 1.6.0-dev (pre-release)
 # General build system settings
 ########################################################
 
+# C++ standard — set EARLY (before BALLConfiguration's C++ feature-detection
+# tests and before any target is defined) so the standard is deterministic on
+# every compiler. The legacy per-compiler raw `-std=` flag in
+# BALLCompilerSpecific.cmake was appended to CMAKE_CXX_FLAGS only AFTER the
+# feature tests ran, so on toolchains whose default standard is < C++14
+# (e.g. AppleClang 15) the tests mis-detected and Eigen rejected the build.
+# C++14 is the current bridge standard; Phase 3 (LANG-03) bumps this to 17.
+SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
+
 # Use folders to group TARGTES using the folder target property in IDEs
 SET(USE_FOLDERS TRUE)
 
