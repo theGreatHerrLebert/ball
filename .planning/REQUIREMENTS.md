@@ -81,25 +81,44 @@ Deferred beyond v1.6.
 
 ## Traceability
 
-Updated during roadmap creation.
+Updated during roadmap creation. GSD phase numbers are sequential; they correspond to ROADMAP-1.6.md phases 1, 4a, 2, 3, 4b, 5, 6, 7, 8.
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| BUILD-01..04 | TBD | Pending |
-| LANG-01..03 | TBD | Pending |
-| DEPS-01..04 | TBD | Pending |
-| RENDER-01..08 | TBD | Pending |
-| QT6-01..03 | TBD | Pending |
-| PY-01 | TBD | Pending |
-| NET-01 | TBD | Pending |
-| PKG-01..02 | TBD | Pending |
-| CI-01..02 | TBD | Pending |
+| Requirement | GSD Phase | Status |
+|-------------|-----------|--------|
+| BUILD-01 | Phase 1 — Build Baseline | Pending |
+| BUILD-02 | Phase 1 — Build Baseline | Pending |
+| BUILD-03 | Phase 1 — Build Baseline | Pending |
+| BUILD-04 | Phase 1 — Build Baseline | Pending |
+| RENDER-01 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-02 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-03 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-04 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-05 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-06 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-07 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-08 | Phase 2 — Rendering Port (4a) | Pending |
+| LANG-01 | Phase 3 — Language Modernization | Pending |
+| LANG-02 | Phase 3 — Language Modernization | Pending |
+| LANG-03 | Phase 3 — Language Modernization | Pending |
+| DEPS-01 | Phase 4 — Dependency System Overhaul | Pending |
+| DEPS-02 | Phase 4 — Dependency System Overhaul | Pending |
+| DEPS-03 | Phase 4 — Dependency System Overhaul | Pending |
+| DEPS-04 | Phase 4 — Dependency System Overhaul | Pending |
+| QT6-01 | Phase 5 — Qt 6 + Pipeline (4b) | Pending |
+| QT6-02 | Phase 5 — Qt 6 + Pipeline (4b) | Pending |
+| QT6-03 | Phase 5 — Qt 6 + Pipeline (4b) | Pending |
+| PY-01 | Phase 6 — Python Bindings | Pending |
+| NET-01 | Phase 7 — Networking Rework | Pending |
+| PKG-01 | Phase 8 — macOS Packaging | Pending |
+| PKG-02 | Phase 8 — macOS Packaging | Pending |
+| CI-01 | Phase 9 — CI & Tests | Pending |
+| CI-02 | Phase 9 — CI & Tests | Pending |
 
 **Coverage:**
 - v1 requirements: 27 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 27 ⚠️
+- Mapped to phases: 27 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-14*
-*Last updated: 2026-05-14 after initial definition*
+*Last updated: 2026-05-14 after roadmap creation*
