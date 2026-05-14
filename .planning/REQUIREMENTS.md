@@ -88,20 +88,25 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 
 ## Feature Matrix
 
-Status of optional components for v1.6 — produced/verified by **FEAT-01** in Phase 4. Initial classification from the Phase 1 review; Phase 4 confirms each and states the user-visible impact of absence.
+Status of optional components for v1.6 — produced/verified by **FEAT-01** in Phase 4, confirmed against Phase 4 research. Initial classification from the Phase 1 review; Phase 4 adds per-platform availability notes and states the user-visible impact of absence.
 
-| Component | v1.6 status | If absent, disables |
-|-----------|-------------|---------------------|
-| Qt 5.15 (→ Qt 6 in Phase 5) | **Required** | Everything (BALLView is a Qt app) |
-| Boost, Eigen, FFTW, GLEW | **Required** | Core BALL/VIEW build |
-| OpenBabel | **Optional** (3.x; was OFF in Phase 1) | Extra molecular file-format import/export |
-| TBB | **Optional** (oneTBB; was OFF in Phase 1) | Parallel speedups; no functional loss |
-| LPSolve | **Optional** (was OFF in Phase 1) | LP-based features (e.g. bond-order assignment ILP path) |
-| libSVM | **Optional** (found in Phase 1) | SVM-based QSAR features |
-| QtWebEngine | **Optional / deferred** | PresentaBALL, BALLaxy, Jupyter plugins (already disabled — `qt@5` has no WebEngine) |
-| RTfact raytracer | **Removed** | Windows-only contrib; not built — the CPU raytracer path remains |
-| Python bindings (SIP) | **Deferred to Phase 6** | The Python interface (re-established via the Phase 6 generator decision) |
-| VRPN / SpaceNavigator | **Removed** | Exotic input-device plugins; not built |
+**D-06 policy:** A missing optional dependency auto-disables its features with a clear configure-time `MESSAGE(STATUS ...)` line — it is never a hard configure error.
+
+| Component | v1.6 status | Platform availability | If absent, disables |
+|-----------|-------------|----------------------|---------------------|
+| Qt 5.15 (→ Qt 6 in Phase 5) | **Required** | macOS / Linux / Windows | Everything (BALLView is a Qt app) |
+| Boost | **Required** | macOS / Linux / Windows | Core BALL build |
+| Eigen | **Required** | macOS / Linux / Windows | Core BALL build |
+| GLEW | **Required-when-VIEW** | macOS / Linux / Windows (vcpkg `glew` 2.3.1) | VIEW/BALLView build (when `BALL_HAS_VIEW=ON`) |
+| FFTW | **Required-for-GPL-builds-only** | macOS / Linux (GPL build only; absent in the default LGPL build) | Fourier-transform algorithms (GPL builds only) |
+| OpenBabel | **Optional** (3.x; was OFF in Phase 1) | macOS: ON (ci-macos preset); Linux: ON (ci-linux preset); Windows: OFF (not a vcpkg port) | `MolecularSimilarity` + 4 TOOLS (`MolDepict`, `ProteinProtonator`, `Ligand3DGenerator`, `MolFilter`) |
+| TBB | **Optional** (oneTBB; was OFF in Phase 1) | macOS / Linux / Windows (vcpkg `tbb` 2022.3.0); enabled-when-found | Parallel speedups; no functional loss when absent |
+| LPSolve | **Optional** (was OFF in Phase 1) | macOS: ON; Linux CI: OFF (Ubuntu `liblpsolve55.a` is non-PIC, cannot link into shared libBALL); Windows: OFF (not a vcpkg port) | LP-based features (e.g. bond-order assignment ILP path) |
+| libSVM | **Optional** (found in Phase 1) | macOS / Linux / Windows (vcpkg `libsvm` 3.35); thin finder shim (no upstream config) | SVM-based QSAR features |
+| QtWebEngine | **Optional / deferred** | None (already disabled — `qt@5` has no WebEngine) | PresentaBALL, BALLaxy, Jupyter plugins |
+| RTfact raytracer | **Removed** | N/A — not built on any platform | Windows-only contrib; not built — the CPU raytracer path remains |
+| Python bindings (SIP) | **Deferred to Phase 6** | Pending Phase 6 generator decision | The Python interface (re-established via the Phase 6 generator decision) |
+| VRPN / SpaceNavigator | **Removed** | N/A — not built on any platform | Exotic input-device plugins; not built |
 
 ## Deferred (1.6.x)
 
