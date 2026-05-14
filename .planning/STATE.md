@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
 status: executing
-stopped_at: Phase 2 complete; Phase 02.1 ready to plan.
-last_updated: "2026-05-14T09:51:39.553Z"
+stopped_at: Completed 02.1-01-PLAN.md
+last_updated: "2026-05-14T10:08:27.287Z"
 progress:
   total_phases: 15
   completed_phases: 2
   total_plans: 8
-  completed_plans: 5
-  percent: 63
+  completed_plans: 6
+  percent: 75
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -19,14 +19,16 @@ progress:
 
 **Core Value:** BALLView must build and visibly render molecules on macOS, Linux, and Windows from current, supported dependencies — the 3D scene working cross-platform is the non-negotiable outcome.
 
-**Current Focus:** Phase 02.1 — Renderer boundary extraction (next to plan)
+**Current Focus:** Phase 02.1 — Renderer boundary extraction
 
 ## Current Position
 
+Phase: 02.1 (Renderer boundary extraction) — EXECUTING
+Plan: 2 of 3
 **Phase:** 02.1 — Renderer boundary extraction
-**Plan:** Not started
-**Status:** Ready to execute
-**Progress:** Phases 1 + 2 complete
+**Plan:** Plan 01 complete (RenderSurface interface); Plan 02 next (Wave 1)
+**Status:** Executing Phase 02.1
+**Progress:** [████████░░] 75%
 
 ```
 Phase 1     [x]  Build Baseline
@@ -46,7 +48,7 @@ Phase 9     [ ]  CI & Tests
 | Metric | Value |
 |--------|-------|
 | Phases complete | 2/11 (incl. 02.1; excl. backlog) |
-| Plans complete | 5 |
+| Plans complete | 6 |
 | Requirements | 30 active + NET-01 deferred |
 | Milestone | v1.6 |
 | Phase 01-build-baseline P01 | 3min | 3 tasks | 9 files |
@@ -54,6 +56,7 @@ Phase 9     [ ]  CI & Tests
 | Phase 02-rendering-port-4a P02 | 12min | 2 tasks | 3 files |
 | Phase 02-rendering-port-4a P03 | 9min | 2 tasks | 4 files |
 | Phase 02-rendering-port-4a P04 | ~4h (incl. 3 debug rounds + human verify) | 3 tasks | 7 files |
+| Phase 02.1-renderer-boundary-extraction P01 | 6min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -69,6 +72,7 @@ Phase 9     [ ]  CI & Tests
 - [Phase 02-rendering-port-4a]: GLRenderWindow rebased on QOpenGLWidget: compat-profile QSurfaceFormat, GL work in initializeGL/resizeGL/paintGL, manual swap deleted, QPainter text overlay, global context sharing in main()
 - [Phase 02-rendering-port-4a]: Plan 02-03: renderer-side files (renderSetup.C, glRenderer.C, glOffscreenTarget.{h,C}) ported to QOpenGLWidget API — QOpenGLContext, grabFramebuffer, Format_RGBA8888+mirrored label upload, QOpenGLFramebufferObject offscreen target; scene.C is the sole remaining VIEW build failure (Plan 04)
 - [Phase 02-rendering-port-4a]: COMPLETE — human-verified on macOS. scene.C ported; the mechanical port then needed 3 debugger rounds for structural QGLWidget→QOpenGLWidget mismatches: lazy context creation (`29aa3d2` defer GL init to initializeGL), HiDPI device-pixel viewport (`81d1145`), and — the big one — `GLRenderWindow::paintGL()` was never being called (Scene::eventFilter swallowed Paint events + ignoreEvents forced); fixed by rendering the GL scene inside paintGL (`5ca7a47`). Two benign startup warnings silenced (`207b1b9`). RENDER-08 (Linux/Windows render) is a documented carry-forward — unverifiable before Phase 4/9.
+- [Phase 02.1-renderer-boundary-extraction]: Plan 02.1-01: RenderSurface interface owns beginFrame/endFrame/nativeHandle; RenderSetup::makeCurrent() delegates via dynamic_cast<RenderSurface*>. endFrame() is a deliberate GL-backend no-op (gains meaning for QRhi in Phase 5). GLOffscreenTarget also adopted the interface (it is a RenderWindow subclass too).
 
 ### Roadmap Evolution
 
@@ -90,7 +94,7 @@ Phase 9     [ ]  CI & Tests
 
 **Last action:** Phase 02.1 (Renderer boundary extraction) planned — 3 plans verified by the plan-checker (passed after one revision). Codex structural roadmap changes also applied (Phase 02.2 + 05.1 inserted, Phase 5 split, feature matrix, etc.).
 
-**Stopped at:** Phase 02.1 planned and verified; ready to execute.
+**Stopped at:** Completed 02.1-01-PLAN.md
 
 **Next action:** `/gsd-execute-phase 02.1` — pure refactor extracting `RenderSurface` (Plan 01) + additive `Renderer::renderRepresentations_()`/`capabilities()` (Plan 02) in parallel Wave 1, then `RendererFactory` + `scene.C` concrete-type removal + human-verify identical render (Plan 03) in Wave 2. Alternatively Phase 02.2 (CI matrix) is independent and could go first.
 
