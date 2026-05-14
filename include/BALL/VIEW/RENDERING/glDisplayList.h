@@ -10,7 +10,10 @@
 #	include <BALL/common.h>
 #endif
 
-#include <QtOpenGL/qgl.h>
+// This header only needs the OpenGL type declarations (GLuint &c.), not the
+// removed-in-Qt6 QtOpenGL/qgl.h (QGLWidget) umbrella. QtGui/qopengl.h provides
+// the GL types portably across Qt 5 and Qt 6.
+#include <QtGui/qopengl.h>
 
 namespace BALL
 {
