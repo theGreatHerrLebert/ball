@@ -9,7 +9,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 ## Phases
 
 - [x] **Phase 1: Build Baseline** - Commit the 8 modern-toolchain patches, bump version, document the macOS build flow
-- [~] **Phase 2: Rendering Port (4a)** - Port `GLRenderWindow` from `QGLWidget` to `QOpenGLWidget` so the embedded 3D scene renders on all 3 OSes *(code complete + HiDPI fix; awaiting human visual recheck)*
+- [x] **Phase 2: Rendering Port (4a)** - Port `GLRenderWindow` from `QGLWidget` to `QOpenGLWidget` so the embedded 3D scene renders on all 3 OSes *(complete — human-verified on macOS; RENDER-08 Linux/Windows render-check stays open pending Phase 4/9)*
 - [ ] **Phase 02.1: Renderer boundary extraction** - Extract a Qt-GL-free `RenderSurface`/`RendererFactory` boundary so Phase 5 is a contained backend swap *(inserted; depends on Phase 2, blocks Phase 5)*
 - [ ] **Phase 3: Language Modernization** - Move the codebase to C++17, remove C++17-removed constructs, set the standard via CMake
 - [ ] **Phase 4: Dependency System Overhaul** - Delete `ball_contrib`, adopt Homebrew/system + vcpkg, rewrite stale `Find*.cmake` as config-mode
@@ -47,7 +47,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 - [x] 02-01-PLAN.md — Wave 0: grep symbol gate + resolve raytracer-GL open question A1
 - [x] 02-02-PLAN.md — Core port: GLRenderWindow base-class swap, QSurfaceFormat compat profile, paintGL, QPainter text overlay, main.C context sharing
 - [x] 02-03-PLAN.md — Renderer subsystem cleanup: renderSetup.C, glRenderer.C, glOffscreenTarget.C
-- [ ] 02-04-PLAN.md — scene.C port + stereo/multi-display guard-defer + human smoke check
+- [x] 02-04-PLAN.md — scene.C port + stereo/multi-display guard-defer + human smoke check
 **UI hint**: yes
 
 ### Phase 02.1: Renderer boundary extraction (INSERTED)
@@ -63,7 +63,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   4. BALLView builds and renders identically to post-Phase-2 (pure refactor — same pixels, verified by the Phase 2 smoke checklist)
 **UI hint**: no
 **Reference**: `.planning/RENDERER-INTERFACE-BOUNDARY.md` (full design)
-**Plans:** 0 plans
+**Plans:** 0 plans (not yet planned)
 
 Plans:
 - [ ] TBD (run /gsd-plan-phase 02.1 to break down)
