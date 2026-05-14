@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-05-14T15:57:47.363Z"
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-05-14T16:16:39.711Z"
 progress:
   total_phases: 17
   completed_phases: 5
   total_plans: 17
-  completed_plans: 15
-  percent: 88
+  completed_plans: 16
+  percent: 94
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -28,7 +28,7 @@ Plan: 1 of 4
 **Phase:** 4 — Dependency System Overhaul
 **Plan:** Not started
 **Status:** Executing Phase 04
-**Progress:** [█████████░] 88%
+**Progress:** [█████████░] 94%
 
 ```
 Phase 1     [x]  Build Baseline
@@ -67,6 +67,7 @@ roadmap/STATE after any gsd-tools phase op.
 | Phase 03 P03 | ~20min | 2 tasks | 3 files |
 | Phase 04 P04-01 | 120 | 3 tasks | 7 files |
 | Phase 04 P04-02 | 26 | 4 tasks | 5 files |
+| Phase 04 P04-03 | 240 | 4 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,8 @@ roadmap/STATE after any gsd-tools phase op.
 - [Phase 04]: ci-* family (ci-macos/ci-linux/ci-windows) satisfies D-07 ci preset: single ci preset cannot carry per-platform cache vars; split per-platform per RESEARCH Open Question 2
 - [Phase 04]: BALL_HAS_OPENBABEL=ON in ci-macos/ci-linux presets (not ci.yml): CMakePresets.json is single source of truth; Plan 03 adds smoke step only
 - [Phase 04]: Eigen3 find_package changed from range 3.4...6 to plain REQUIRED NO_MODULE + manual VERSION_LESS check: Ubuntu 22.04 Eigen 3.4.0 ships old Eigen3ConfigVersion.cmake that does not support range queries
+- [Phase 04]: GPL-gate preserved for OpenBabel in CI: -DBALL_LICENSE=GPL added to ci-macos/ci-linux configure steps; LGPL default build never searches for OpenBabel
+- [Phase 04]: BeginModify/EndModify required in OB 3.x createOBMol: replaces auto-clear behavior removed in 3.x; EndModify(true) resets all perception flags atomically
 
 ### Roadmap Evolution
 
@@ -131,7 +134,7 @@ roadmap/STATE after any gsd-tools phase op.
 
 **Last action:** Phase 3 (Language Modernization) marked COMPLETE — all 3 plans executed, code review clean (0 critical / 1 pre-existing warning), gsd-verifier passed 3/3 must-haves, `phase complete 03` run. CI run 25862456769 (`446cf10`) is fully green (build macos/linux/windows + lint); render-smoke passed on macOS and Linux. Branch `v1.6-modernization` is at `446cf10` + planning-doc commits.
 
-**Stopped at:** Completed 04-02-PLAN.md
+**Stopped at:** Completed 04-03-PLAN.md
 
 **Next action:** Phase 4 — Dependency System Overhaul (`/gsd-discuss-phase 4` or `/gsd-plan-phase 4`). Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix. CI (Phase 02.2) remains the regression net.
 
