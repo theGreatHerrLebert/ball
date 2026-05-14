@@ -16,7 +16,7 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 
 ### Language Modernization
 
-- [ ] **LANG-01**: The codebase compiles under C++17 (the C++14 bridge flag is removed)
+- [x] **LANG-01**: The codebase compiles under C++17 (the C++14 bridge flag is removed)
 - [x] **LANG-02**: All uses of C++17-removed constructs (`std::unary_function`, `binary_function`, `bind2nd`, `bind1st`, `ptr_fun`, `auto_ptr`, `mem_fun`) are replaced across the 7 known files
 - [x] **LANG-03**: C++ standard is set via `CMAKE_CXX_STANDARD`/`target_compile_features`, not raw `-std=` flags
 
@@ -148,7 +148,7 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | ARCH-04 | Phase 02.1 — Renderer boundary extraction | Complete |
 | CI-01 | Phase 02.2 — CI and build-smoke matrix | Complete |
 | DIAG-01 | Phase 02.2 — CI and build-smoke matrix | Complete |
-| LANG-01 | Phase 3 — Language Modernization | Pending |
+| LANG-01 | Phase 3 — Language Modernization | Complete |
 | LANG-02 | Phase 3 — Language Modernization | Complete |
 | LANG-03 | Phase 3 — Language Modernization | Complete |
 | DEPS-01 | Phase 4 — Dependency System Overhaul | Pending |
