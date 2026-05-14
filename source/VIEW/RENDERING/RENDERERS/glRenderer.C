@@ -1152,7 +1152,11 @@ namespace BALL
 				p.drawText(-r.x() + border, -r.y() + border, text);
 			p.end();
 
-			QImage gldata = QGLWidget::convertToGLFormat(pm);
+			// The legacy Qt4-era GL-widget format helper was removed. It did
+			// two things: convert to GL-native byte order and flip vertically.
+			// Format_RGBA8888 is GL byte order on little-endian (all targets);
+			// mirrored() supplies the vertical flip.
+			QImage gldata = pm.convertToFormat(QImage::Format_RGBA8888).mirrored();
 
 			glPushAttrib(GL_BLEND);
 			glEnable(GL_BLEND);

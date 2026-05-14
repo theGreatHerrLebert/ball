@@ -9,7 +9,7 @@
 #include <QtGui/QPaintEvent>
 #include <QtGui/QPainter>
 
-#include <QtOpenGL/QGLPixelBuffer>
+#include <QtGui/QOpenGLFramebufferObject>
 
 namespace BALL
 {
@@ -20,52 +20,59 @@ namespace BALL
 				QPaintDevice(),
 				filename_(filename),
 				share_from_(share_from),
-				pixel_buffer_(),
-				use_pixel_buffer_(QGLPixelBuffer::hasOpenGLPbuffers()),
+				fbo_(),
 				current_image_(share_from->width(), share_from->height(), QImage::Format_ARGB32)
 		{
 		}
 
 		void GLOffscreenTarget::prepareRendering()
 		{
-			if (use_pixel_buffer_ && pixel_buffer_)
-				pixel_buffer_->makeCurrent();
-			else if (share_from_)
+			// FBOs have no context of their own: make the shared GLRenderWindow
+			// context current, then bind the FBO as the render target.
+			if (share_from_)
 				share_from_->makeCurrent();
+
+			if (fbo_)
+				fbo_->bind();
 		}
 
 		bool GLOffscreenTarget::resize(const unsigned int width, const unsigned int height)
 		{
 			RenderWindow::resize(width, height);
 
-			if (use_pixel_buffer_)
-			{
-				pixel_buffer_ = boost::shared_ptr<QGLPixelBuffer>(new QGLPixelBuffer(width, height, share_from_->format(), share_from_));
-			}
+			// Creating the FBO requires the shared context to be current.
+			if (share_from_)
+				share_from_->makeCurrent();
+
+			fbo_ = boost::shared_ptr<QOpenGLFramebufferObject>(
+				new QOpenGLFramebufferObject((int)width, (int)height,
+				                             QOpenGLFramebufferObject::CombinedDepthStencil));
 			return true;
 		}
 
-		void GLOffscreenTarget::tryUsePixelBuffer(bool use_pbo)
+		void GLOffscreenTarget::tryUsePixelBuffer(bool /*use_pbo*/)
 		{
-			use_pixel_buffer_ = QGLPixelBuffer::hasOpenGLPbuffers() && use_pbo;
+			// No-op: the offscreen target is always FBO-backed now. The legacy
+			// Qt4-era pixel-buffer class was removed with the GL widget port;
+			// FBOs are universally available on the target GL versions.
 		}
 
 		QImage GLOffscreenTarget::getImage()
 		{
-			if (use_pixel_buffer_ && pixel_buffer_)
-				return pixel_buffer_->toImage();
+			if (fbo_)
+				return fbo_->toImage();
 			else if (share_from_)
-				return share_from_->grabFrameBuffer();
+				return share_from_->grabFramebuffer();
 
 			return QImage();
 		}
 
 		void GLOffscreenTarget::prepareUpscaling(Size final_width, Size final_height)
 		{
-			if (use_pixel_buffer_ && pixel_buffer_)
-				current_image_ = QImage(final_width, final_height, pixel_buffer_->toImage().format());
+			if (fbo_)
+				current_image_ = QImage(final_width, final_height, fbo_->toImage().format());
 			else if (share_from_)
-				current_image_ = QImage(final_width, final_height, share_from_->grabFrameBuffer().format());
+				current_image_ = QImage(final_width, final_height, share_from_->grabFramebuffer().format());
 			QPainter::setRedirected(this, &current_image_);
 		}
 
@@ -73,10 +80,10 @@ namespace BALL
 		{
 			QImage current_screen;
 
-			if (use_pixel_buffer_ && pixel_buffer_)
-				current_screen = pixel_buffer_->toImage();
+			if (fbo_)
+				current_screen = fbo_->toImage();
 			else if (share_from_)
-				current_screen = share_from_->grabFrameBuffer();
+				current_screen = share_from_->grabFramebuffer();
 
 			if (!current_screen.isNull())
 			{

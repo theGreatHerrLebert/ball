@@ -22,7 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-class QGLPixelBuffer;
+class QOpenGLFramebufferObject;
 
 namespace BALL
 {
@@ -61,9 +61,7 @@ namespace BALL
 
 				GLRenderWindow* share_from_;
 
-				boost::shared_ptr<QGLPixelBuffer> pixel_buffer_;
-
-				bool use_pixel_buffer_;
+				boost::shared_ptr<QOpenGLFramebufferObject> fbo_;
 
 				QImage current_image_;
 		};
