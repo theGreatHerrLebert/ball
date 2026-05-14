@@ -45,10 +45,8 @@ IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		SET(USE_PEDANTIC OFF)
 	ENDIF()
 
-	# Added -Wno-deprecated-declarations as Eigen3 currently uses binder2nd which spams the compiler output.
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 
 	IF(USE_PEDANTIC)
 		SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -pedantic")
