@@ -8,6 +8,8 @@
 #endif
 
 #include <BALL/VIEW/RENDERING/glRenderWindow.h>
+#include <BALL/VIEW/RENDERING/renderSetup.h>
+#include <BALL/VIEW/RENDERING/RENDERERS/glRenderer.h>
 #include <BALL/VIEW/WIDGETS/scene.h>
 #include <BALL/COMMON/logStream.h>
 #include <BALL/VIEW/KERNEL/mainControl.h>
@@ -138,9 +140,29 @@ namespace BALL
 			// QOpenGLWidget guarantees: context current + defaultFramebufferObject()
 			// bound. It swaps the buffers automatically when this returns — no manual
 			// buffer-swap call is needed or possible.
+			//
+			// QOpenGLWidget's default framebuffer is only valid and current INSIDE
+			// paintGL(). The QGLWidget-era code rendered the GL scene from an event
+			// handler (Scene::handleRenderToBufferFinishedEvent_) into an FBO that
+			// is undefined outside paintGL() — leaving the window empty until an
+			// interaction forced a repaint, blank on resize, and (combined with the
+			// stale refresh() texture blit) z-fighting/banding. All GL-renderer
+			// framebuffer drawing now happens here instead.
 			if (ignore_events_) return;
 
-			// Blit the CPU pixel buffer (raytracer) / renderer output as a texture.
+			// If a GLRenderer drives this window, render the molecular scene
+			// directly into the (current, valid) default FBO. GLRenderer::
+			// renderToBuffer() issues its own glClear(GL_COLOR_BUFFER_BIT |
+			// GL_DEPTH_BUFFER_BIT) and depth-tested draw — exactly once per frame.
+			if (render_setup_ != 0 &&
+			    RTTI::isKindOf<GLRenderer>(render_setup_->renderer))
+			{
+				render_setup_->renderToBuffer();
+				return;
+			}
+
+			// Otherwise (buffered/raytracer renderer): blit the CPU pixel buffer
+			// produced by the worker thread as a fullscreen texture.
 			refresh();
 		}
 

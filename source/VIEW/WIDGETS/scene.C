@@ -439,7 +439,11 @@ namespace BALL
 				GLRenderWindow* gt = dynamic_cast<GLRenderWindow*>(renderers_[i]->target);
 				if (gt)
 				{
-					gt->ignoreEvents(true);
+					// NOTE: do NOT ignoreEvents(true) here. In the QGLWidget era
+					// the Scene drove all rendering and the GL widget had to be
+					// kept passive. With QOpenGLWidget the widget's own paintGL()
+					// IS the render path and must run — see GLRenderWindow::
+					// paintGL() and Scene::eventFilter().
 					gt->installEventFilter(this);
 				}
 			}
@@ -575,12 +579,21 @@ namespace BALL
 				switch (event->type())
 				{
 					case QEvent::Resize:
-						// we already handle resize events for our child widgets
-						filter_out = true;
+						// Let the QOpenGLWidget receive its own resize event: it
+						// must recreate its device-pixel default framebuffer and
+						// run resizeGL() at the new size. Swallowing it (the
+						// QGLWidget-era behaviour) left the scene blank after a
+						// window resize because the FBO/viewport went stale.
+						// Scene::resizeEvent still drives RenderSetup::resize()
+						// for the renderer-side bookkeeping.
 						break;
 					case QEvent::Paint:
-						paintGL();
-						filter_out = true;
+						// Let the QOpenGLWidget receive its own paint event so
+						// GLRenderWindow::paintGL() runs — that is the ONLY place
+						// QOpenGLWidget guarantees a valid, current default FBO,
+						// and is where the GL scene is now drawn. The old code
+						// swallowed this and rendered from elsewhere, leaving the
+						// window empty until an interaction forced a repaint.
 						break;
 					case QEvent::ToolTip:
 						// prevent tool tip events for continuous renderers; these would
@@ -1595,10 +1608,20 @@ namespace BALL
 			}
 
 			renderer->makeCurrent();
-			// NOTE: GLRenderers currently render in the GUI thread!
-            if (RTTI::isKindOf<GLRenderer>(renderer->renderer))
-				renderer->renderToBuffer();
-			else
+			// GLRenderers must NOT render here: this is an event handler, not
+			// paintGL(). QOpenGLWidget's default framebuffer is only valid and
+			// current inside paintGL() -- drawing the GL scene from here leaves
+			// the FBO contents undefined (empty window until an interaction
+			// forces a repaint, blank on resize, z-fighting/banding from the
+			// stale refresh() blit composited over it). The GL scene is now
+			// rendered inside GLRenderWindow::paintGL(), driven by the
+			// registered RenderSetup. Here we only request that repaint via
+			// update() (issued further below once all renderers are ready).
+			//
+			// Buffered renderers (raytracer) still hand off their freshly
+			// produced CPU pixel buffer to the target here; paintGL() then
+			// blits it as a texture.
+            if (!RTTI::isKindOf<GLRenderer>(renderer->renderer))
 				renderer->target->refresh();
 
 			renderer->setBufferReady(true);

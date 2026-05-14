@@ -31,7 +31,9 @@
 namespace BALL
 {
 	namespace VIEW
-	{				
+	{
+		class RenderSetup;
+
 		/**
 		 * Model of the \link RenderWindow \endlink which uses OpenGL to render its buffer to the screen
 		 */
@@ -39,7 +41,7 @@ namespace BALL
 			: public RenderWindow,
 				public QOpenGLWidget
 		{
-			
+
 		public:
 			GLRenderWindow();
 			GLRenderWindow(QWidget* parent_widget, const char* name = NULL, Qt::WindowFlags w_flags = 0);
@@ -65,6 +67,17 @@ namespace BALL
 
 			/// Force the window to ignore paint events
 			void ignoreEvents(bool ignore) {ignore_events_ = ignore;}
+
+			/** Register the RenderSetup that drives this window.
+			 *
+			 *  When the active renderer is a GLRenderer, all framebuffer
+			 *  rendering must happen inside paintGL() -- QOpenGLWidget only
+			 *  guarantees a valid, current default FBO there. paintGL() uses
+			 *  this back-reference to drive the GL renderer directly. For
+			 *  buffered renderers (raytracer) it stays unused and paintGL()
+			 *  falls back to the CPU-buffer texture blit (refresh()).
+			 */
+			void setRenderSetup(RenderSetup* rs) { render_setup_ = rs; }
 			
 			/// Set the window's downsampling factor. This is a speed up factor.
 			void setDownsamplingFactor(float dsfactor)
@@ -125,6 +138,10 @@ namespace BALL
 			bool ignore_events_;
 			float down_sampling_factor_;
 			//float stereo_delta_;
+
+			// The RenderSetup driving this window (see setRenderSetup()).
+			// Non-owning; null until a RenderSetup registers itself.
+			RenderSetup* render_setup_ = nullptr;
 		};
 
 	} // namespace VIEW

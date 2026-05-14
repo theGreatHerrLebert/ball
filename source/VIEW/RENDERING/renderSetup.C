@@ -133,6 +133,13 @@ namespace BALL
 			gl_target_   = dynamic_cast<GLRenderWindow*>(target);
 			gl_renderer_ = dynamic_cast<GLRenderer*>(renderer);
 
+			// Let the GL window drive its renderer from inside paintGL().
+			// QOpenGLWidget's default framebuffer is only valid and current
+			// there; rendering the GL scene anywhere else (e.g. from an event
+			// handler) leaves the FBO contents undefined.
+			if (gl_target_)
+				gl_target_->setRenderSetup(this);
+
 			// initialize the rendering target
 			target->init();
 
@@ -162,6 +169,12 @@ namespace BALL
 			}
 
 			render_mutex_.lock();
+
+			// Keep the GL window's driving-RenderSetup back-reference current.
+			// Cheap and idempotent; also covers RenderSetups created outside the
+			// init() path (e.g. Scene::switchRenderer).
+			if (gl_target_)
+				gl_target_->setRenderSetup(this);
 
 			makeCurrent();
 
@@ -308,7 +321,11 @@ namespace BALL
 				scheduler = boost::shared_ptr<tbb::task_scheduler_init>(new tbb::task_scheduler_init(num_threads));
 			}
 #endif
-			if (gl_target_)
+			// Only suppress the GL window's own paint path when a non-GL
+			// (raytracer) worker produces its frames -- then the window is a
+			// passive blit surface. When a GLRenderer drives the window, its
+			// paintGL() IS the render path and must keep running.
+			if (gl_target_ && !gl_renderer_)
 				gl_target_->ignoreEvents(true);
 			Timer t;
 
