@@ -17,8 +17,11 @@
 #include <QtCore/QEvent>
 #include <QtGui/QWindow>
 #include <QtGui/QOpenGLContext>
+#include <QtGui/QSurfaceFormat>
 #include <QtGui/QPainter>
 #include <QtGui/QFont>
+
+#include <iostream>
 
 //#define USE_GLPAINTPIXELS
 #undef USE_GLPAINTPIXELS
@@ -115,6 +118,46 @@ namespace BALL
 			glewInit();
 #endif
 			checkGL();
+
+			// DIAG-01: emit a single machine-parseable GL-capability line to stdout.
+			// The context is current here, so glGetString() and the QOpenGLWidget
+			// queries (format()/devicePixelRatioF()/defaultFramebufferObject()/size)
+			// are all valid. This line is both a debugging aid and the render
+			// smoke-check's oracle: it records exactly the fields that would have
+			// caught the Phase 2 "renders blank because the GL context/FBO is wrong"
+			// bugs (detached window, HiDPI viewport mismatch, paintGL never called).
+			// It is unconditional (no debug flag), one physical line, std::cout (not
+			// BALL::Log) so CI greps stdout, and flushed so it survives an early kill.
+			{
+				const char* gl_vendor   = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+				const char* gl_renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+				const char* gl_version  = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+
+				QSurfaceFormat fmt = format();   // the *actual* granted format
+				const char* profile_str =
+					(fmt.profile() == QSurfaceFormat::CoreProfile)          ? "core"          :
+					(fmt.profile() == QSurfaceFormat::CompatibilityProfile) ? "compatibility" :
+					                                                          "none";
+
+				const qreal  dpr = devicePixelRatioF();
+				const int    fbo_w = static_cast<int>(width()  * dpr);
+				const int    fbo_h = static_cast<int>(height() * dpr);
+
+				std::cout << "BALLVIEW_GL_DIAG"
+				          << " gl_vendor=\""        << (gl_vendor   ? gl_vendor   : "unknown") << "\""
+				          << " gl_renderer=\""      << (gl_renderer ? gl_renderer : "unknown") << "\""
+				          << " gl_version=\""       << (gl_version  ? gl_version  : "unknown") << "\""
+				          << " gl_profile="         << profile_str
+				          << " surface_version="    << fmt.majorVersion() << "." << fmt.minorVersion()
+				          << " depth_bits="         << fmt.depthBufferSize()
+				          << " stencil_bits="       << fmt.stencilBufferSize()
+				          << " samples="            << fmt.samples()
+				          << " device_pixel_ratio=" << dpr
+				          << " default_fbo="        << defaultFramebufferObject()
+				          << " fbo_size="           << fbo_w << "x" << fbo_h
+				          << " renderer_backend=GL"
+				          << std::endl;
+			}
 
 			// QOpenGLWidget creates its GL context lazily on first show, unlike the
 			// old QGLWidget which created it eagerly in its constructor. The owning
