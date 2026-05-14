@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
+milestone: v1.6
 milestone_name: milestone
-status: executing
-stopped_at: 02-04-PLAN.md Tasks 1-2 complete; paused at Task 3 human-verify checkpoint
-last_updated: "2026-05-14T08:00:00.000Z"
+status: planning
+stopped_at: 02-04-PLAN.md Task 3 — human-verify checkpoint (embedded molecule smoke check on macOS)
+last_updated: "2026-05-14T09:21:21.050Z"
 progress:
-  total_phases: 9
-  completed_phases: 1
+  total_phases: 13
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_plans: 5
+  percent: 100
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -19,41 +19,41 @@ progress:
 
 **Core Value:** BALLView must build and visibly render molecules on macOS, Linux, and Windows from current, supported dependencies — the 3D scene working cross-platform is the non-negotiable outcome.
 
-**Current Focus:** Phase 2 — Rendering Port (4a)
+**Current Focus:** Phase 02.1 — Renderer boundary extraction (next to plan)
 
 ## Current Position
 
-Phase: 2 (Rendering Port (4a)) — EXECUTING
-Plan: 4 of 4
-**Phase:** 2
-**Plan:** 04 in progress — Tasks 1-2 complete and committed; paused at Task 3 (human-verify checkpoint)
-**Status:** Executing Phase 2 — awaiting human smoke check
-**Progress:** [████████░░] 80%
+**Phase:** 02.1 — Renderer boundary extraction
+**Plan:** Not started
+**Status:** Ready to plan (`/gsd-plan-phase 02.1`)
+**Progress:** Phases 1 + 2 complete
 
 ```
-Phase 1  [x]  Build Baseline
-Phase 2  [ ]  Rendering Port (4a)  <- immediate execution priority
-Phase 3  [ ]  Language Modernization
-Phase 4  [ ]  Dependency System Overhaul
-Phase 5  [ ]  Qt 6 + Pipeline (4b)
-Phase 6  [ ]  Python Bindings
-Phase 7  [ ]  Networking Rework
-Phase 8  [ ]  macOS Packaging
-Phase 9  [ ]  CI & Tests
+Phase 1     [x]  Build Baseline
+Phase 2     [x]  Rendering Port (4a)  — human-verified on macOS
+Phase 02.1  [ ]  Renderer boundary extraction  <- NEXT
+Phase 3     [ ]  Language Modernization
+Phase 4     [ ]  Dependency System Overhaul
+Phase 5     [ ]  Qt 6 (4b)  (flagged oversized — split pending)
+Phase 6     [ ]  Python Bindings
+Phase 8     [ ]  macOS Packaging
+Phase 9     [ ]  CI & Tests
+(Phase 7 Networking → backlog 999.3)
 ```
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 1/9 |
-| Plans complete | 2 |
-| Requirements mapped | 27/27 |
+| Phases complete | 2/11 (incl. 02.1; excl. backlog) |
+| Plans complete | 5 |
+| Requirements | 30 active + NET-01 deferred |
 | Milestone | v1.6 |
 | Phase 01-build-baseline P01 | 3min | 3 tasks | 9 files |
 | Phase 02-rendering-port-4a P01 | 3min | 2 tasks | 2 files |
 | Phase 02-rendering-port-4a P02 | 12min | 2 tasks | 3 files |
 | Phase 02-rendering-port-4a P03 | 9min | 2 tasks | 4 files |
+| Phase 02-rendering-port-4a P04 | ~4h (incl. 3 debug rounds + human verify) | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -68,28 +68,30 @@ Phase 9  [ ]  CI & Tests
 - [Phase 02-rendering-port-4a]: A1 CONFIRMED: raytracer/BufferedRenderer worker path issues no GL — Plans 03/04 threading scope stays minimal (no QOffscreenSurface/shared context)
 - [Phase 02-rendering-port-4a]: GLRenderWindow rebased on QOpenGLWidget: compat-profile QSurfaceFormat, GL work in initializeGL/resizeGL/paintGL, manual swap deleted, QPainter text overlay, global context sharing in main()
 - [Phase 02-rendering-port-4a]: Plan 02-03: renderer-side files (renderSetup.C, glRenderer.C, glOffscreenTarget.{h,C}) ported to QOpenGLWidget API — QOpenGLContext, grabFramebuffer, Format_RGBA8888+mirrored label upload, QOpenGLFramebufferObject offscreen target; scene.C is the sole remaining VIEW build failure (Plan 04)
-- [Phase 02-rendering-port-4a]: Plan 02-04 Tasks 1-2: scene.C ported (QSurfaceFormat+QOpenGLContext stereo probe, swap-sync block -> update(), grabFramebuffer) and the 4 top-level stereo/multi-display paths (addGlWindow, enterStereo, enterDualStereo, enterDualStereoDifferentDisplays) guard-deferred per Pitfall 6. Full clean BALL+VIEW+BALLView build links bin/BALLView.app; grep gate clean across source/VIEW + include/BALL/VIEW except the known-deferred glDisplayList.h. Awaiting human smoke-check (Task 3 checkpoint)
+- [Phase 02-rendering-port-4a]: COMPLETE — human-verified on macOS. scene.C ported; the mechanical port then needed 3 debugger rounds for structural QGLWidget→QOpenGLWidget mismatches: lazy context creation (`29aa3d2` defer GL init to initializeGL), HiDPI device-pixel viewport (`81d1145`), and — the big one — `GLRenderWindow::paintGL()` was never being called (Scene::eventFilter swallowed Paint events + ignoreEvents forced); fixed by rendering the GL scene inside paintGL (`5ca7a47`). Two benign startup warnings silenced (`207b1b9`). RENDER-08 (Linux/Windows render) is a documented carry-forward — unverifiable before Phase 4/9.
 
 ### Roadmap Evolution
 
 - Phase 02.1 inserted after Phase 2: Renderer boundary extraction — pure refactor that makes Phase 5 a contained backend swap. Depends on Phase 2, blocks Phase 5. Design: `.planning/RENDERER-INTERFACE-BOUNDARY.md`.
-- Design Handover package analyzed (`.planning/DESIGN-HANDOVER-INTEGRATION.md`): a separate UI/UX modernization milestone (~8 phases) that depends on this milestone's Phase 5 (Qt 6). To be planted as Milestone 2; not folded into the current roadmap.
+- Design Handover package analyzed (`.planning/DESIGN-HANDOVER-INTEGRATION.md`): a separate UI/UX modernization milestone (~8 phases) that depends on this milestone's Phase 5 (Qt 6). Planted as SEED-001 (Milestone 2 "BALLView Refresh", target 1.7); not folded into the current roadmap.
+- Codex adversarial review run on the roadmap. Cheap fixes applied (numbering normalized, status accuracy, QT6-03/PIPE-01 contradiction removed, networking deferred to backlog 999.3, version policy). Structural changes still pending: insert an early CI phase, split Phase 5, add a graphics-diagnostics requirement + feature matrix.
+- Backlog: 999.1 (UI maintainer open-questions), 999.2 (Ninja generator), 999.3 (networking rework).
 
 ### Todos
 
-- Phase 2 rendering defect: geometry renders embedded (macOS blocker fixed) but mis-projected — bonds draw as giant cylinders. `Cannot resize window. Size 0 x 0` in the log is the likely cause. Gap to close before Phase 2 verification.
+- (none open)
 
 ### Blockers
 
-- Phase 2 human smoke-check FAILED visually: scene renders embedded (core macOS blocker resolved) but geometry is mis-scaled/mis-projected and unrecognizable. Phase 2 cannot be marked complete until this rendering gap is fixed.
+- None.
 
 ## Session Continuity
 
-**Last action:** Executing 02-04-PLAN.md — Tasks 1-2 complete and committed (`b4965b1` scene.C port, `f75dbc5` top-level stereo/multi-display guard-defer). Full clean `make BALL VIEW BALLView -j8` succeeds; `bin/BALLView.app` linked. Grep gate clean across `source/VIEW` + `include/BALL/VIEW` except the known-deferred `glDisplayList.h` (`QtOpenGL/qgl.h`, logged in `deferred-items.md`, a Qt6 blocker not a Qt5 build blocker). Paused at Task 3 — the blocking human-verify checkpoint.
+**Last action:** Phase 2 (Rendering Port) marked COMPLETE — human visual verification passed ("Approved"), gsd-verifier passed 5/5, `phase complete 02` run. The QGLWidget→QOpenGLWidget port is functionally done on macOS: molecule renders embedded, ball-and-stick correct, survives resize, rotate/zoom/pick work, clean startup log.
 
-**Stopped at:** 02-04-PLAN.md Task 3 — human-verify checkpoint (embedded molecule smoke check on macOS)
+**Stopped at:** Phase 2 complete; Phase 02.1 ready to plan.
 
-**Next action:** Human runs BALLView and verifies the smoke checklist (embedded molecule renders, rotate/zoom/pick, raytracer, text overlay, no GL error flood). On "approved", a continuation agent finalizes 02-04: creates `02-04-SUMMARY.md`, advances the plan counter, updates ROADMAP/REQUIREMENTS, makes the final docs commit.
+**Next action:** `/gsd-plan-phase 02.1` — Renderer boundary extraction (the design is fully drafted in `.planning/RENDERER-INTERFACE-BOUNDARY.md`, so research can be skipped). Alternatively, apply the Codex review's structural roadmap changes first (early CI phase, Phase 5 split) before continuing — user's call.
 
 **Notes:**
 
