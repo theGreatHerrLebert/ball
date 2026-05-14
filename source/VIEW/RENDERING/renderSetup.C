@@ -168,6 +168,13 @@ namespace BALL
 				return;
 			}
 
+			// Ignore degenerate 0x0 resizes — these fire as a transient during
+			// the first layout pass before the widget has real geometry. The
+			// real resize follows immediately; acting on 0x0 only produced a
+			// spurious "Cannot resize window" error and a degenerate frustum.
+			if (width == 0 || height == 0)
+				return;
+
 			render_mutex_.lock();
 
 			// Keep the GL window's driving-RenderSetup back-reference current.
