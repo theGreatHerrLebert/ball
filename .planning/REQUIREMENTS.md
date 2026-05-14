@@ -44,7 +44,7 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 
 - [x] **ARCH-01**: A `RenderSurface` interface owns context-lifecycle verbs (`beginFrame`/`endFrame`); `RenderSetup::makeCurrent()`'s GL-specific body moves behind it
 - [ ] **ARCH-02**: A `RendererFactory` constructs renderers/surfaces by enum; `scene.C` has zero `new GLRenderWindow` and zero `dynamic_cast<GLRenderWindow>`/`dynamic_cast<GLRenderer>` sites
-- [ ] **ARCH-03**: The `Renderer` interface gains a batched `renderRepresentations_()` + `capabilities()` entry point; existing immediate-mode renderers are untouched
+- [x] **ARCH-03**: The `Renderer` interface gains a batched `renderRepresentations_()` + `capabilities()` entry point; existing immediate-mode renderers are untouched
 - [ ] **ARCH-04**: BALLView builds and renders identically to post-Phase-2 (pure refactor, no behaviour change)
 
 ### CI & Diagnostics (Phase 02.2 — inserted)
@@ -144,7 +144,7 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | RENDER-08 | Phase 2 — Rendering Port (4a) | Carry-forward — Linux/Windows render verified via Phase 02.2 CI |
 | ARCH-01 | Phase 02.1 — Renderer boundary extraction | Complete |
 | ARCH-02 | Phase 02.1 — Renderer boundary extraction | Pending |
-| ARCH-03 | Phase 02.1 — Renderer boundary extraction | Pending |
+| ARCH-03 | Phase 02.1 — Renderer boundary extraction | Complete |
 | ARCH-04 | Phase 02.1 — Renderer boundary extraction | Pending |
 | CI-01 | Phase 02.2 — CI and build-smoke matrix | Pending |
 | DIAG-01 | Phase 02.2 — CI and build-smoke matrix | Pending |
