@@ -26,8 +26,8 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 - [ ] **DEPS-02**: A vcpkg manifest provides the Windows dependency set
 - [x] **DEPS-03**: Stale bundled `Find*.cmake` modules (Boost, TBB, Eigen3, OpenBabel) are replaced with config-mode `find_package` where upstream provides it
 - [x] **DEPS-04**: Minimum dependency versions are pinned and documented
-- [ ] **DEPS-05**: A `CMakePresets.json` provides stable configure presets for macOS-Homebrew, Linux-system, Windows-vcpkg, and CI
-- [ ] **FEAT-01**: A feature matrix classifies every optional dependency as required / optional / removed / deferred and states what each one's absence disables (see the "Feature Matrix" section below)
+- [x] **DEPS-05**: A `CMakePresets.json` provides stable configure presets for macOS-Homebrew, Linux-system, Windows-vcpkg, and CI
+- [x] **FEAT-01**: A feature matrix classifies every optional dependency as required / optional / removed / deferred and states what each one's absence disables (see the "Feature Matrix" section below)
 
 ### Configuration (Phase 4.1 — promoted from backlog 999.4)
 
@@ -164,8 +164,8 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | DEPS-02 | Phase 4 — Dependency System Overhaul | Pending |
 | DEPS-03 | Phase 4 — Dependency System Overhaul | Complete |
 | DEPS-04 | Phase 4 — Dependency System Overhaul | Complete |
-| DEPS-05 | Phase 4 — Dependency System Overhaul | Pending |
-| FEAT-01 | Phase 4 — Dependency System Overhaul | Pending |
+| DEPS-05 | Phase 4 — Dependency System Overhaul | Complete |
+| FEAT-01 | Phase 4 — Dependency System Overhaul | Complete |
 | CONFIG-01 | Phase 4.1 — Config Color-Defaults Fix | Pending |
 | QT6-01 | Phase 5 — Qt 6 Migration (4b) | Pending |
 | QT6-02 | Phase 5 — Qt 6 Migration (4b) | Pending |

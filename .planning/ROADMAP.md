@@ -112,7 +112,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   6. A feature matrix (REQUIREMENTS.md) classifies every optional dependency (OpenBabel, TBB, LPSolve, WebEngine, …) as required / optional / removed / deferred, and states what each one's absence disables
 **Plans**: 4 plans, 2 waves
 - [x] 04-01-PLAN.md — Wave 1: config-mode finder migration (Eigen3/TBB/OpenBabel), ball_contrib de-referencing, min-version pinning (DEPS-01/03/04)
-- [ ] 04-02-PLAN.md — Wave 1: CMakePresets.json (4 presets) + CI/BUILD-macos.md preset migration + FEAT-01 feature matrix annotation (DEPS-05/FEAT-01)
+- [x] 04-02-PLAN.md — Wave 1: CMakePresets.json (4 presets) + CI/BUILD-macos.md preset migration + FEAT-01 feature matrix annotation (DEPS-05/FEAT-01)
 - [ ] 04-03-PLAN.md — Wave 2: OpenBabel 2.x→3.x API port across the 5-file surface + CI exercises it + chemistry smoke check (D-05)
 - [ ] 04-04-PLAN.md — Wave 2: vcpkg.json manifest + Windows CI provisioning to required-green (DEPS-02)
 
