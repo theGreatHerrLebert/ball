@@ -51,15 +51,20 @@ SCAN_DIRS=(
 )
 
 # --- Scan --------------------------------------------------------------------
-HITS="$(grep -rEn "${LEGACY_PATTERN}" "${SCAN_DIRS[@]}" 2>/dev/null)"
+# Match the legacy symbols, then drop hits that occur on comment-only lines
+# (`file:N:<ws>//...`, `file:N:<ws>*...`, `file:N:<ws>/*...`). Historical
+# comments that mention "QGLWidget" while explaining the port are not code and
+# must not fail the gate — only real code references should.
+HITS="$(grep -rEn "${LEGACY_PATTERN}" "${SCAN_DIRS[@]}" 2>/dev/null \
+  | grep -vE ':[0-9]+:[[:space:]]*(//|\*|/\*)' || true)"
 
 if [[ -n "${HITS}" ]]; then
   echo "${HITS}"
   COUNT="$(printf '%s\n' "${HITS}" | grep -c '')"
   echo ""
-  echo "${COUNT} legacy Qt GL symbol references remain"
+  echo "${COUNT} legacy Qt GL symbol reference(s) remain in code"
   exit 1
 fi
 
-echo "0 legacy Qt GL symbol references remain"
+echo "0 legacy Qt GL symbol references remain in code"
 exit 0
