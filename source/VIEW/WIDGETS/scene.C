@@ -2443,6 +2443,18 @@ namespace BALL
 
 		void Scene::addGlWindow()
 		{
+			// DEFERRED (02-RESEARCH.md Pitfall 6): a top-level QOpenGLWidget
+			// (Qt::Window) for an additional GL scene window is the highest-risk
+			// composition path of the rendering port and is not validated in this
+			// phase. The embedded Scene is the Core Value. Guard-and-defer: log and
+			// return without constructing the top-level GL window. Re-enabled in
+			// Phase 5 (Qt 6 + pipeline) once top-level QOpenGLWidget compositing is
+			// validated. The body below is kept intact (compiles) for that work.
+			Log.info() << "Scene::addGlWindow(): additional top-level GL windows are "
+			              "deferred to Phase 5 (Qt 6 + pipeline) - see 02-RESEARCH.md Pitfall 6."
+			           << std::endl;
+			return;
+
 			GLRenderWindow* new_widget = new GLRenderWindow(0, ((String)tr("Scene")).c_str(), Qt::Window);
 			new_widget->init();
 			new_widget->makeCurrent();
@@ -2497,6 +2509,17 @@ namespace BALL
 		{
 			// first clean up
 			exitStereo();
+
+			// DEFERRED (02-RESEARCH.md Pitfall 6): stereo / multi-display uses
+			// top-level Qt::FramelessWindowHint GLRenderWindows - top-level
+			// QOpenGLWidget compositing is the highest-risk path of the rendering
+			// port and is not validated in this phase. Guard-and-defer: log and
+			// return before any top-level GL widget is constructed. The body below
+			// is kept intact (compiles) for the Phase 5 stereo re-enablement work.
+			Log.info() << "Scene::enterStereo(): stereo / multi-display GL windows are "
+			              "deferred to Phase 5 (Qt 6 + pipeline) - see 02-RESEARCH.md Pitfall 6."
+			           << std::endl;
+			return;
 
 			// get the correct screens for control, left, and right eye
 			// TODO: handle the control screen! currently, we just leave it alone
@@ -2679,6 +2702,17 @@ namespace BALL
 			// first clean up
 			exitStereo();
 
+			// DEFERRED (02-RESEARCH.md Pitfall 6): dual-view stereo creates
+			// top-level Qt::FramelessWindowHint GLRenderWindows. Top-level
+			// QOpenGLWidget compositing is the highest-risk path of the rendering
+			// port and is not validated in this phase. Guard-and-defer: log and
+			// return before any top-level GL widget is constructed. The body below
+			// is kept intact (compiles) for the Phase 5 stereo re-enablement work.
+			Log.info() << "Scene::enterDualStereo(): stereo / multi-display GL windows are "
+			              "deferred to Phase 5 (Qt 6 + pipeline) - see 02-RESEARCH.md Pitfall 6."
+			           << std::endl;
+			return;
+
 			// get the correct screens for control, left, and right eye
 			// TODO: handle the control screen! currently, we just leave it alone
 			int left_screen_index = stage_settings_->getLeftEyeScreenNumber();
@@ -2781,6 +2815,18 @@ namespace BALL
 		{
 			// first clean up
 			exitStereo();
+
+			// DEFERRED (02-RESEARCH.md Pitfall 6): dual-display stereo creates
+			// top-level fullscreen GLRenderWindows on separate screens. Top-level
+			// QOpenGLWidget compositing is the highest-risk path of the rendering
+			// port and is not validated in this phase. Guard-and-defer: log and
+			// return before any top-level GL widget is constructed. The body below
+			// is kept intact (compiles) for the Phase 5 stereo re-enablement work.
+			Log.info() << "Scene::enterDualStereoDifferentDisplays(): stereo / multi-display "
+			              "GL windows are deferred to Phase 5 (Qt 6 + pipeline) - see "
+			              "02-RESEARCH.md Pitfall 6."
+			           << std::endl;
+			return;
 
 			// get the correct screens for control, left, and right eye
 			// TODO: handle the control screen! currently, we just leave it alone
