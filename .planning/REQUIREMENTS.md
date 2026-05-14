@@ -29,13 +29,13 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 
 ### Rendering — Phase 4a (IMMEDIATE PRIORITY)
 
-- [ ] **RENDER-01**: `GLRenderWindow` derives from `QOpenGLWidget` (not the removed-in-Qt6 `QGLWidget`); `QGLFormat` is replaced by `QSurfaceFormat` requesting a compatibility profile + depth/stencil/double buffer
+- [x] **RENDER-01**: `GLRenderWindow` derives from `QOpenGLWidget` (not the removed-in-Qt6 `QGLWidget`); `QGLFormat` is replaced by `QSurfaceFormat` requesting a compatibility profile + depth/stencil/double buffer
 - [ ] **RENDER-02**: BALLView displays a molecule in the embedded 3D scene on macOS (Apple Silicon) — the scene widget renders inside the main window, not a detached native window
-- [ ] **RENDER-03**: The interactive GL renderer runs on the GUI thread via `paintGL()`; manual `swapBuffers()`/`setAutoBufferSwap` are removed
+- [x] **RENDER-03**: The interactive GL renderer runs on the GUI thread via `paintGL()`; manual `swapBuffers()`/`setAutoBufferSwap` are removed
 - [ ] **RENDER-04**: The raytracer renderer continues to work via its CPU pixel-buffer path, blitted to the `QOpenGLWidget` as a texture
 - [ ] **RENDER-05**: On-screen text rendering (formerly `QGLWidget::renderText`) is reimplemented via a `QPainter` overlay
 - [ ] **RENDER-06**: Mouse/keyboard interaction (rotate, zoom, pick, selection) works in the ported scene widget
-- [ ] **RENDER-07**: `RenderSetup`, `scene.C`, `glOffscreenTarget.C`, `glRenderer.C` are updated to remove all `QGLWidget`/`QGLContext`/`QGLFormat` references and compile cleanly
+- [x] **RENDER-07**: `RenderSetup`, `scene.C`, `glOffscreenTarget.C`, `glRenderer.C` are updated to remove all `QGLWidget`/`QGLContext`/`QGLFormat` references and compile cleanly
 - [ ] **RENDER-08**: BALLView builds, launches, and renders a molecule on Linux and Windows (platform-independence verified, no regressions vs. macOS)
 
 ### Qt 6 + Pipeline
@@ -89,13 +89,13 @@ Updated during roadmap creation. GSD phase numbers are sequential; they correspo
 | BUILD-02 | Phase 1 — Build Baseline | Complete |
 | BUILD-03 | Phase 1 — Build Baseline | Complete |
 | BUILD-04 | Phase 1 — Build Baseline | Complete |
-| RENDER-01 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-01 | Phase 2 — Rendering Port (4a) | Complete |
 | RENDER-02 | Phase 2 — Rendering Port (4a) | Pending |
-| RENDER-03 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-03 | Phase 2 — Rendering Port (4a) | Complete |
 | RENDER-04 | Phase 2 — Rendering Port (4a) | Pending |
 | RENDER-05 | Phase 2 — Rendering Port (4a) | Pending |
 | RENDER-06 | Phase 2 — Rendering Port (4a) | Pending |
-| RENDER-07 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-07 | Phase 2 — Rendering Port (4a) | Complete |
 | RENDER-08 | Phase 2 — Rendering Port (4a) | Pending |
 | LANG-01 | Phase 3 — Language Modernization | Pending |
 | LANG-02 | Phase 3 — Language Modernization | Pending |
