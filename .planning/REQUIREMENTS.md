@@ -146,7 +146,7 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | ARCH-02 | Phase 02.1 — Renderer boundary extraction | Complete |
 | ARCH-03 | Phase 02.1 — Renderer boundary extraction | Complete |
 | ARCH-04 | Phase 02.1 — Renderer boundary extraction | Complete |
-| CI-01 | Phase 02.2 — CI and build-smoke matrix | Pending |
+| CI-01 | Phase 02.2 — CI and build-smoke matrix | Complete |
 | DIAG-01 | Phase 02.2 — CI and build-smoke matrix | Complete |
 | LANG-01 | Phase 3 — Language Modernization | Pending |
 | LANG-02 | Phase 3 — Language Modernization | Pending |
