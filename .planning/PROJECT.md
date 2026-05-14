@@ -26,24 +26,34 @@ non-negotiable outcome.
 
 ### Active
 
-<!-- v1.6 scope. Mirrors /Users/kohlbach/Claude/BALL/ROADMAP-1.6.md -->
+<!-- v1.6 scope. Canonical numbering = GSD phases in .planning/ROADMAP.md.
+     The original ROADMAP-1.6.md "4a/4b" labels are kept only as aliases. -->
 
-- [ ] **Phase 1** — Land the modern-toolchain build baseline (8 patches already applied locally; needs committing, version bump, BUILD-macos.md)
-- [ ] **Phase 2** — Modernize language baseline: move off C++14 bridge to C++17, remove `std::unary_function`/`bind2nd`/etc. (7 known files)
-- [ ] **Phase 3** — Dependency system overhaul: delete `ball_contrib`, adopt Homebrew/system + vcpkg, rewrite stale `Find*.cmake` as config-mode
-- [ ] **Phase 4a** — **(IMMEDIATE PRIORITY)** Port `GLRenderWindow` from the removed-in-Qt6 `QGLWidget` to `QOpenGLWidget`; hybrid threading model (interactive GL on GUI thread, raytracer stays a CPU-buffer worker thread); keep fixed-function GL via a compatibility profile. Restores the 3D scene on Linux/macOS/Windows.
-- [ ] **Phase 4b** — Qt 6 migration + rendering pipeline modernization (GL core profile or QRhi)
-- [ ] **Phase 5** — Replace SIP 4 Python bindings (SIP 6 or pybind11/nanobind)
-- [ ] **Phase 6** — Rework `TCPServer`/Boost.Asio networking onto the modern Asio model, add tests
-- [ ] **Phase 7** — macOS packaging: embed `data/` into the `.app` bundle, wire `macdeployqt`, notarizable universal binary
-- [ ] **Phase 8** — CI (GitHub Actions matrix: macOS-arm64/Linux/Windows) + wire up the `test/` tree
+- [x] **GSD Phase 1** — Build baseline: commit the 8 modern-toolchain patches, bump version, BUILD-macos.md *(done)*
+- [~] **GSD Phase 2** *(orig. "4a")* — Port `GLRenderWindow` `QGLWidget`→`QOpenGLWidget`; hybrid threading; keep fixed-function GL via a compat profile *(code + HiDPI fix done; awaiting human visual recheck)*
+- [ ] **GSD Phase 02.1** — Renderer boundary extraction (`RenderSurface`/`RendererFactory`); makes Phase 5 a contained swap *(inserted; depends on 2, blocks 5)*
+- [ ] **GSD Phase 3** — Language modernization: move off the C++14 bridge to C++17, remove `std::unary_function`/`bind2nd`/etc. (7 known files)
+- [ ] **GSD Phase 4** — Dependency system overhaul: delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`
+- [ ] **GSD Phase 5** *(orig. "4b")* — Qt 6 migration; deprecated VIEW APIs replaced. Keeps the compat-profile GL path working *(flagged oversized — split pending)*
+- [ ] **GSD Phase 6** — Replace SIP 4 Python bindings (SIP 6 or pybind11/nanobind)
+- [ ] **GSD Phase 8** — macOS packaging: embed `data/` into the `.app` bundle, wire `macdeployqt`, notarizable universal binary
+- [ ] **GSD Phase 9** — CI (GitHub Actions matrix: macOS-arm64/Linux/Windows) + wire up the `test/` tree
+
+*(GSD Phase 7 "Networking Rework" deferred to backlog 999.3 per the Codex review — not core value, the Asio code already compiles.)*
+
+### Release Policy
+
+- **1.6 = modernized foundation.** This milestone makes BALL/BALLView build and render on current toolchains (macOS/Linux/Windows) — it is *not* a UI-polish release.
+- **1.7 = "BALLView Refresh"** — the UI/UX modernization (SEED-001), a separate milestone gated on GSD Phase 5 (Qt 6).
+- This resolves the version-numbering collision with the Claude Design Handover package (which internally assumed "1.6 = UI refresh").
 
 ### Out of Scope
 
-- Programmable-pipeline GL rewrite of `glRenderer.C` — deferred to post-1.6; Phase 4a keeps fixed-function via a compat profile
+- Programmable-pipeline GL rewrite of `glRenderer.C` (`PIPE-01`) — v2; Phase 2 keeps fixed-function via a compat profile, Phase 5 keeps it working under Qt 6
 - Reviving the `ball_contrib` source-tarball build system — dead end on modern toolchains; replaced by system/Homebrew deps
 - New molecular-modelling features or algorithms — this milestone is modernization only
 - RTfact raytracer revival (Windows-only contrib) — not load-bearing
+- `TCPServer` proper rework + test (`NET-01`) — deferred to 1.6.x / backlog 999.3
 
 ## Context
 
@@ -58,9 +68,10 @@ non-negotiable outcome.
 ## Constraints
 
 - **Compatibility**: Must build and render on macOS (Apple Silicon), Linux, and Windows — platform independence is a hard requirement, no per-OS graphics code if avoidable.
-- **Tech stack**: C++ / CMake / Qt. Phase 4a stays on Qt 5.15 + fixed-function GL (compat profile); Qt 6 is Phase 4b.
+- **Tech stack**: C++ / CMake / Qt. GSD Phase 2 stays on Qt 5.15 + fixed-function GL (compat profile); Qt 6 is GSD Phase 5.
+- **C++ standard**: Currently a load-bearing **C++14 bridge** (GSD Phase 1). The real risk of staying on C++14 is *not* an ABI clash — Boost/Eigen/Qt are consumed through headers/stable ABIs — it is **language-mode-conditional header APIs, removed STL adapters, Qt 6 build assumptions, and toolchain-default drift across the 3 compilers**. GSD Phase 3 moves to C++17 and should run early (no rendering dependency).
 - **Dependencies**: System/Homebrew packages on macOS/Linux, vcpkg on Windows. No reliance on the dead `ball_contrib`.
-- **Risk**: Phase 4a touches the threaded renderer — the highest-risk area. Threading rework must be incremental and verifiable against a running GUI.
+- **Risk**: GSD Phase 2 touches the threaded renderer — the highest-risk area. Threading rework must be incremental and verifiable against a running GUI.
 
 ## Key Decisions
 

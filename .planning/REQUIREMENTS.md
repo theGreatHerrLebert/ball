@@ -49,15 +49,15 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 
 - [ ] **QT6-01**: BALLView builds against Qt 6, with `QGLWidget`-era APIs fully removed
 - [ ] **QT6-02**: Qt-deprecated APIs in VIEW (`QRegExp`, `QDesktopWidget`) are replaced with Qt 6 equivalents
-- [ ] **QT6-03**: The rendering pipeline is modernized off fixed-function GL (GL core profile or QRhi — decided in Phase 4b)
+
+> **QT6-03 removed (Codex review):** "the rendering pipeline is modernized off
+> fixed-function GL" directly contradicted `PIPE-01` (full pipeline rewrite =
+> v2/out-of-scope). The pipeline rewrite is `PIPE-01`, a separate future phase.
+> Phase 5 keeps the compatibility-profile fixed-function path working under Qt 6.
 
 ### Python Bindings
 
 - [ ] **PY-01**: BALL's Python bindings build against a supported Python (3.12+) using a modern binding generator (SIP 6 or pybind11/nanobind)
-
-### Networking
-
-- [ ] **NET-01**: `TCPServer`/`TCPServerThread` are reworked onto the modern Boost.Asio model (or Qt networking) and covered by a unit test
 
 ### Packaging
 
@@ -68,6 +68,14 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 
 - [ ] **CI-01**: A GitHub Actions matrix builds BALL/VIEW/BALLView on macOS-arm64, Linux, and Windows
 - [ ] **CI-02**: The `test/` tree is wired into the build and `ctest` runs in CI
+
+## Deferred (1.6.x)
+
+Moved out of the v1.6 active scope per the Codex adversarial review — tracked but not gating the milestone.
+
+### Networking
+
+- **NET-01**: `TCPServer`/`TCPServerThread` are reworked onto the modern Boost.Asio acceptor/socket model and covered by a unit test. *(Backlog 999.3. The Asio API breakage is already fixed and compiling as of Phase 1; this is the proper rework + test.)*
 
 ## v2 Requirements
 
@@ -88,7 +96,7 @@ Deferred beyond v1.6.
 
 ## Traceability
 
-Updated during roadmap creation. GSD phase numbers are sequential; they correspond to ROADMAP-1.6.md phases 1, 4a, 2, 3, 4b, 5, 6, 7, 8.
+GSD phase numbers are the canonical scheme used everywhere. The original human-authored `ROADMAP-1.6.md` labels (Phase "4a"/"4b") are kept only as aliases in phase titles.
 
 | Requirement | GSD Phase | Status |
 |-------------|-----------|--------|
@@ -97,13 +105,17 @@ Updated during roadmap creation. GSD phase numbers are sequential; they correspo
 | BUILD-03 | Phase 1 — Build Baseline | Complete |
 | BUILD-04 | Phase 1 — Build Baseline | Complete |
 | RENDER-01 | Phase 2 — Rendering Port (4a) | Complete |
-| RENDER-02 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-02 | Phase 2 — Rendering Port (4a) | Pending — awaiting human visual recheck |
 | RENDER-03 | Phase 2 — Rendering Port (4a) | Complete |
-| RENDER-04 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-04 | Phase 2 — Rendering Port (4a) | Pending — awaiting human visual recheck |
 | RENDER-05 | Phase 2 — Rendering Port (4a) | Complete |
-| RENDER-06 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-06 | Phase 2 — Rendering Port (4a) | Pending — awaiting human visual recheck |
 | RENDER-07 | Phase 2 — Rendering Port (4a) | Complete |
-| RENDER-08 | Phase 2 — Rendering Port (4a) | Pending |
+| RENDER-08 | Phase 2 — Rendering Port (4a) | Pending — needs CI/dependency model (cannot be verified before Phase 4/9) |
+| ARCH-01 | Phase 02.1 — Renderer boundary extraction | Pending |
+| ARCH-02 | Phase 02.1 — Renderer boundary extraction | Pending |
+| ARCH-03 | Phase 02.1 — Renderer boundary extraction | Pending |
+| ARCH-04 | Phase 02.1 — Renderer boundary extraction | Pending |
 | LANG-01 | Phase 3 — Language Modernization | Pending |
 | LANG-02 | Phase 3 — Language Modernization | Pending |
 | LANG-03 | Phase 3 — Language Modernization | Pending |
@@ -111,21 +123,21 @@ Updated during roadmap creation. GSD phase numbers are sequential; they correspo
 | DEPS-02 | Phase 4 — Dependency System Overhaul | Pending |
 | DEPS-03 | Phase 4 — Dependency System Overhaul | Pending |
 | DEPS-04 | Phase 4 — Dependency System Overhaul | Pending |
-| QT6-01 | Phase 5 — Qt 6 + Pipeline (4b) | Pending |
-| QT6-02 | Phase 5 — Qt 6 + Pipeline (4b) | Pending |
-| QT6-03 | Phase 5 — Qt 6 + Pipeline (4b) | Pending |
+| QT6-01 | Phase 5 — Qt 6 (4b) | Pending |
+| QT6-02 | Phase 5 — Qt 6 (4b) | Pending |
 | PY-01 | Phase 6 — Python Bindings | Pending |
-| NET-01 | Phase 7 — Networking Rework | Pending |
 | PKG-01 | Phase 8 — macOS Packaging | Pending |
 | PKG-02 | Phase 8 — macOS Packaging | Pending |
 | CI-01 | Phase 9 — CI & Tests | Pending |
 | CI-02 | Phase 9 — CI & Tests | Pending |
+| NET-01 | Deferred (1.6.x) — backlog 999.3 | Deferred |
 
 **Coverage:**
-- v1 requirements: 27 total
-- Mapped to phases: 27 ✓
+- v1 requirements: 30 active (BUILD ×4, RENDER ×8, ARCH ×4, LANG ×3, DEPS ×4, QT6 ×2, PY ×1, PKG ×2, CI ×2) + NET-01 deferred to 1.6.x
+- Mapped to phases: 30 ✓
 - Unmapped: 0
+- Note: QT6-03 removed (contradicted PIPE-01); ARCH-01..04 added (Phase 02.1 insertion)
 
 ---
 *Requirements defined: 2026-05-14*
-*Last updated: 2026-05-14 after roadmap creation*
+*Last updated: 2026-05-14 — Codex adversarial review cheap-fixes applied (QT6-03 removed, NET-01 deferred, ARCH-01..04 traced, numbering normalized)*

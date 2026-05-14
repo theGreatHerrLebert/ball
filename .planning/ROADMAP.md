@@ -8,13 +8,14 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 
 ## Phases
 
-- [ ] **Phase 1: Build Baseline** - Commit the 8 modern-toolchain patches, bump version, document the macOS build flow
-- [ ] **Phase 2: Rendering Port (4a)** - Port `GLRenderWindow` from `QGLWidget` to `QOpenGLWidget` so the embedded 3D scene renders on all 3 OSes
+- [x] **Phase 1: Build Baseline** - Commit the 8 modern-toolchain patches, bump version, document the macOS build flow
+- [~] **Phase 2: Rendering Port (4a)** - Port `GLRenderWindow` from `QGLWidget` to `QOpenGLWidget` so the embedded 3D scene renders on all 3 OSes *(code complete + HiDPI fix; awaiting human visual recheck)*
+- [ ] **Phase 02.1: Renderer boundary extraction** - Extract a Qt-GL-free `RenderSurface`/`RendererFactory` boundary so Phase 5 is a contained backend swap *(inserted; depends on Phase 2, blocks Phase 5)*
 - [ ] **Phase 3: Language Modernization** - Move the codebase to C++17, remove C++17-removed constructs, set the standard via CMake
 - [ ] **Phase 4: Dependency System Overhaul** - Delete `ball_contrib`, adopt Homebrew/system + vcpkg, rewrite stale `Find*.cmake` as config-mode
-- [ ] **Phase 5: Qt 6 + Pipeline (4b)** - Build against Qt 6, replace deprecated VIEW APIs, modernize the rendering pipeline
+- [ ] **Phase 5: Qt 6 + Pipeline (4b)** - Build against Qt 6 and replace deprecated VIEW APIs *(NOTE: oversized — flagged for a split into Qt6-migration + renderer-backend in the next roadmap revision)*
 - [ ] **Phase 6: Python Bindings** - Replace the SIP 4 binding generator with SIP 6 or pybind11/nanobind against Python 3.12+
-- [ ] **Phase 7: Networking Rework** - Rework `TCPServer`/`TCPServerThread` onto the modern Boost.Asio model with a unit test
+- [ ] ~~**Phase 7: Networking Rework**~~ - **Deferred to backlog 999.3** — not core value, the Asio code already compiles (Phase 1); the proper rework + test is 1.6.x polish
 - [ ] **Phase 8: macOS Packaging** - Embed `data/` into the `.app` bundle, wire `macdeployqt`, produce a notarizable universal binary
 - [ ] **Phase 9: CI & Tests** - GitHub Actions matrix (macOS-arm64/Linux/Windows) and wire the `test/` tree into `ctest`
 
@@ -89,15 +90,21 @@ Plans:
 **Plans**: TBD
 
 ### Phase 5: Qt 6 + Pipeline (4b)
-**Goal**: BALLView builds and runs on Qt 6 with deprecated APIs removed and the rendering pipeline modernized off fixed-function GL.
-**Depends on**: Phase 2 (the `QOpenGLWidget` port is the prerequisite for Qt 6), Phase 4 (Qt 6 from the modern dependency system)
-**Requirements**: QT6-01, QT6-02, QT6-03
+**Goal**: BALLView builds and runs on Qt 6 with deprecated VIEW APIs removed. The compatibility-profile fixed-function GL path is *kept working under Qt 6* as the known-good backend; the full pipeline rewrite is explicitly NOT in this phase (see PIPE-01, v2).
+**Depends on**: Phase 02.1 (the renderer boundary), Phase 2 (the `QOpenGLWidget` port), Phase 4 (Qt 6 from the modern dependency system)
+**Requirements**: QT6-01, QT6-02
 **Success Criteria** (what must be TRUE):
   1. BALLView builds and launches against Qt 6 with all `QGLWidget`-era APIs removed
   2. The user-facing GUI behaves correctly with `QRegExp` and `QDesktopWidget` replaced by Qt 6 equivalents
-  3. The 3D scene renders through a modernized pipeline (GL core profile or QRhi) rather than fixed-function GL
+  3. The 3D scene still renders correctly under Qt 6 via the compatibility-profile fixed-function path (no pixel regression vs. Phase 2)
 **Plans**: TBD
 **UI hint**: yes
+
+> **NOTE (Codex review, to apply in the next roadmap revision):** This phase is
+> oversized and should be split — Qt 6 migration / renderer-backend decision spike /
+> new GL-core-or-QRhi backend. `QT6-03` ("pipeline modernized off fixed-function
+> GL") was **removed** because it contradicted `PIPE-01` (full pipeline rewrite =
+> v2/out-of-scope). The actual pipeline rewrite is `PIPE-01`, a separate future phase.
 
 ### Phase 6: Python Bindings
 **Goal**: BALL's Python bindings build and import against a supported Python using a modern binding generator.
@@ -108,13 +115,8 @@ Plans:
   2. The generated module imports and exercises core BALL classes from a Python interpreter
 **Plans**: TBD
 
-### Phase 7: Networking Rework
-**Goal**: The TCP networking layer runs on the modern Boost.Asio model and is covered by an automated test.
-**Depends on**: Phase 3 (C++17 codebase), Phase 4 (modern Boost from the dependency system)
-**Requirements**: NET-01
-**Success Criteria** (what must be TRUE):
-  1. `TCPServer`/`TCPServerThread` are reworked onto the modern Boost.Asio acceptor/socket model
-  2. A unit test exercises the server's connect/send/receive path and passes
+### Phase 7: Networking Rework — DEFERRED TO BACKLOG 999.3
+**Status**: Removed from the v1.6 active roadmap per the Codex review. Networking is not core value, and the Boost.Asio code already *compiles* (the API breakage was fixed in Phase 1). The proper `TCPServer` rework + unit test is 1.6.x polish, tracked as backlog **999.3**. `NET-01` moved to REQUIREMENTS.md "Deferred (1.6.x)".
 **Plans**: TBD
 
 ### Phase 8: macOS Packaging
@@ -139,13 +141,14 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Build Baseline | 0/1 | Planned | - |
-| 2. Rendering Port (4a) | 3/4 | In Progress|  |
+| 1. Build Baseline | 1/1 | Complete | 2026-05-14 |
+| 2. Rendering Port (4a) | 4/4 | In Progress — awaiting human visual recheck (HiDPI fix landed) | - |
+| 02.1 Renderer boundary extraction | 0/0 | Not planned | - |
 | 3. Language Modernization | 0/0 | Not started | - |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
 | 5. Qt 6 + Pipeline (4b) | 0/0 | Not started | - |
 | 6. Python Bindings | 0/0 | Not started | - |
-| 7. Networking Rework | 0/0 | Not started | - |
+| 7. Networking Rework | — | Deferred to backlog 999.3 | - |
 | 8. macOS Packaging | 0/0 | Not started | - |
 | 9. CI & Tests | 0/0 | Not started | - |
 
@@ -184,6 +187,16 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
+### Phase 999.3: Networking rework (BACKLOG)
+
+**Goal:** Rework `TCPServer`/`TCPServerThread` onto the modern Boost.Asio acceptor/socket model and cover it with a unit test.
+**Why backlog, not v1.6:** Networking is not the milestone's core value, and the Boost.Asio API breakage was already fixed in Phase 1 — the code compiles and links. A proper rework + test is genuine polish but does not gate "build and render on 3 OSes". Deferred to a 1.6.x release. (Moved out of the active roadmap per the Codex adversarial review.)
+**Requirements:** NET-01
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
 ---
 *Roadmap created: 2026-05-14*
-*Mirrors `/Users/kohlbach/Claude/BALL/ROADMAP-1.6.md` (phases 1, 2, 3, 4a, 4b, 5, 6, 7, 8)*
+*Mirrors `/Users/kohlbach/Claude/BALL/ROADMAP-1.6.md` (phases 1, 2, 3, 4a, 4b, 5, 6, 7, 8). Revised 2026-05-14 after Codex adversarial review — cheap fixes applied; structural changes (early CI phase, Phase 5 split, diagnostics requirement, feature matrix) pending a deliberate roadmap revision.*
