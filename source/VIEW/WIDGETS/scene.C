@@ -168,10 +168,9 @@ namespace BALL
 				setObjectName(name);
 				setAcceptDrops(true);
 
-				init();
-				renderers_[main_renderer_]->resize(width(), height());
-				renderers_[main_renderer_]->start();
-
+				// GL-context-dependent init (init()/resize()/start()) is deferred
+				// to initializeGLContext(), invoked from GLRenderWindow::initializeGL()
+				// once QOpenGLWidget has lazily created its GL context on first show.
 				registerWidget(this);
 			}
 
@@ -3371,6 +3370,21 @@ namespace BALL
 			atomic_number_ = 6;
 			default_font_ = QFont("Arial", 16., QFont::Bold);
 			has_overlay_ = false;
+			gl_initialized_ = false;
+		}
+
+		void Scene::initializeGLContext()
+		{
+			// Called from GLRenderWindow::initializeGL() on the GUI thread with
+			// the QOpenGLWidget context current. Runs exactly once. This is the
+			// GL-context-dependent init that used to live in the constructor
+			// back when QGLWidget created its context eagerly.
+			if (gl_initialized_) return;
+			gl_initialized_ = true;
+
+			init();
+			renderers_[main_renderer_]->resize(width(), height());
+			renderers_[main_renderer_]->start();
 		}
 
 		void Scene::setCursor(String c)

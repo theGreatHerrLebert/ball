@@ -112,8 +112,16 @@ namespace BALL
 			glewInit();
 #endif
 			checkGL();
-			// One-time texture setup happens in init()/resize(), which RenderSetup
-			// drives from the GUI-thread event handler once the buffer size is known.
+
+			// QOpenGLWidget creates its GL context lazily on first show, unlike the
+			// old QGLWidget which created it eagerly in its constructor. The owning
+			// Scene therefore defers its GL-context-dependent init (render-setup
+			// init, display-list allocation, texture setup) until now — the first
+			// point at which a current context is guaranteed.
+			if (Scene* scene = dynamic_cast<Scene*>(parentWidget()))
+			{
+				scene->initializeGLContext();
+			}
 		}
 
 		void GLRenderWindow::resizeGL(int w, int h)
