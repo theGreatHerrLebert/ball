@@ -179,14 +179,15 @@ jobs:
       #     as VCPKG_INSTALLATION_ROOT). The windows-vcpkg preset toolchainFile
       #     picks it up via $env{VCPKG_ROOT}, bridged in the Configure step.
       #     Build speed (T-04-17 mitigation):
-      #       - vcpkg binary caching via the `x-gha` provider — per-package,
-      #         ABI-hash-keyed binary cache on the GitHub Actions cache backend.
-      #         Far more granular than caching the whole installed/ tree: a
-      #         one-line vcpkg.json edit only re-resolves what actually changed.
-      #         Needs ACTIONS_CACHE_URL + ACTIONS_RUNTIME_TOKEN exported to the
-      #         job env (the export step below).
+      #       - actions/cache@v4 of C:\vcpkg\installed keyed on the vcpkg.json
+      #         hash — restores the prebuilt port tree so a warm run skips the
+      #         Qt5/Boost source build entirely. (vcpkg's own x-gha binary
+      #         cache was tried and dropped: the current GitHub Actions cache
+      #         service no longer exposes ACTIONS_CACHE_URL, so x-gha silently
+      #         no-ops.)
       #       - the `x64-windows-release` overlay triplet (cmake/vcpkg-triplets)
-      #         builds Release-only, skipping the debug half of every port.
+      #         builds Release-only, skipping the debug half of every port —
+      #         roughly halves a cold build.
       #  2. flex/bison: not vcpkg ports; provisioned via winflexbison3 (choco).
       #     winflexbison3 installs win_flex.exe + win_bison.exe in
       #     C:\ProgramData\chocolatey\bin\.  BALL's bison logic (CMakeLists.txt
@@ -196,13 +197,14 @@ jobs:
       #     IF(WIN32) FIND_PROGRAM doesn't shadow the cache values.
       # ======================================================================
 
-      - name: Export GitHub Actions cache env (vcpkg x-gha binary cache)
+      - name: Cache vcpkg packages (Windows)
         if: matrix.os == 'windows-x64'
-        uses: actions/github-script@v7
+        uses: actions/cache@v4
         with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          path: C:\vcpkg\installed
+          key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'cmake/vcpkg-triplets/x64-windows-release.cmake') }}
+          restore-keys: |
+            vcpkg-${{ matrix.os }}-
 
       - name: Install flex/bison (Windows — winflexbison3 via choco)
         if: matrix.os == 'windows-x64'
@@ -224,9 +226,6 @@ jobs:
           # it must be read inside the shell.)
           $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
           Write-Host "VCPKG_ROOT=$env:VCPKG_ROOT"
-          # vcpkg binary caching: read+write per-package binaries to the GitHub
-          # Actions cache backend (x-gha). `clear` drops the default file cache.
-          $env:VCPKG_BINARY_SOURCES = "clear;x-gha,readwrite"
           # D-07: ci-windows preset inherits windows-vcpkg (vcpkg toolchainFile,
           # VCPKG_TARGET_TRIPLET=x64-windows-release + overlay triplet,
           # USE_LPSOLVE=OFF, BALL_HAS_OPENBABEL=OFF, ccache) and installs
