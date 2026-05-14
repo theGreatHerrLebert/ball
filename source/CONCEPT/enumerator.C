@@ -130,7 +130,7 @@ namespace BALL
     // for the new digit)
 		std::transform(base_multipliers_.begin(), base_multipliers_.end(),
 									 base_multipliers_.begin(),
-									 std::bind2nd(std::multiplies<Position>(), modulus));
+									 [modulus](Position m) { return m * modulus; });
 		base_multipliers_.push_back(1);		
 		
 		return *this;

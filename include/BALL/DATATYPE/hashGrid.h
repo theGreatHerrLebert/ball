@@ -1348,7 +1348,7 @@ namespace BALL
 	HashGrid3<Item>::countNonEmptyBoxes() const
 	{
 		return std::count_if(box_.begin(), box_.end(),
-			std::not1(std::mem_fun_ref(&HashGridBox3<Item>::isEmpty))
+			[](const HashGridBox3<Item>& box) { return !box.isEmpty(); }
 		);
 	}
 
