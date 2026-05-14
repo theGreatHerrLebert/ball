@@ -26,7 +26,7 @@ ELSE()
                     COMMAND ${CMAKE_COMMAND} -E echo "You should now build BALLView and the unit tests."
                     COMMAND ${CMAKE_COMMAND} -E echo "Then you should test your installation by executing the tests."
                     COMMAND ${CMAKE_COMMAND} -E echo ""
-                    COMMAND ${CMAKE_COMMAND} -E echo "Make sure to add the BALL and contrib lib/ path"
+                    COMMAND ${CMAKE_COMMAND} -E echo "Make sure to add the BALL lib/ path"
                     COMMAND ${CMAKE_COMMAND} -E echo "to your LD_LIBRARY_PATH environment variable."
                     COMMAND ${CMAKE_COMMAND} -E echo "Otherwise the tests and BALLView will not work."
                     COMMAND ${CMAKE_COMMAND} -E echo ""

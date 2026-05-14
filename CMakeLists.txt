@@ -5,7 +5,7 @@
 #
 ########################################################
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5...3.31 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21...3.31 FATAL_ERROR)
 
 CMAKE_POLICY(SET CMP0042 NEW)
 CMAKE_POLICY(SET CMP0043 NEW)
@@ -54,23 +54,6 @@ INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/include")
 # Add include directoy from build tree for configured files
 INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/include")
 
-# Handling user specified path to ball_contrib installation (-DBALL_CONTRIB_PATH)
-# NOTE (BALL >= 1.6): ball_contrib is OBSOLETE on macOS and Linux. Build against
-# system / Homebrew packages instead (see BUILD-macos.md). BALL_CONTRIB_PATH is
-# retained only for legacy Windows builds until the vcpkg migration lands; it
-# should not be set on macOS or Linux.
-# TODO: Remove BALL_CONTRIB_PATH entirely once the Windows vcpkg manifest exists.
-SET(BALL_CONTRIB_PATH "" CACHE PATH "Path to the ball_contrib installation directory (legacy Windows only; obsolete on macOS/Linux)")
-IF(BALL_CONTRIB_PATH)
-	# Add include directoy from user specified BALL_CONTRIB_PATH
-	INCLUDE_DIRECTORIES("${BALL_CONTRIB_PATH}/include")
-
-	# Add ball contrib install directories to CMake search paths for find_XXX() functions
-	SET(CMAKE_PREFIX_PATH  "${BALL_CONTRIB_PATH}" "${CMAKE_PREFIX_PATH}")
-
-	# Required for CMake include and compile tests (seems to be required only on Windows)
-	SET(CMAKE_REQUIRED_INCLUDES ${BALL_CONTRIB_PATH}/include ${CMAKE_REQUIRED_INCLUDES})
-ENDIF()
 
 # Include BALL specific CMake macros
 INCLUDE(cmake/BALLMacros.cmake)
@@ -104,6 +87,18 @@ ELSE()
 ENDIF()
 
 
+
+########################################################
+# Minimum dependency version floors (DEPS-04 / D-08)
+# Pinned inline at each find_package call site (or via the SET below for Qt).
+#
+#   CMake   3.21  — CMakePresets.json schema v3 + toolchainFile support
+#   Qt5     5.15  — the only maintained Qt5 release line; Homebrew + vcpkg both ship 5.15.x
+#   Boost   1.70  — config-mode BoostConfig.cmake is reliable from 1.70+
+#   Eigen3  3.4   — first Eigen with stable Eigen3Config.cmake (covers the 5.x line via range)
+#   TBB    2021.0 — first oneTBB release shipping TBBConfig.cmake / TBB::tbb target
+#   OpenBabel 3.0 — first OpenBabel shipping OpenBabel3Config.cmake
+########################################################
 
 ########################################################
 # Search and configure third party dependencies
@@ -286,7 +281,7 @@ IF(QTDIR)
 	INCLUDE_DIRECTORIES(BEFORE "${QTDIR}/include")
 ENDIF()
 
-SET(QT_MIN_VERSION 5.5)
+SET(QT_MIN_VERSION 5.15)
 
 FIND_PACKAGE(Qt5 ${QT_MIN_VERSION} REQUIRED Core Network Xml)
 
@@ -399,15 +394,6 @@ ENDIF(BALL_HAS_VIEW)
 OPTION(BALL_PYTHON_SUPPORT "Compile BALL's python interface (requires python development packages)" ON)
 
 IF (BALL_PYTHON_SUPPORT)
-	# make sure that we set the modules that come with contrib
-	IF(BALL_CONTRIB_PATH)
-		IF(WIN32)
-			SET(ENV{PYTHONPATH} "$ENV{PYTHONPATH};${BALL_CONTRIB_PATH}/install/lib/python")
-		ELSE()
-			SET(ENV{PYTHONPATH} "$ENV{PYTHONPATH}:${BALL_CONTRIB_PATH}/install/lib/python")
-		ENDIF()
-		SET(BALL_PYTHONPATH $ENV{PYTHONPATH})
-	ENDIF()
 	FIND_PACKAGE(Python3 COMPONENTS Interpreter Development)
 
 	IF (Python3_FOUND)
@@ -426,7 +412,7 @@ ENDIF()
 
 
 IF(APPLE)
-	FIND_PROGRAM(MACDEPLOYQT_EXECUTABLE macdeployqt PATHS ${BALL_CONTRIB_PATH}/bin)
+	FIND_PROGRAM(MACDEPLOYQT_EXECUTABLE macdeployqt)
 
 	IF(${MACDEPLOYQT_EXECUTABLE} STREQUAL "MACDEPLOYQT_EXECUTABLE-NOTFOUND")
 		MESSAGE(WARNING "MacOS Bundle generation not possible: macdeployqt not found")
@@ -434,7 +420,7 @@ IF(APPLE)
 		SET(QT_DEPLOY_EXECUTABLE ${MACDEPLOYQT_EXECUTABLE})
 	ENDIF()
 ELSEIF(WIN32)
-	FIND_PROGRAM(WINDEPLOYQT_EXECUTABLE windeployqt.exe PATHS ${BALL_CONTRIB_PATH}/bin)
+	FIND_PROGRAM(WINDEPLOYQT_EXECUTABLE windeployqt.exe)
 
 	IF(${WINDEPLOYQT_EXECUTABLE} STREQUAL "WINDEPLOYQT_EXECUTABLE-NOTFOUND")
 		MESSAGE(WARNING "Package generation not possible: windeployqt.exe not found")
