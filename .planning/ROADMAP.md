@@ -168,6 +168,22 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
+### Phase 999.2: Ninja build generator (BACKLOG)
+
+**Goal:** Switch the default CMake generator from Make/MSBuild to **Ninja** across all three platforms.
+**Why:** Faster incremental builds and consistent parallelism everywhere; on Windows it replaces slow MSBuild and makes the legacy `ball_contrib` "do not use -j" hazard moot (contrib is already obsolete on macOS/Linux). Pure build-tooling change — **zero source changes**, just `cmake -G Ninja`.
+**Cross-platform impact sketch:**
+  - **macOS:** `brew install ninja`; `cmake -G Ninja`. Faster rebuilds, better core utilization than Make. Update `BUILD-macos.md`. Low risk.
+  - **Linux:** `apt/dnf install ninja-build`; `cmake -G Ninja`. Same benefits. Low risk.
+  - **Windows:** Biggest win — replaces MSBuild (`cmake -G Ninja` in a VS dev shell, or `Ninja Multi-Config`). Eliminates the `ball_contrib` `/maxcpucount`/`-j` undefined-behaviour warning entirely. Slightly more setup (Ninja must be on PATH).
+  - **CI (Phase 9):** the GH Actions matrix should standardize on `-G Ninja` on all three runners — simpler, faster, uniform.
+  - **Risk:** Low. CMake fully supports Ninja; the only watch-items are non-standard custom commands / `add_custom_command` ordering and any code that shells out assuming Makefile targets. BALL's CMake is fairly standard. Best sequenced *after* Phase 4 (dependency overhaul) and *with* Phase 9 (CI) so it lands once, matrix-wide.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
 ---
 *Roadmap created: 2026-05-14*
 *Mirrors `/Users/kohlbach/Claude/BALL/ROADMAP-1.6.md` (phases 1, 2, 3, 4a, 4b, 5, 6, 7, 8)*
