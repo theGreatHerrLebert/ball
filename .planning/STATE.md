@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
 status: executing
-stopped_at: Phase 4 context gathered
-last_updated: "2026-05-14T15:09:50.740Z"
+stopped_at: 04-01 Task 2 complete; paused at Task 3 checkpoint (OpenBabel LGPL decision)
+last_updated: "2026-05-14T15:24:07.986Z"
 progress:
   total_phases: 17
   completed_phases: 5
@@ -19,13 +19,15 @@ progress:
 
 **Core Value:** BALLView must build and visibly render molecules on macOS, Linux, and Windows from current, supported dependencies — the 3D scene working cross-platform is the non-negotiable outcome.
 
-**Current Focus:** Phase 4 — Dependency System Overhaul (next to plan)
+**Current Focus:** Phase 04 — dependency-system-overhaul
 
 ## Current Position
 
+Phase: 04 (dependency-system-overhaul) — EXECUTING
+Plan: 1 of 4
 **Phase:** 4 — Dependency System Overhaul
 **Plan:** Not started
-**Status:** Ready to execute
+**Status:** Executing Phase 04
 **Progress:** Phases 1, 2, 02.1, 02.2, 3 complete
 
 ```
@@ -93,6 +95,9 @@ roadmap/STATE after any gsd-tools phase op.
 - [Phase 03]: D-07 applied: fixed 3 additional C++17 breakages (set_unexpected, streampos, dynamic-exception-spec in parser)
 - [Phase 03]: D-08 achieved: CI run 25862456769 — all 4 jobs green on 446cf10; render smoke passed macOS and Linux; Windows also green
 - [Phase 03]: D-06 confirmed: no Qt noise flood on removing -Wno-deprecated-declarations; no narrowed suppression needed
+- [Phase 04-dependency-system-overhaul]: Eigen3 version range 3.4...6 used (not plain 3.4) because Homebrew ships Eigen 5.0.1 which uses a version compatibility schema where 3.4 would only match 3.4.x but not 5.x
+- [Phase 04-dependency-system-overhaul]: QT_NO_KEYWORDS enabled (was commented out) to prevent Qt emit/signals macros clashing with TBB oneAPI tbb::detail::d1::event::emit() method — required for TBB config-mode to build
+- [Phase 04-dependency-system-overhaul]: OpenBabel BALL_HAS_OPENBABEL activation deferred to Plan 03 — config-mode find_package(OpenBabel3) is in place but enabling compilation requires the 2.x→3.x API port first
 
 ### Roadmap Evolution
 
@@ -119,7 +124,7 @@ roadmap/STATE after any gsd-tools phase op.
 
 **Last action:** Phase 3 (Language Modernization) marked COMPLETE — all 3 plans executed, code review clean (0 critical / 1 pre-existing warning), gsd-verifier passed 3/3 must-haves, `phase complete 03` run. CI run 25862456769 (`446cf10`) is fully green (build macos/linux/windows + lint); render-smoke passed on macOS and Linux. Branch `v1.6-modernization` is at `446cf10` + planning-doc commits.
 
-**Stopped at:** Phase 4 context gathered
+**Stopped at:** 04-01 Task 2 complete; paused at Task 3 checkpoint (OpenBabel LGPL decision)
 
 **Next action:** Phase 4 — Dependency System Overhaul (`/gsd-discuss-phase 4` or `/gsd-plan-phase 4`). Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix. CI (Phase 02.2) remains the regression net.
 
