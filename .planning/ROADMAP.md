@@ -245,6 +245,20 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
+### Phase 999.5: Open-PR triage (BACKLOG)
+
+**Goal:** Review every open pull request on `BALL-Project/ball` in GitHub — triage each one against the current state of the codebase.
+**Why:** The repo was frozen at a 2022 commit; open PRs predate the 1.6 modernization work and may be stale, superseded by the patches/phases already landed, or still valuable. They need a deliberate merge / close / defer decision rather than being left to rot.
+**Scope sketch:**
+  - Enumerate all open PRs (`gh pr list`).
+  - For each: assess relevance to v1.6 modernization (or a later milestone), check for conflicts with work already done (Phases 1–02.2), decide merge / rebase-then-merge / close / defer-to-milestone, and record the rationale.
+  - Output: a triage table (PR #, title, decision, rationale).
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
 ---
 *Roadmap created: 2026-05-14*
 *Mirrors `/Users/kohlbach/Claude/BALL/ROADMAP-1.6.md` (phases 1, 2, 3, 4a, 4b, 5, 6, 7, 8). Revised 2026-05-14 after Codex adversarial review — cheap fixes applied; structural changes (early CI phase, Phase 5 split, diagnostics requirement, feature matrix) pending a deliberate roadmap revision.*
