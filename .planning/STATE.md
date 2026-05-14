@@ -98,8 +98,10 @@ tool's decimal-phase bug; 05.1 depends on Phase 5. The real next phase is **Phas
 - Phase 02.1 inserted after Phase 2: Renderer boundary extraction — pure refactor that makes Phase 5 a contained backend swap. Depends on Phase 2, blocks Phase 5. Design: `.planning/RENDERER-INTERFACE-BOUNDARY.md`.
 - Design Handover package analyzed (`.planning/DESIGN-HANDOVER-INTEGRATION.md`): a separate UI/UX modernization milestone (~8 phases) that depends on this milestone's Phase 5 (Qt 6). Planted as SEED-001 (Milestone 2 "BALLView Refresh", target 1.7); not folded into the current roadmap.
 - Codex adversarial review run on the roadmap. Cheap fixes AND structural changes applied: Phase 02.2 (early CI matrix) + Phase 05.1 (renderer backend spike) inserted; Phase 5 split to Qt6-only; Phase 6 restructured (decision+slice); Phase 8 scope clarified; DEPS-05/FEAT-01/DIAG-01/SPIKE/PY-02/PKG-03 added; feature matrix added.
-- Backlog: 999.1 (UI maintainer open-questions), 999.2 (Ninja generator), 999.3 (networking rework).
+- Backlog: 999.1 (UI maintainer open-questions), 999.2 (Ninja generator), 999.3 (networking rework), 999.4 (config shadows color defaults), 999.5 (open-PR triage).
 - Phase 02.1 planned: 3 plans, 2 waves (01+02 parallel Wave 1, 03 Wave 2). Plan-checker passed after one revision (build-file path fix: BALL uses per-directory `sources.cmake`, not `source/VIEW/CMakeLists.txt`).
+- 2026-05-14 consolidation: a duplicate `.planning/` had been created at the workspace root (`/Users/kohlbach/Claude/BALL/.planning/`) by a stray top-level `/gsd-map-codebase` + `/gsd-new-project` run. Codebase map rolled into `.planning/codebase/` (7 docs, paths re-based to project root); orphaned root `.planning/` and root `.git` removed. The canonical GSD project root is `ball/`.
+- `.planning/JOINT-ROADMAP.md` added — program-level read-only view collating Milestone 1 (this roadmap), Milestone 2 (SEED-001 UI refresh), and the 999.x backlog. Canonical sources remain `ROADMAP.md` + `seeds/SEED-001-*`.
 
 ### Todos
 
@@ -126,6 +128,7 @@ tool's decimal-phase bug; 05.1 depends on Phase 5. The real next phase is **Phas
 - Renderer boundary (Phase 02.1) is in place: `RenderSurface`/`RendererFactory` + additive `Renderer::renderRepresentations_()`/`capabilities()`. Phase 5/05.1 backend swap is now contained — no scene.C edits.
 - A1 CONFIRMED (Phase 2): raytracer worker issues no GL. `TilingRenderer`'s GL path is GUI-thread-only.
 - Build/run: `BUILD-macos.md`. CI mirrors it. `~/.BALLView` was deleted (stale element-color cache shadowed compiled defaults — backlog 999.4).
+- Codebase map available at `.planning/codebase/` (STACK, ARCHITECTURE, STRUCTURE, CONVENTIONS, TESTING, INTEGRATIONS, CONCERNS) — generated 2026-05-14, use as reference when planning Phases 4-9. `ball/CLAUDE.md` still has placeholder stack/arch sections — refresh from the map when convenient.
 
 ---
 *State initialized: 2026-05-14*
