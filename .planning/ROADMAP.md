@@ -49,6 +49,24 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 - [ ] 02-04-PLAN.md — scene.C port + stereo/multi-display guard-defer + human smoke check
 **UI hint**: yes
 
+### Phase 02.1: Renderer boundary extraction (INSERTED)
+
+**Goal**: Extract a clean, Qt-GL-free renderer/surface boundary so the Phase 5 pipeline modernization is a contained ~2-file backend swap behind a flag, not a re-touch of scene.C. Pure refactor — no behaviour change.
+**Depends on**: Phase 2 (the QOpenGLWidget port must land first so the extracted `RenderSurface` wraps the real post-port widget)
+**Blocks**: Phase 5 (Qt 6 + Pipeline) — the contained-swap boundary is its prerequisite
+**Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04
+**Success Criteria** (what must be TRUE):
+  1. A `RenderSurface` interface owns the context-lifecycle verbs (`beginFrame`/`endFrame`); `RenderSetup::makeCurrent()`'s GL-specific body moves behind it
+  2. A `RendererFactory` constructs renderers and surfaces by enum; `scene.C` contains zero `new GLRenderWindow` and zero `dynamic_cast<GLRenderWindow>`/`dynamic_cast<GLRenderer>` sites
+  3. The `Renderer` interface gains a batched `renderRepresentations_()` + `capabilities()` entry point; existing immediate-mode renderers are untouched (default fan-out preserves behaviour)
+  4. BALLView builds and renders identically to post-Phase-2 (pure refactor — same pixels, verified by the Phase 2 smoke checklist)
+**UI hint**: no
+**Reference**: `.planning/RENDERER-INTERFACE-BOUNDARY.md` (full design)
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 02.1 to break down)
+
 ### Phase 3: Language Modernization
 **Goal**: The whole project compiles under C++17 with the standard set the modern CMake way, removing the load-bearing C++14 bridge.
 **Depends on**: Phase 1 (build baseline). Independent of Phase 2.

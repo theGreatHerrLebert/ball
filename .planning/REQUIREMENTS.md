@@ -38,6 +38,13 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 - [x] **RENDER-07**: `RenderSetup`, `scene.C`, `glOffscreenTarget.C`, `glRenderer.C` are updated to remove all `QGLWidget`/`QGLContext`/`QGLFormat` references and compile cleanly
 - [ ] **RENDER-08**: BALLView builds, launches, and renders a molecule on Linux and Windows (platform-independence verified, no regressions vs. macOS)
 
+### Renderer Architecture (Phase 02.1 — inserted)
+
+- [ ] **ARCH-01**: A `RenderSurface` interface owns context-lifecycle verbs (`beginFrame`/`endFrame`); `RenderSetup::makeCurrent()`'s GL-specific body moves behind it
+- [ ] **ARCH-02**: A `RendererFactory` constructs renderers/surfaces by enum; `scene.C` has zero `new GLRenderWindow` and zero `dynamic_cast<GLRenderWindow>`/`dynamic_cast<GLRenderer>` sites
+- [ ] **ARCH-03**: The `Renderer` interface gains a batched `renderRepresentations_()` + `capabilities()` entry point; existing immediate-mode renderers are untouched
+- [ ] **ARCH-04**: BALLView builds and renders identically to post-Phase-2 (pure refactor, no behaviour change)
+
 ### Qt 6 + Pipeline
 
 - [ ] **QT6-01**: BALLView builds against Qt 6, with `QGLWidget`-era APIs fully removed

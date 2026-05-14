@@ -70,13 +70,18 @@ Phase 9  [ ]  CI & Tests
 - [Phase 02-rendering-port-4a]: Plan 02-03: renderer-side files (renderSetup.C, glRenderer.C, glOffscreenTarget.{h,C}) ported to QOpenGLWidget API — QOpenGLContext, grabFramebuffer, Format_RGBA8888+mirrored label upload, QOpenGLFramebufferObject offscreen target; scene.C is the sole remaining VIEW build failure (Plan 04)
 - [Phase 02-rendering-port-4a]: Plan 02-04 Tasks 1-2: scene.C ported (QSurfaceFormat+QOpenGLContext stereo probe, swap-sync block -> update(), grabFramebuffer) and the 4 top-level stereo/multi-display paths (addGlWindow, enterStereo, enterDualStereo, enterDualStereoDifferentDisplays) guard-deferred per Pitfall 6. Full clean BALL+VIEW+BALLView build links bin/BALLView.app; grep gate clean across source/VIEW + include/BALL/VIEW except the known-deferred glDisplayList.h. Awaiting human smoke-check (Task 3 checkpoint)
 
+### Roadmap Evolution
+
+- Phase 02.1 inserted after Phase 2: Renderer boundary extraction — pure refactor that makes Phase 5 a contained backend swap. Depends on Phase 2, blocks Phase 5. Design: `.planning/RENDERER-INTERFACE-BOUNDARY.md`.
+- Design Handover package analyzed (`.planning/DESIGN-HANDOVER-INTEGRATION.md`): a separate UI/UX modernization milestone (~8 phases) that depends on this milestone's Phase 5 (Qt 6). To be planted as Milestone 2; not folded into the current roadmap.
+
 ### Todos
 
-- None yet (roadmap just created).
+- Phase 2 rendering defect: geometry renders embedded (macOS blocker fixed) but mis-projected — bonds draw as giant cylinders. `Cannot resize window. Size 0 x 0` in the log is the likely cause. Gap to close before Phase 2 verification.
 
 ### Blockers
 
-- None. The known blank-3D-scene blocker is the target of Phase 2, not an obstacle to planning.
+- Phase 2 human smoke-check FAILED visually: scene renders embedded (core macOS blocker resolved) but geometry is mis-scaled/mis-projected and unrecognizable. Phase 2 cannot be marked complete until this rendering gap is fixed.
 
 ## Session Continuity
 
