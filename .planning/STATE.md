@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02.2-01-PLAN.md
-last_updated: "2026-05-14T12:04:24.256Z"
+stopped_at: 02.2-02 Tasks 1-2 done; PAUSED at Task 3 checkpoint (post-push CI-green human-verify)
+last_updated: "2026-05-14T12:10:00.000Z"
 progress:
   total_phases: 16
   completed_phases: 3
@@ -26,8 +26,8 @@ progress:
 Phase: 02.2 (CI and build-smoke matrix) — EXECUTING
 Plan: 2 of 2
 **Phase:** 02.2
-**Plan:** 02.2-01 complete; 02.2-02 next
-**Status:** Executing Phase 02.2
+**Plan:** 02.2-01 complete; 02.2-02 Tasks 1-2 done, PAUSED at Task 3 checkpoint
+**Status:** Executing Phase 02.2 — awaiting post-push CI-green human-verify
 **Progress:** [█████████░] 90%
 
 ```
@@ -79,6 +79,8 @@ Phase 9     [ ]  CI & Tests
 - [Phase 02.1]: Plan 02.1-03 Tasks 1-2 (ARCH-02): RendererFactory namespace (enum Kind + makeRenderer/makeSurface) centralises construction; scene.C's non-deferred paths routed through it. gl_renderer_/main_display_ kept concrete-typed with one static_cast at the construction site only (fewest ripples). setDownsamplingFactor added to RenderSurface, setFogIntensity to Renderer base (no-op defaults) so the casts drop out. RTTI::isKindOf<GLRenderer> guards routed through RenderSetup::getRendererType(). dynamic_cast<GLRenderWindow> replaced with dynamic_cast<RenderSurface>+nativeHandle(). ~9 deferred-stereo 3-arg-ctor new GLRenderWindow + 8 new GLRenderer sites remain as expected guard-deferred residuals (all in stereo/multi-display methods, deferred to Phase 5). Build clean. PAUSED at Task 3 human-verify checkpoint (ARCH-04 identical render).
 - [Phase 02.2]: DIAG-01: BALLVIEW_GL_DIAG single-line stdout diagnostic emitted from GLRenderWindow::initializeGL(); fbo_size is pre-layout so the smoke check uses the line's presence + live gl_version as the GL-context oracle, not exact dimensions
 - [Phase 02.2]: Render smoke check uses the D-09 fallback (fixed PDB data/structures/bpti.pdb) + a minimal -export-png main.C flag; the auto-demo peptide is restored ~/.BALLView session state, not a deterministic CI input
+- [Phase 02.2]: Plan 02.2-02: `.github/workflows/ci.yml` — single `build` job, strategy.matrix.include per OS (extensible without rewrite, D-11); macOS mirrors BUILD-macos.md verbatim, Linux apt+xvfb/software-Mesa, Windows non-blocking via matrix-driven `continue-on-error: ${{ !matrix.blocking }}` (D-03). Standalone blocking `lint` job runs the legacy-GL grep gate.
+- [Phase 02.2]: KNOWN ISSUE (deferred-items.md): the legacy-GL grep gate exits 1 on the current tree — 1 real `#include <QtOpenGL/qgl.h>` in glDisplayList.h + 6 false-positive comment matches. The wired `lint` job WILL be red on first CI run; resolution is a Phase-2 follow-up (out of scope for the CI workflow plan).
 
 ### Roadmap Evolution
 
