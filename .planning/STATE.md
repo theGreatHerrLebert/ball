@@ -74,8 +74,9 @@ Phase 9     [ ]  CI & Tests
 
 - Phase 02.1 inserted after Phase 2: Renderer boundary extraction — pure refactor that makes Phase 5 a contained backend swap. Depends on Phase 2, blocks Phase 5. Design: `.planning/RENDERER-INTERFACE-BOUNDARY.md`.
 - Design Handover package analyzed (`.planning/DESIGN-HANDOVER-INTEGRATION.md`): a separate UI/UX modernization milestone (~8 phases) that depends on this milestone's Phase 5 (Qt 6). Planted as SEED-001 (Milestone 2 "BALLView Refresh", target 1.7); not folded into the current roadmap.
-- Codex adversarial review run on the roadmap. Cheap fixes applied (numbering normalized, status accuracy, QT6-03/PIPE-01 contradiction removed, networking deferred to backlog 999.3, version policy). Structural changes still pending: insert an early CI phase, split Phase 5, add a graphics-diagnostics requirement + feature matrix.
+- Codex adversarial review run on the roadmap. Cheap fixes AND structural changes applied: Phase 02.2 (early CI matrix) + Phase 05.1 (renderer backend spike) inserted; Phase 5 split to Qt6-only; Phase 6 restructured (decision+slice); Phase 8 scope clarified; DEPS-05/FEAT-01/DIAG-01/SPIKE/PY-02/PKG-03 added; feature matrix added.
 - Backlog: 999.1 (UI maintainer open-questions), 999.2 (Ninja generator), 999.3 (networking rework).
+- Phase 02.1 planned: 3 plans, 2 waves (01+02 parallel Wave 1, 03 Wave 2). Plan-checker passed after one revision (build-file path fix: BALL uses per-directory `sources.cmake`, not `source/VIEW/CMakeLists.txt`).
 
 ### Todos
 
@@ -87,16 +88,17 @@ Phase 9     [ ]  CI & Tests
 
 ## Session Continuity
 
-**Last action:** Phase 2 (Rendering Port) marked COMPLETE — human visual verification passed ("Approved"), gsd-verifier passed 5/5, `phase complete 02` run. The QGLWidget→QOpenGLWidget port is functionally done on macOS: molecule renders embedded, ball-and-stick correct, survives resize, rotate/zoom/pick work, clean startup log.
+**Last action:** Phase 02.1 (Renderer boundary extraction) planned — 3 plans verified by the plan-checker (passed after one revision). Codex structural roadmap changes also applied (Phase 02.2 + 05.1 inserted, Phase 5 split, feature matrix, etc.).
 
-**Stopped at:** Phase 2 complete; Phase 02.1 ready to plan.
+**Stopped at:** Phase 02.1 planned and verified; ready to execute.
 
-**Next action:** `/gsd-plan-phase 02.1` — Renderer boundary extraction (the design is fully drafted in `.planning/RENDERER-INTERFACE-BOUNDARY.md`, so research can be skipped). Alternatively, apply the Codex review's structural roadmap changes first (early CI phase, Phase 5 split) before continuing — user's call.
+**Next action:** `/gsd-execute-phase 02.1` — pure refactor extracting `RenderSurface` (Plan 01) + additive `Renderer::renderRepresentations_()`/`capabilities()` (Plan 02) in parallel Wave 1, then `RendererFactory` + `scene.C` concrete-type removal + human-verify identical render (Plan 03) in Wave 2. Alternatively Phase 02.2 (CI matrix) is independent and could go first.
 
 **Notes:**
 
-- GSD phase numbers are sequential (1-9); they map to ROADMAP-1.6.md phases 1, 4a, 2, 3, 4b, 5, 6, 7, 8 respectively. The reorder reflects that the rendering port (4a) is the immediate priority and only depends on the build baseline.
-- A1 CONFIRMED → Plans 03/04 threading scope stays minimal: no `QOffscreenSurface` / shared context needed, just worker-thread `makeCurrent()` removal. Caveat documented in `02-A1-FINDINGS.md`: keep `TilingRenderer`'s GL path GUI-thread-only (it already is).
+- Phase 02.1 plans: 01 → `RenderSurface` interface + `makeCurrent` body behind `beginFrame/endFrame` (ARCH-01); 02 → additive batched `renderRepresentations_()`/`capabilities()` non-pure default fan-out (ARCH-03); 03 → `RendererFactory` + kill `new GLRenderWindow`/`dynamic_cast<GLRenderWindow|GLRenderer>` in scene.C + human-verify (ARCH-02, ARCH-04). The ~10 deferred-stereo `new GLRenderWindow` 3-arg sites are EXPECTED residuals (guard-deferred to Phase 5).
+- Build files: BALL uses per-directory `sources.cmake` (e.g. `source/VIEW/RENDERING/sources.cmake`), NOT `source/VIEW/CMakeLists.txt`. Headers are implicit, not listed.
+- A1 CONFIRMED (Phase 2): raytracer worker issues no GL — threading scope stays minimal. `TilingRenderer`'s GL path is GUI-thread-only.
 
 ---
 *State initialized: 2026-05-14*
