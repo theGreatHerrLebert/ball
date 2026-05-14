@@ -82,34 +82,61 @@ echo "openbabel-smoke: libBALL   = ${LIBBALL}"
 OBABEL_INCLUDE=""
 OBABEL_LIB_DIR=""
 
-# Try the CMakeCache first — the most reliable source (it recorded what was used)
+# Try the CMakeCache for reliable paths (records exactly what was used at configure time).
 CACHE_FILE="${BUILD_DIR}/CMakeCache.txt"
 if [ -f "${CACHE_FILE}" ]; then
-  OB_ROOT="$(grep -m1 '^OpenBabel3_DIR' "${CACHE_FILE}" 2>/dev/null | cut -d= -f2 | tr -d '[:space:]' || true)"
-  if [ -n "${OB_ROOT}" ]; then
-    # OpenBabel3_DIR is the cmake/ dir inside the install prefix; go three levels up
-    OB_INSTALL="$(cd "${OB_ROOT}/../../.." && pwd)"
-    OBABEL_INCLUDE="${OB_INSTALL}/include/openbabel3"
-    OBABEL_LIB_DIR="${OB_INSTALL}/lib"
+  # OpenBabel3_INCLUDE_DIRS is the most direct source
+  OB_INC_CACHE="$(grep -m1 '^OpenBabel3_INCLUDE_DIRS\b' "${CACHE_FILE}" 2>/dev/null | cut -d= -f2 | tr -d '[:space:]' || true)"
+  if [ -n "${OB_INC_CACHE}" ] && [ -d "${OB_INC_CACHE}" ]; then
+    OBABEL_INCLUDE="${OB_INC_CACHE}"
+  fi
+  # Derive lib dir from OpenBabel3_DIR if include still not found
+  if [ -z "${OBABEL_INCLUDE}" ]; then
+    OB_ROOT="$(grep -m1 '^OpenBabel3_DIR' "${CACHE_FILE}" 2>/dev/null | cut -d= -f2 | tr -d '[:space:]' || true)"
+    if [ -n "${OB_ROOT}" ]; then
+      # OpenBabel3_DIR is the cmake/ dir; walk up to find the install prefix
+      # (may be 2 or 3 levels up depending on Linux distro layout vs Homebrew)
+      for levels in 2 3 4; do
+        OB_CANDIDATE="${OB_ROOT}"
+        for i in $(seq 1 ${levels}); do OB_CANDIDATE="$(dirname "${OB_CANDIDATE}")"; done
+        if [ -d "${OB_CANDIDATE}/include/openbabel3" ]; then
+          OBABEL_INCLUDE="${OB_CANDIDATE}/include/openbabel3"
+          OBABEL_LIB_DIR="${OB_CANDIDATE}/lib"
+          break
+        fi
+      done
+    fi
   fi
 fi
 
-# Fallback: pkg-config
+# Fallback: pkg-config (most reliable on Linux distros)
 if [ -z "${OBABEL_INCLUDE}" ] && command -v pkg-config >/dev/null 2>&1; then
-  OBABEL_INCLUDE="$(pkg-config --variable=includedir openbabel-3 2>/dev/null || true)"
-  OBABEL_LIB_DIR="$(pkg-config --variable=libdir openbabel-3 2>/dev/null || true)"
+  OB_PC_INC="$(pkg-config --variable=includedir openbabel-3 2>/dev/null || true)"
+  if [ -n "${OB_PC_INC}" ] && [ -d "${OB_PC_INC}" ]; then
+    OBABEL_INCLUDE="${OB_PC_INC}"
+    OBABEL_LIB_DIR="$(pkg-config --variable=libdir openbabel-3 2>/dev/null || true)"
+  fi
 fi
 
-# Second fallback: Homebrew well-known paths
+# Well-known system paths fallback
 if [ -z "${OBABEL_INCLUDE}" ] && [ -d "/opt/homebrew/include/openbabel3" ]; then
   OBABEL_INCLUDE="/opt/homebrew/include/openbabel3"
   OBABEL_LIB_DIR="/opt/homebrew/lib"
-elif [ -z "${OBABEL_INCLUDE}" ] && [ -d "/usr/include/openbabel3" ]; then
+fi
+if [ -z "${OBABEL_INCLUDE}" ] && [ -d "/usr/include/openbabel3" ]; then
+  OBABEL_INCLUDE="/usr/include/openbabel3"
+  OBABEL_LIB_DIR="/usr/lib"
+fi
+# Ubuntu: libopenbabel-dev may install to /usr/include (openbabel3 is a subdirectory)
+if [ -z "${OBABEL_INCLUDE}" ] && [ -d "/usr/include" ] && [ -f "/usr/include/openbabel3/openbabel/mol.h" ]; then
   OBABEL_INCLUDE="/usr/include/openbabel3"
   OBABEL_LIB_DIR="/usr/lib"
 fi
 
 [ -n "${OBABEL_INCLUDE}" ] || fail "could not find OpenBabel include directory"
+# Verify the include dir actually has the expected headers
+[ -f "${OBABEL_INCLUDE}/openbabel/mol.h" ] || \
+  fail "OpenBabel include dir '${OBABEL_INCLUDE}' does not contain openbabel/mol.h — check install"
 echo "openbabel-smoke: OB include = ${OBABEL_INCLUDE}"
 
 # ----------------------------------------------------------------------------
