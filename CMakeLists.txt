@@ -153,7 +153,9 @@ LIST(APPEND BALL_DEP_LIBRARIES ${Boost_LIBRARIES})
 
 
 
-# OpenBabel availability: default false
+# OpenBabel availability: default false (GPL-gated — set TRUE automatically when
+# BALL_LICENSE=GPL and OpenBabel3 is found; LGPL builds never search for it).
+# Maintainer decision recorded in Plan 04-01 SUMMARY (2026-05-14).
 SET(BALL_HAS_OPENBABEL FALSE)
 
 IF(${BALL_LICENSE_GPL})
@@ -180,13 +182,15 @@ IF(${BALL_LICENSE_GPL})
 	# OpenBabel (GPL-gated — dynamically linked optional dep; only searched in GPL builds).
 	# Decision: OpenBabel stays GPL-gated to avoid any licensing ambiguity in the default
 	# LGPL build (maintainer decision recorded in Plan 04-01 SUMMARY, 2026-05-14).
-	# Plan 04-03 verifies the 2.x→3.x C++ API port via a -DBALL_LICENSE=GPL configure.
-	# NOTE: BALL_HAS_OPENBABEL is not enabled here; the C++ API port from 2.x to 3.x is
-	# done in Plan 03. Once that port lands, this block sets BALL_HAS_OPENBABEL TRUE.
+	# The C++ API was ported from 2.x to 3.x in Plan 04-03.
+	# Verification: cmake --preset macos-homebrew -DBALL_LICENSE=GPL
+	# (or use the ci-macos/ci-linux presets which set BALL_HAS_OPENBABEL=ON via
+	# cacheVariables; those presets must also pass -DBALL_LICENSE=GPL in the CI step).
 	FIND_PACKAGE(OpenBabel3 3.0 CONFIG)
 	IF(OpenBabel3_FOUND)
-		# Port is Plan 03 — link and enable there; for now only detect.
-		MESSAGE(STATUS "Found OpenBabel ${OpenBabel3_VERSION} (config mode) — C++ port pending (Plan 03)")
+		SET(BALL_HAS_OPENBABEL TRUE)
+		INCLUDE_DIRECTORIES(${OpenBabel3_INCLUDE_DIRS})
+		MESSAGE(STATUS "Found OpenBabel ${OpenBabel3_VERSION} (config mode) — molecular file-format conversion enabled")
 	ELSE()
 		MESSAGE(STATUS "OpenBabel not found — molecular file-format conversion disabled (optional dependency)")
 	ENDIF()
@@ -542,6 +546,18 @@ ENDIF()
 
 IF(TBB_FOUND)
 	LIST(APPEND BALL_DEP_LIBRARIES TBB::tbb)
+ENDIF()
+
+IF(BALL_HAS_OPENBABEL)
+	LIST(APPEND BALL_DEP_LIBRARIES openbabel)
+	# OpenBabel 3.1.1's plugin.h inherits from std::binary_function, which was removed
+	# in C++17. Re-enable it via the libc++ (macOS) and libstdc++ (Linux) compatibility
+	# defines so BALL can include OpenBabel headers cleanly under C++17.
+	IF(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+		ADD_COMPILE_DEFINITIONS(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
+	ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		ADD_COMPILE_DEFINITIONS(_GLIBCXX_USE_DEPRECATED=1)
+	ENDIF()
 ENDIF()
 
 IF(LIBSVM_FOUND)

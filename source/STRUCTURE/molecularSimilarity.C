@@ -1,3 +1,6 @@
+// -*- Mode: C++; tab-width: 2; -*-
+// vi: set ts=2:
+//
 // ----------------------------------------------------
 // $Maintainer: Marcel Schumann $
 // $Authors: Marcel Schumann $
@@ -13,11 +16,19 @@
 #include <sstream>
 
 #ifdef BALL_HAS_OPENBABEL
-	#include <openbabel/obconversion.h>
-	#include <openbabel/parsmart.h>
-	#include <BALL/FORMAT/SDFile.h>
-	#include <openbabel/atom.h>
-	using namespace OpenBabel;
+  // OpenBabel 3.x explicit includes — mol.h no longer pulls these transitively.
+  // obiter.h: OBAtomIterator, OBBondIterator
+  // mol.h: OBMol
+  // atom.h: OBAtom
+  // bond.h: OBBond
+  #include <openbabel/mol.h>
+  #include <openbabel/atom.h>
+  #include <openbabel/bond.h>
+  #include <openbabel/obiter.h>
+  #include <openbabel/obconversion.h>
+  #include <openbabel/parsmart.h>
+  #include <BALL/FORMAT/SDFile.h>
+  using namespace OpenBabel;
 #endif
 
 using namespace BALL;
@@ -235,7 +246,13 @@ OBMol* MolecularSimilarity::createOBMol(const Molecule& mol, bool ignore_hydroge
 		}
 	}
 
-	obmol->SetAromaticPerceived(); // make sure that detection of aromatic atoms/bonds will work later when using smarts-matcher
+  // OpenBabel 3.x: calling SetAromaticPerceived(false) clears the "already perceived"
+  // flag, which forces OpenBabel to re-run aromaticity perception the next time it is
+  // needed (e.g. by the SMARTS matcher). In 2.x, molecule modification auto-cleared this
+  // flag; in 3.x it does not, so we must clear it explicitly after building the molecule.
+  // We set bond orders explicitly above (including bond order 5 for aromatic bonds), so
+  // the re-perception will correctly identify aromatic systems from the topology we built.
+  obmol->SetAromaticPerceived(false); // force re-perception for SMARTS matching
 
 	return obmol;
 }
