@@ -10,7 +10,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 
 - [x] **Phase 1: Build Baseline** - Commit the 8 modern-toolchain patches, bump version, document the macOS build flow
 - [x] **Phase 2: Rendering Port (4a)** - Port `GLRenderWindow` from `QGLWidget` to `QOpenGLWidget` so the embedded 3D scene renders on all 3 OSes *(complete — human-verified on macOS; RENDER-08 Linux/Windows render-check carry-forward)*
-- [ ] **Phase 02.1: Renderer boundary extraction** - Extract a Qt-GL-free `RenderSurface`/`RendererFactory` boundary so Phase 5 is a contained backend swap *(inserted; depends on Phase 2, blocks Phase 5)*
+- [x] **Phase 02.1: Renderer boundary extraction** - Extract a Qt-GL-free `RenderSurface`/`RendererFactory` boundary so Phase 5 is a contained backend swap *(inserted; depends on Phase 2, blocks Phase 5)* (completed 2026-05-14)
 - [ ] **Phase 02.2: CI and build-smoke matrix** - Early GitHub Actions build matrix (macOS-arm64/Linux/Windows) + a non-blank render smoke check + a GL-capability diagnostics log *(inserted per Codex review — pulled forward so Phases 3-9 land with a regression net)*
 - [ ] **Phase 3: Language Modernization** - Move the codebase to C++17, remove C++17-removed constructs, set the standard via CMake
 - [ ] **Phase 4: Dependency System Overhaul** - Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix
@@ -68,7 +68,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 **Plans**: 3 plans
 - [x] 02.1-01-PLAN.md — Extract the `RenderSurface` interface; move `RenderSetup::makeCurrent()`'s GL body behind `beginFrame()/endFrame()` (ARCH-01)
 - [x] 02.1-02-PLAN.md — Add the additive batched `Renderer::renderRepresentations_()` + `capabilities()` entry point with a behaviour-preserving default fan-out (ARCH-03)
-- [ ] 02.1-03-PLAN.md — Add `RendererFactory`; route `Scene` through it and remove the `new GLRenderWindow` / `dynamic_cast<GLRenderWindow>` / `dynamic_cast<GLRenderer>` sites; human-verify identical render (ARCH-02, ARCH-04)
+- [x] 02.1-03-PLAN.md — Add `RendererFactory`; route `Scene` through it and remove the `new GLRenderWindow` / `dynamic_cast<GLRenderWindow>` / `dynamic_cast<GLRenderer>` sites; human-verify identical render (ARCH-02, ARCH-04)
 
 ### Phase 02.2: CI and build-smoke matrix (INSERTED)
 
@@ -170,7 +170,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 |-------|----------------|--------|-----------|
 | 1. Build Baseline | 1/1 | Complete | 2026-05-14 |
 | 2. Rendering Port (4a) | 4/4 | Complete — human-verified on macOS (RENDER-08 Linux/Windows carry-forward) | 2026-05-14 |
-| 02.1 Renderer boundary extraction | 2/3 | In Progress|  |
+| 02.1 Renderer boundary extraction | 3/3 | Complete   | 2026-05-14 |
 | 02.2 CI and build-smoke matrix | 0/0 | Not planned (inserted — Codex review) | - |
 | 3. Language Modernization | 0/0 | Not started | - |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
@@ -194,7 +194,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   3. Theme picker — ship one neutral theme, or Light/Dark/Follow-System? (handover recommends Follow-System)
   4. Translation churn — the menu re-org invalidates ~40% of `BALLView-de_DE.ts`; plan a community translation round.
 **Requirements:** TBD
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 **Reference:** `.planning/DESIGN-HANDOVER-INTEGRATION.md`, `.planning/seeds/SEED-001-ballview-refresh-ui-milestone.md`
 
 Plans:
