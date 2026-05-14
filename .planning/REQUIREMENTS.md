@@ -29,6 +29,10 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 - [ ] **DEPS-05**: A `CMakePresets.json` provides stable configure presets for macOS-Homebrew, Linux-system, Windows-vcpkg, and CI
 - [ ] **FEAT-01**: A feature matrix classifies every optional dependency as required / optional / removed / deferred and states what each one's absence disables (see the "Feature Matrix" section below)
 
+### Configuration (Phase 4.1 — promoted from backlog 999.4)
+
+- [ ] **CONFIG-01**: The persisted `~/.BALLView` config no longer silently shadows compiled element/residue color defaults — compiled defaults show through for un-customized colors, a stale/partial saved color block falls back to compiled defaults, and the user can reset colors to defaults from Preferences without deleting `~/.BALLView`
+
 ### Rendering — Phase 4a (IMMEDIATE PRIORITY)
 
 - [x] **RENDER-01**: `GLRenderWindow` derives from `QOpenGLWidget` (not the removed-in-Qt6 `QGLWidget`); `QGLFormat` is replaced by `QSurfaceFormat` requesting a compatibility profile + depth/stencil/double buffer
@@ -62,7 +66,7 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 > v2/out-of-scope). The pipeline rewrite is `PIPE-01`, a separate future phase.
 > Phase 5 keeps the compatibility-profile fixed-function path working under Qt 6.
 
-### Renderer Backend Spike (Phase 05.1 — inserted)
+### Renderer Backend Spike (Phase 5 — folded in from former Phase 05.1)
 
 - [ ] **SPIKE-01**: A throwaway prototype renders the demo molecule through at least the leading backend candidate (GL-core and/or QRhi) behind the Phase 02.1 `RendererFactory`, demonstrating picking and a text overlay
 - [ ] **SPIKE-02**: A decision record names the chosen backend, the rationale, per-platform (macOS/Windows) acceptance criteria, and a scoped task list for the `PIPE-01` full rewrite
@@ -122,7 +126,7 @@ Deferred beyond v1.6.
 | Reviving `ball_contrib` source build | Dead end on modern toolchains; replaced by system/Homebrew/vcpkg deps |
 | New molecular-modelling features/algorithms | This milestone is modernization only |
 | RTfact raytracer revival | Windows-only contrib, not load-bearing |
-| Programmable-pipeline GL rewrite (`PIPE-01`) | Large; Phase 2 + Phase 5 keep fixed-function via a compat profile. The Phase 05.1 spike de-risks and scopes it; the full rewrite is v2 |
+| Programmable-pipeline GL rewrite (`PIPE-01`) | Large; Phase 2 + Phase 5 keep fixed-function via a compat profile. The Phase 5 backend spike de-risks and scopes it; the full rewrite is v2 |
 
 ## Traceability
 
@@ -157,10 +161,11 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | DEPS-04 | Phase 4 — Dependency System Overhaul | Pending |
 | DEPS-05 | Phase 4 — Dependency System Overhaul | Pending |
 | FEAT-01 | Phase 4 — Dependency System Overhaul | Pending |
+| CONFIG-01 | Phase 4.1 — Config Color-Defaults Fix | Pending |
 | QT6-01 | Phase 5 — Qt 6 Migration (4b) | Pending |
 | QT6-02 | Phase 5 — Qt 6 Migration (4b) | Pending |
-| SPIKE-01 | Phase 05.1 — Renderer backend decision spike | Pending |
-| SPIKE-02 | Phase 05.1 — Renderer backend decision spike | Pending |
+| SPIKE-01 | Phase 5 — Qt 6 Migration + Renderer Backend Spike | Pending |
+| SPIKE-02 | Phase 5 — Qt 6 Migration + Renderer Backend Spike | Pending |
 | PY-01 | Phase 6 — Python Bindings | Pending |
 | PY-02 | Phase 6 — Python Bindings | Pending |
 | PKG-01 | Phase 8 — Packaging & Distribution | Pending |
@@ -170,11 +175,12 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | NET-01 | Deferred (1.6.x) — backlog 999.3 | Deferred |
 
 **Coverage:**
-- v1 requirements: 37 active (BUILD ×4, RENDER ×8, ARCH ×4, CI/DIAG ×2, LANG ×3, DEPS ×6, QT6 ×2, SPIKE ×2, PY ×2, PKG ×3, CI-02 ×1) + NET-01 deferred to 1.6.x
-- Mapped to phases: 37 ✓
+- v1 requirements: 38 active (BUILD ×4, RENDER ×8, ARCH ×4, CI/DIAG ×2, LANG ×3, DEPS ×6, CONFIG ×1, QT6 ×2, SPIKE ×2, PY ×2, PKG ×3, CI-02 ×1) + NET-01 deferred to 1.6.x
+- Mapped to phases: 38 ✓
 - Unmapped: 0
-- v2: PIPE-01 (full pipeline rewrite — now de-risked by the Phase 05.1 spike)
+- v2: PIPE-01 (full pipeline rewrite — now de-risked by the Phase 5 backend spike)
 
 ---
 *Requirements defined: 2026-05-14*
 *Last updated: 2026-05-14 — Codex structural changes applied: Phase 02.2 (CI) + Phase 05.1 (backend spike) inserted; Phase 5 split (Qt6-only); Phase 6 restructured (decision+slice); Phase 8 scope clarified; DEPS-05/FEAT-01/DIAG-01/SPIKE/PY-02/PKG-03 added; feature matrix added.*
+*Updated 2026-05-14 (consolidation): CONFIG-01 added → Phase 4.1 (promoted from backlog 999.4); SPIKE-01/SPIKE-02 re-mapped from former Phase 05.1 into Phase 5 (folded in). Active count 37 → 38.*

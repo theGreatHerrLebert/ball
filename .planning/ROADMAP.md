@@ -14,8 +14,8 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 - [x] **Phase 02.2: CI and build-smoke matrix** - Early GitHub Actions build matrix (macOS-arm64/Linux/Windows) + a non-blank render smoke check + a GL-capability diagnostics log *(inserted per Codex review — pulled forward so Phases 3-9 land with a regression net)* (completed 2026-05-14)
 - [x] **Phase 3: Language Modernization** - Move the codebase to C++17, remove C++17-removed constructs, set the standard via CMake (completed 2026-05-14)
 - [ ] **Phase 4: Dependency System Overhaul** - Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix
-- [ ] **Phase 5: Qt 6 Migration** - Build against Qt 6 and replace deprecated VIEW APIs; keep the compat-profile GL path working *(split from the old oversized "Qt 6 + Pipeline")*
-- [ ] **Phase 05.1: Renderer backend decision spike** - Prototype GL-core vs QRhi behind the Phase 02.1 boundary; produce a recorded decision with macOS/Windows acceptance criteria *(de-risks the v2 PIPE-01 full rewrite)*
+- [ ] **Phase 4.1: Config Color-Defaults Fix** - Stop persisted `~/.BALLView` config from silently shadowing compiled element/residue color defaults *(promoted from backlog 999.4 — real user-facing bug)*
+- [ ] **Phase 5: Qt 6 Migration + Renderer Backend Spike** - Build against Qt 6 and replace deprecated VIEW APIs (keep the compat-profile GL path working), then a time-boxed renderer-backend decision spike behind the Phase 02.1 boundary *(former Phase 05.1 folded in — it must prototype against Qt 6)*
 - [ ] **Phase 6: Python Bindings** - Decide the binding generator via a vertical slice (5-10 core classes), then commit *(restructured per Codex review — was a single under-scoped criterion)*
 - [ ] ~~**Phase 7: Networking Rework**~~ - **Deferred to backlog 999.3** — not core value, the Asio code already compiles (Phase 1); the proper rework + test is 1.6.x polish
 - [ ] **Phase 8: Packaging & Distribution** - Notarizable macOS bundle (`data/` embedded, `macdeployqt`); documented build-from-source for Linux/Windows; license/distribution review
@@ -56,7 +56,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 
 **Goal**: Extract a clean, Qt-GL-free renderer/surface boundary so the Phase 5 pipeline modernization is a contained ~2-file backend swap behind a flag, not a re-touch of scene.C. Pure refactor — no behaviour change.
 **Depends on**: Phase 2 (the QOpenGLWidget port must land first so the extracted `RenderSurface` wraps the real post-port widget)
-**Blocks**: Phase 5, Phase 05.1 — the contained-swap boundary is their prerequisite
+**Blocks**: Phase 5 (incl. its folded-in renderer backend spike) — the contained-swap boundary is its prerequisite
 **Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04
 **Success Criteria** (what must be TRUE):
   1. A `RenderSurface` interface owns the context-lifecycle verbs (`beginFrame`/`endFrame`); `RenderSetup::makeCurrent()`'s GL-specific body moves behind it
@@ -112,27 +112,32 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   6. A feature matrix (REQUIREMENTS.md) classifies every optional dependency (OpenBabel, TBB, LPSolve, WebEngine, …) as required / optional / removed / deferred, and states what each one's absence disables
 **Plans**: TBD
 
-### Phase 5: Qt 6 Migration (4b)
-**Goal**: BALLView builds and runs on Qt 6 with deprecated VIEW APIs removed. The compatibility-profile fixed-function GL path is *kept working under Qt 6* as the known-good backend — the renderer-pipeline modernization is explicitly a separate phase (05.1 spike → v2 PIPE-01 rewrite). Split from the old oversized "Qt 6 + Pipeline" per the Codex review.
+### Phase 4.1: Config Color-Defaults Fix (PROMOTED from backlog 999.4)
+
+**Goal**: The persisted `~/.BALLView` config no longer silently shadows the compiled-in element/residue color defaults. Users see compiled defaults for any color they have not explicitly customized, and a stale or partial saved color block falls back to compiled defaults instead of being applied blindly.
+**Depends on**: Phase 1 (build baseline). Independent of Phase 4 — sequenced here as small, contained polish; the only workaround today is deleting `~/.BALLView`.
+**Requirements**: CONFIG-01
+**The problem (found 2026-05-14)**: BALLView persists the full element/residue color tables in `~/.BALLView` (`Elements=` / `ResidueNameColors=` lines). On startup the saved map is applied over the compiled `ElementColorProcessor`/`ResidueNameColorProcessor` defaults — so editing the default tables in source and rebuilding has no visible effect if any config exists. The saved map can also be stale or partial: a real case had indices 0-20 (incl. C/N/O/P/S) all `ffffffff` white.
+**Success Criteria** (what must be TRUE):
+  1. Editing the compiled `ElementColorProcessor`/`ResidueNameColorProcessor` default tables and rebuilding produces visibly updated colors even when a `~/.BALLView` config already exists
+  2. A stale or partial saved color block (version/schema mismatch, or implausible all-white indices) is detected and compiled defaults are used instead of the stale map
+  3. The user can reset element/residue colors to compiled defaults from Preferences without deleting `~/.BALLView`
+**Fix options** (decide during planning): version/checksum the color block with fallback-on-mismatch; a "reset colors to defaults" Preferences action; or persist only user-customized colors as a diff/override set so new compiled defaults show through.
+**UI hint**: yes
+**Plans**: TBD
+
+### Phase 5: Qt 6 Migration (4b) + Renderer Backend Decision Spike
+**Goal**: BALLView builds and runs on Qt 6 with deprecated VIEW APIs removed and the compatibility-profile fixed-function GL path kept working as the known-good backend. Once the Qt 6 build is stable, a time-boxed spike prototypes the renderer backend behind the Phase 02.1 `Renderer`/`RenderSurface` boundary and produces a *recorded decision* (GL-core vs QRhi) — de-risking and scoping the v2 `PIPE-01` rewrite, which stays out of scope. (The spike was formerly standalone Phase 05.1; folded in here 2026-05-14 because it must prototype against Qt 6. Phase 5 itself was split from the old oversized "Qt 6 + Pipeline" per the Codex review.)
 **Depends on**: Phase 02.1 (the renderer boundary), Phase 2 (the `QOpenGLWidget` port), Phase 4 (Qt 6 from the modern dependency system)
-**Requirements**: QT6-01, QT6-02
+**Requirements**: QT6-01, QT6-02, SPIKE-01, SPIKE-02
 **Success Criteria** (what must be TRUE):
   1. BALLView builds and launches against Qt 6 with all `QGLWidget`-era APIs removed (including `glDisplayList.h`'s `QtOpenGL/qgl.h`)
   2. The user-facing GUI behaves correctly with `QRegExp` and `QDesktopWidget` replaced by Qt 6 equivalents
   3. The 3D scene still renders correctly under Qt 6 via the compatibility-profile fixed-function path (no pixel regression vs. Phase 2, gated by the Phase 02.2 smoke check)
-**Plans**: TBD
+  4. A throwaway prototype renders the demo molecule through at least the leading backend candidate (GL-core and/or QRhi) behind the `RendererFactory`, demonstrating picking and a text overlay; macOS (Apple Silicon) and Windows driver behaviour are checked and recorded
+  5. A decision record (`.planning/` doc) names the chosen backend, the rationale, per-platform (macOS/Windows) acceptance criteria, and a scoped task list for the `PIPE-01` full rewrite
+**Sequencing note**: the Qt 6 migration (criteria 1-3) lands first; the spike (criteria 4-5) runs against the working Qt 6 build. Split into separate plan waves accordingly.
 **UI hint**: yes
-
-### Phase 05.1: Renderer backend decision spike (INSERTED)
-
-**Goal**: De-risk the eventual pipeline modernization with a time-boxed prototype. Build one molecule render path on GL-core *and* QRhi behind the Phase 02.1 `Renderer`/`RenderSurface` boundary, evaluate picking, text overlay, offscreen export, and macOS + Windows driver behaviour, and produce a *recorded decision* (GL-core vs QRhi) with explicit per-platform acceptance criteria. This is a spike + decision, NOT the full rewrite — the full rewrite is `PIPE-01` (v2), which this phase makes estimable.
-**Depends on**: Phase 02.1 (the boundary the prototype plugs into), Phase 5 (prototype against Qt 6)
-**Requirements**: SPIKE-01, SPIKE-02
-**Success Criteria** (what must be TRUE):
-  1. A throwaway prototype renders the demo molecule through at least the leading backend candidate behind the `RendererFactory`, with picking and a text overlay demonstrated
-  2. macOS (Apple Silicon) and Windows driver behaviour are checked and recorded — no per-OS graphics code in the chosen design
-  3. A decision record (`.planning/` doc) names the chosen backend, the rationale, the per-platform acceptance criteria, and a scoped task list for the `PIPE-01` full rewrite
-**UI hint**: no
 **Plans**: TBD
 
 ### Phase 6: Python Bindings
@@ -179,8 +184,8 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 | 02.2 CI and build-smoke matrix | 2/2 | Complete    | 2026-05-14 |
 | 3. Language Modernization | 3/3 | Complete   | 2026-05-14 |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
-| 5. Qt 6 Migration (4b) | 0/0 | Not started | - |
-| 05.1 Renderer backend decision spike | 0/0 | Not planned (inserted — Codex review) | - |
+| 4.1 Config Color-Defaults Fix | 0/0 | Not started (promoted from backlog 999.4) | - |
+| 5. Qt 6 Migration (4b) + Renderer Backend Spike | 0/0 | Not started (former Phase 05.1 folded in) | - |
 | 6. Python Bindings | 0/0 | Not started | - |
 | 7. Networking Rework | — | Deferred to backlog 999.3 | - |
 | 8. Packaging & Distribution | 0/0 | Not started | - |
@@ -198,9 +203,9 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   2. Legacy 5-dock "Classic" workspace — keep as a long-term opt-in preset, or retire after one release?
   3. Theme picker — ship one neutral theme, or Light/Dark/Follow-System? (handover recommends Follow-System)
   4. Translation churn — the menu re-org invalidates ~40% of `BALLView-de_DE.ts`; plan a community translation round.
+**Status:** Questions written up issue-ready in `.planning/MAINTAINER-QUESTIONS-999.1.md` (2026-05-14) — awaiting publication to maintainers.
 **Requirements:** TBD
-**Plans:** 3/3 plans complete
-**Reference:** `.planning/DESIGN-HANDOVER-INTEGRATION.md`, `.planning/seeds/SEED-001-ballview-refresh-ui-milestone.md`
+**Reference:** `.planning/MAINTAINER-QUESTIONS-999.1.md`, `.planning/DESIGN-HANDOVER-INTEGRATION.md`, `.planning/seeds/SEED-001-ballview-refresh-ui-milestone.md`
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
@@ -231,19 +236,9 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
-### Phase 999.4: Config shadows compiled color defaults (BACKLOG)
+### Phase 999.4: Config shadows compiled color defaults — PROMOTED to Phase 4.1
 
-**Goal:** Stop the persisted `~/.BALLView` config from silently overriding the compiled-in element/residue color defaults.
-**The problem (found 2026-05-14):** BALLView persists the full element/residue color tables in `~/.BALLView` (`Elements=` / `ResidueNameColors=` lines). On startup the saved map is applied over the compiled `ElementColorProcessor`/`ResidueNameColorProcessor` defaults — so editing the default tables in source and rebuilding has **no visible effect** if any config exists. Worse, the saved map can be stale or partial: a real case had indices 0-20 (incl. C/N/O/P/S) all `ffffffff` white. The only workaround today is deleting `~/.BALLView`.
-**Fix options (decide when promoted):**
-  - Version/checksum the color block — on a schema/version mismatch, fall back to compiled defaults instead of applying a stale map.
-  - A real "reset element/residue colors to defaults" action in Preferences that re-pulls the compiled table.
-  - Persist only colors the user actually customized (a diff/override set), not the whole table — so new compiled defaults show through for untouched elements.
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
+**Status:** Promoted to active **Phase 4.1: Config Color-Defaults Fix** on 2026-05-14 (real user-facing bug; only workaround is deleting `~/.BALLView`). See the Phase 4.1 detail section above.
 
 ### Phase 999.5: Open-PR triage (BACKLOG)
 
@@ -262,3 +257,4 @@ Plans:
 ---
 *Roadmap created: 2026-05-14*
 *Mirrors `/Users/kohlbach/Claude/BALL/ROADMAP-1.6.md` (phases 1, 2, 3, 4a, 4b, 5, 6, 7, 8). Revised 2026-05-14 after Codex adversarial review — cheap fixes applied; structural changes (early CI phase, Phase 5 split, diagnostics requirement, feature matrix) pending a deliberate roadmap revision.*
+*Revised 2026-05-14 (consolidation): backlog 999.4 promoted to active Phase 4.1 (Config Color-Defaults Fix, CONFIG-01); former standalone Phase 05.1 (renderer backend spike) folded into Phase 5 since it must prototype against Qt 6.*

@@ -50,17 +50,17 @@ and Windows from current, supported dependencies.
 | 02.2 | CI & build-smoke matrix (3-OS GitHub Actions) | ✅ Complete (CI green ×4) | 2 |
 | 3 | Language Modernization (C++14 → C++17) | ✅ Complete (CI green ×4) | 1 |
 | **4** | **Dependency System Overhaul** — delete `ball_contrib`, Homebrew/system + vcpkg, `CMakePresets.json`, feature matrix | ⬜ **NEXT — not yet planned** | 1 (benefits from 3) |
-| 5 | Qt 6 Migration (4b) — keep compat-profile GL working | ⬜ Not started | 02.1, 2, 4 |
-| 05.1 | Renderer backend decision spike (GL-core vs QRhi) | ⬜ Not planned | 02.1, 5 |
+| 4.1 | Config Color-Defaults Fix — stop `~/.BALLView` shadowing compiled colors | ⬜ Not started *(promoted from backlog 999.4)* | 1 |
+| 5 | Qt 6 Migration (4b) + Renderer Backend Spike — keep compat-profile GL working, then prototype GL-core vs QRhi behind the 02.1 boundary | ⬜ Not started *(former Phase 05.1 folded in)* | 02.1, 2, 4 |
 | 6 | Python Bindings — decision-first vertical slice (SIP 6 vs pybind11/nanobind) | ⬜ Not started | 3, 4 |
 | 8 | Packaging & Distribution — notarizable macOS bundle, Linux/Windows build-from-source | ⬜ Not started | 5 |
 | 9 | Test Suite Triage — wire `test/` into `ctest` | ⬜ Not started | 02.2, 3, 4 |
 
 *(Phase 7 "Networking Rework" was removed from the active roadmap → backlog 999.3.)*
 
-**Requirements coverage:** 37 active reqs, all mapped. Complete: BUILD ×4, RENDER ×8,
-ARCH ×4, CI/DIAG ×2, LANG ×3 (= 21). Pending: DEPS ×6, QT6 ×2, SPIKE ×2, PY ×2,
-PKG ×3, CI-02 ×1 (= 16). NET-01 deferred to 1.6.x.
+**Requirements coverage:** 38 active reqs, all mapped. Complete: BUILD ×4, RENDER ×8,
+ARCH ×4, CI/DIAG ×2, LANG ×3 (= 21). Pending: DEPS ×6, CONFIG ×1, QT6 ×2, SPIKE ×2,
+PY ×2, PKG ×3, CI-02 ×1 (= 17). NET-01 deferred to 1.6.x.
 
 ---
 
@@ -99,23 +99,19 @@ one PR per phase; all 3 platforms green every commit; every keyboard shortcut su
 
 | Item | Name | Notes |
 |------|------|-------|
-| 999.1 | BALLView UI maintainer open-questions | 4 questions needing maintainer decisions before M2 Phase 4 — long lead time, raise early. macOS native menubar; retire legacy 5-dock workspace?; theme-picker scope; translation churn (~40% of `BALLView-de_DE.ts`). |
+| 999.1 | BALLView UI maintainer open-questions | 4 questions needing maintainer decisions before M2 Phase 4 — long lead time, raise early. Written up issue-ready in `.planning/MAINTAINER-QUESTIONS-999.1.md`, awaiting publication. |
 | 999.2 | Ninja build generator | Switch CMake generator to Ninja on all 3 OSes. Zero source changes. Sequence after Phase 4, with Phase 9. |
 | 999.3 | Networking rework | `TCPServer`/`TCPServerThread` onto modern Boost.Asio + unit test (NET-01). Code already compiles; this is 1.6.x polish. |
-| 999.4 | Config shadows compiled color defaults | `~/.BALLView` silently overrides compiled element/residue colors. Version/checksum the color block, or persist only user-customized colors. |
+| ~~999.4~~ | Config shadows compiled color defaults | **Promoted to active Phase 4.1** (2026-05-14) — real user-facing bug. |
 | 999.5 | Open-PR triage | Review every open PR on `BALL-Project/ball` against current state — merge / rebase / close / defer. |
 
 ---
 
 ## Open issues this collation surfaced
 
-1. **Two `.planning/` directories.** The canonical GSD project is `ball/.planning/`.
-   A second, near-empty `.planning/` exists at the repo root
-   (`/Users/kohlbach/Claude/BALL/.planning/`) — created during a top-level
-   `/gsd-map-codebase` run; it holds only `codebase/*.md`. **Decide:** either move
-   that codebase map into `ball/.planning/codebase/` and delete the root one, or
-   treat the root dir as a workspace wrapper. Until resolved, GSD commands run from
-   the repo root will not see the real project state.
+1. ~~**Two `.planning/` directories.**~~ **Resolved 2026-05-14** — codebase map moved
+   into `ball/.planning/codebase/` (paths re-based), orphaned root `.planning/` and
+   root `.git` removed. Canonical GSD project root is `ball/`.
 
 2. **`ROADMAP-1.6.md` at the repo root** is the original human-authored review and
    is now mirrored/superseded by `ball/.planning/ROADMAP.md`. Keep as a historical
@@ -123,7 +119,7 @@ one PR per phase; all 3 platforms green every commit; every keyboard shortcut su
 
 3. **gsd-tools decimal-phase bug** (noted in STATE.md): `phase complete` mis-reports
    next-phase for decimal phases. Hand-verify roadmap/STATE after phase ops. Real
-   next phase is **4**, not 05.1.
+   next phase is **4**.
 
 ---
 *Joint roadmap collated 2026-05-14. Canonical sources remain `ball/.planning/ROADMAP.md`

@@ -24,19 +24,37 @@ non-negotiable outcome.
 <!-- GSD:stack-start source:STACK.md -->
 ## Technology Stack
 
-Technology stack not yet documented. Will populate after codebase mapping or first phase.
+C++17 (set via `CMAKE_CXX_STANDARD` since Phase 3), built with CMake 3.5+ (tested to 3.31). Flex + Bison generate the format parsers. Cross-platform: macOS (Apple Silicon + Intel), Linux, Windows.
+
+**Required:** Qt 5 (5.15.x via Homebrew — `Core`, `Network`, `Xml`, `OpenGL`, `PrintSupport`, `Widgets`), Boost (chrono/date_time/iostreams/regex/serialization/thread), Eigen3 (5.x), OpenGL/GLU. **Optional (compile-time `BALL_HAS_*` flags):** GLEW, TBB (oneTBB), FFTW (GPL builds), OpenBabel 2.x, lp_solve, libSVM, MPI, CUDA. **Removed/disabled:** RTfact, QtWebEngine, SIP Python bindings.
+
+Dependencies come from Homebrew/system on macOS/Linux; vcpkg for Windows is pending (Phase 4). The legacy `ball_contrib` tree is deprecated and being removed from the build path. Build config is generated into `include/BALL/CONFIG/config.h` from `cmake/config.h.in`. Build output: `libBALL`, `libVIEW`, and the `BALLView` app; `BALL_DATA_PATH` must point at `data/` at runtime.
+
+Full detail: `.planning/codebase/STACK.md`, `.planning/codebase/INTEGRATIONS.md`.
 <!-- GSD:stack-end -->
 
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
-Conventions not yet established. Will populate as patterns emerge during development.
+Headers are `.h`, implementation files are `.C` (matching names). Every file starts with the modeline `// -*- Mode: C++; tab-width: 2; -*-` + `// vi: set ts=2:` — **2-space indentation**, Allman braces. Tests are `{Component}_test.C` / `{Component}_test{N}.C`, co-located in `test/`.
+
+Naming: classes PascalCase with the `BALL_EXPORT` macro for shared-library visibility; methods camelCase with `get*`/`set*`/`has*`/`is*`/`create*`/`destroy*` prefixes; member variables camelCase with a **trailing underscore** (`type_`, `descriptor_matrix_`); constants/macros `UPPER_CASE`, defaults as `BALL_{CLASS}_DEFAULT_*`. Include guards are `BALL_{MODULE}_{FILE}_H`; internal includes are guarded and tab-indented (`#\tinclude <BALL/...>`).
+
+Everything lives in `namespace BALL`, submodules nest (`BALL::QSAR`). Source files typically declare `using namespace BALL;` after includes. Errors throw the `BALL::Exception` hierarchy with `__FILE__, __LINE__, message`; `BALL::Log` handles warnings/errors. Public APIs require Doxygen `/** ... */` with `@param`/`@return`/`@see`.
+
+Full detail: `.planning/codebase/CONVENTIONS.md`.
 <!-- GSD:conventions-end -->
 
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->
 ## Architecture
 
-Architecture not yet mapped. Follow existing patterns found in the codebase.
+Layered, modular C++ library. Foundational layers — `COMMON` (exceptions, `LogStream`, hash containers), `CONCEPT` (the core patterns), `DATATYPE`, `MATHS`, `SYSTEM` — sit under `KERNEL` (the molecular hierarchy: `System → Molecule → Residue → Chain → Atom → Bond`). Domain layers (`FORMAT`, `STRUCTURE`, `ENERGY`, `MOLMEC`, `NMR`, `SOLVATION`, `QSAR`, `DOCKING`, `SCORING`, `XRAY`) build on `KERNEL`. `VIEW` is the Qt/OpenGL rendering + GUI layer; `PYTHON` (SIP, currently disabled) sits on top. Code is split `include/BALL/<LAYER>/` + `source/<LAYER>/`.
+
+Two patterns dominate: **Composite** (`CONCEPT/composite.h`) — the structural tree, with `apply()` traversal — and **Processor / `UnaryProcessor<T>`** (`CONCEPT/processor.h`) — the visitor used for structure traversal, model building, and energy calculation, with `start()/operator()/finish()` and `CONTINUE/BREAK/ABORT` control flow.
+
+Rendering goes through a pluggable-backend abstraction: `ModelProcessor`s turn the molecular tree into primitives → `RenderSetup` batches them → `RendererFactory` picks a `Renderer` (`GLRenderer` for interactive, plus POV-Ray/raytracing/etc.) → draws into a `RenderWindow`/`RenderSurface` (the post-Phase-2 `GLRenderWindow` is a `QOpenGLWidget`). The `Renderer`/`RenderSurface` boundary (Phase 02.1, see `.planning/RENDERER-INTERFACE-BOUNDARY.md`) is the stable contract for the Phase 5 backend swap. Entry point: `source/APPLICATIONS/BALLVIEW/main.C` → `MainFrame` → `Scene` widget.
+
+Full detail: `.planning/codebase/ARCHITECTURE.md`, `.planning/codebase/STRUCTURE.md`.
 <!-- GSD:architecture-end -->
 
 <!-- GSD:skills-start source:skills/ -->
