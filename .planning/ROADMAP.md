@@ -94,7 +94,10 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   1. The codebase compiles cleanly with C++17 and the C++14 bridge flag is gone
   2. No occurrences of `std::unary_function`, `binary_function`, `bind2nd`, `bind1st`, `ptr_fun`, `auto_ptr`, or `mem_fun` remain across the 7 known files
   3. The C++ standard is configured via `CMAKE_CXX_STANDARD`/`target_compile_features`, with no raw `-std=` flags
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 03-01-PLAN.md — Rewrite the 7 C++17-removed STL construct sites as lambdas / dropped base classes (LANG-02)
+- [ ] 03-02-PLAN.md — Bump CMAKE_CXX_STANDARD to 17, delete raw -std= flags and the blanket -Wno-deprecated-declarations (LANG-03)
+- [ ] 03-03-PLAN.md — C++17 build-and-fix loop + drive all 3 CI platforms green on the C++17 commit (LANG-01)
 
 ### Phase 4: Dependency System Overhaul
 **Goal**: All dependencies come from current, supported sources (Homebrew/system on macOS/Linux, vcpkg on Windows) with `ball_contrib` fully removed from the build path, stable per-platform CMake presets, and an explicit feature matrix.
@@ -174,7 +177,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 | 2. Rendering Port (4a) | 4/4 | Complete — human-verified on macOS (RENDER-08 Linux/Windows carry-forward) | 2026-05-14 |
 | 02.1 Renderer boundary extraction | 3/3 | Complete    | 2026-05-14 |
 | 02.2 CI and build-smoke matrix | 2/2 | Complete    | 2026-05-14 |
-| 3. Language Modernization | 0/0 | Not started | - |
+| 3. Language Modernization | 0/3 | Planned | - |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
 | 5. Qt 6 Migration (4b) | 0/0 | Not started | - |
 | 05.1 Renderer backend decision spike | 0/0 | Not planned (inserted — Codex review) | - |
