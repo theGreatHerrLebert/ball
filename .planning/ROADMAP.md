@@ -150,5 +150,24 @@ Plans:
 | 9. CI & Tests | 0/0 | Not started | - |
 
 ---
+
+## Backlog
+
+### Phase 999.1: BALLView UI maintainer open-questions (BACKLOG)
+
+**Goal:** Get BALL maintainer decisions on 4 UI questions from the Claude Design Handover package — long lead time, raise before Milestone 2 ("BALLView Refresh", SEED-001) reaches its Inspector phase.
+**Questions:**
+  1. macOS menu bar — keep inline, or use the native global menubar via `QAction::setMenuRole`?
+  2. Legacy 5-dock "Classic" workspace — keep as a long-term opt-in preset, or retire after one release?
+  3. Theme picker — ship one neutral theme, or Light/Dark/Follow-System? (handover recommends Follow-System)
+  4. Translation churn — the menu re-org invalidates ~40% of `BALLView-de_DE.ts`; plan a community translation round.
+**Requirements:** TBD
+**Plans:** 0 plans
+**Reference:** `.planning/DESIGN-HANDOVER-INTEGRATION.md`, `.planning/seeds/SEED-001-ballview-refresh-ui-milestone.md`
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
+---
 *Roadmap created: 2026-05-14*
 *Mirrors `/Users/kohlbach/Claude/BALL/ROADMAP-1.6.md` (phases 1, 2, 3, 4a, 4b, 5, 6, 7, 8)*
