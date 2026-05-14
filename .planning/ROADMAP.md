@@ -110,7 +110,11 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   4. Minimum dependency versions are pinned in CMake and documented
   5. A `CMakePresets.json` provides stable configure presets for macOS-Homebrew, Linux-system, Windows-vcpkg, and CI — no more bespoke per-platform configure invocations
   6. A feature matrix (REQUIREMENTS.md) classifies every optional dependency (OpenBabel, TBB, LPSolve, WebEngine, …) as required / optional / removed / deferred, and states what each one's absence disables
-**Plans**: TBD
+**Plans**: 4 plans, 2 waves
+- [ ] 04-01-PLAN.md — Wave 1: config-mode finder migration (Eigen3/TBB/OpenBabel), ball_contrib de-referencing, min-version pinning (DEPS-01/03/04)
+- [ ] 04-02-PLAN.md — Wave 1: CMakePresets.json (4 presets) + CI/BUILD-macos.md preset migration + FEAT-01 feature matrix annotation (DEPS-05/FEAT-01)
+- [ ] 04-03-PLAN.md — Wave 2: OpenBabel 2.x→3.x API port across the 5-file surface + CI exercises it + chemistry smoke check (D-05)
+- [ ] 04-04-PLAN.md — Wave 2: vcpkg.json manifest + Windows CI provisioning to required-green (DEPS-02)
 
 ### Phase 4.1: Config Color-Defaults Fix (PROMOTED from backlog 999.4)
 
@@ -183,7 +187,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 | 02.1 Renderer boundary extraction | 3/3 | Complete    | 2026-05-14 |
 | 02.2 CI and build-smoke matrix | 2/2 | Complete    | 2026-05-14 |
 | 3. Language Modernization | 3/3 | Complete   | 2026-05-14 |
-| 4. Dependency System Overhaul | 0/0 | Not started | - |
+| 4. Dependency System Overhaul | 0/4 | Planned (4 plans, 2 waves) | - |
 | 4.1 Config Color-Defaults Fix | 0/0 | Not started (promoted from backlog 999.4) | - |
 | 5. Qt 6 Migration (4b) + Renderer Backend Spike | 0/0 | Not started (former Phase 05.1 folded in) | - |
 | 6. Python Bindings | 0/0 | Not started | - |
