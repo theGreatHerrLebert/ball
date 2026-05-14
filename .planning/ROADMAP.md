@@ -96,7 +96,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   3. The C++ standard is configured via `CMAKE_CXX_STANDARD`/`target_compile_features`, with no raw `-std=` flags
 **Plans**: 3 plans
 - [x] 03-01-PLAN.md — Rewrite the 7 C++17-removed STL construct sites as lambdas / dropped base classes (LANG-02)
-- [ ] 03-02-PLAN.md — Bump CMAKE_CXX_STANDARD to 17, delete raw -std= flags and the blanket -Wno-deprecated-declarations (LANG-03)
+- [x] 03-02-PLAN.md — Bump CMAKE_CXX_STANDARD to 17, delete raw -std= flags and the blanket -Wno-deprecated-declarations (LANG-03)
 - [ ] 03-03-PLAN.md — C++17 build-and-fix loop + drive all 3 CI platforms green on the C++17 commit (LANG-01)
 
 ### Phase 4: Dependency System Overhaul
@@ -177,7 +177,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 | 2. Rendering Port (4a) | 4/4 | Complete — human-verified on macOS (RENDER-08 Linux/Windows carry-forward) | 2026-05-14 |
 | 02.1 Renderer boundary extraction | 3/3 | Complete    | 2026-05-14 |
 | 02.2 CI and build-smoke matrix | 2/2 | Complete    | 2026-05-14 |
-| 3. Language Modernization | 0/3 | Planned | - |
+| 3. Language Modernization | 2/3 | In Progress|  |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
 | 5. Qt 6 Migration (4b) | 0/0 | Not started | - |
 | 05.1 Renderer backend decision spike | 0/0 | Not planned (inserted — Codex review) | - |
@@ -199,7 +199,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   3. Theme picker — ship one neutral theme, or Light/Dark/Follow-System? (handover recommends Follow-System)
   4. Translation churn — the menu re-org invalidates ~40% of `BALLView-de_DE.ts`; plan a community translation round.
 **Requirements:** TBD
-**Plans:** 2/2 plans complete
+**Plans:** 2/3 plans executed
 **Reference:** `.planning/DESIGN-HANDOVER-INTEGRATION.md`, `.planning/seeds/SEED-001-ballview-refresh-ui-milestone.md`
 
 Plans:

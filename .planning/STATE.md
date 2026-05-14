@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md (LANG-02 STL construct removal)
-last_updated: "2026-05-14T13:15:21.112Z"
+stopped_at: Completed 03-02-PLAN.md (LANG-03 CMake C++17 configuration)
+last_updated: "2026-05-14T13:18:12.773Z"
 progress:
   total_phases: 17
   completed_phases: 4
   total_plans: 13
-  completed_plans: 11
-  percent: 85
+  completed_plans: 12
+  percent: 92
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -28,7 +28,7 @@ Plan: 1 of 3
 **Phase:** 3 — Language Modernization
 **Plan:** Not started
 **Status:** Executing Phase 03
-**Progress:** [█████████░] 85%
+**Progress:** [█████████░] 92%
 
 ```
 Phase 1     [x]  Build Baseline
@@ -62,6 +62,7 @@ tool's decimal-phase bug; 05.1 depends on Phase 5. The real next phase is **Phas
 | Phase 02.2-ci-and-build-smoke-matrix P01 | 25min | 2 tasks | 3 files |
 | Phase 02.2-ci-and-build-smoke-matrix P02 | ~3h (incl. 2 CI bring-up iterations) | 3 tasks | 4 files |
 | Phase 03-language-modernization P01 | 83 | 3 tasks | 7 files |
+| Phase 03 P02 | 5min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,7 @@ tool's decimal-phase bug; 05.1 depends on Phase 5. The real next phase is **Phas
 - [Phase 02.2]: COMPLETE — CI run 25859952862 (`1959d9b`) all 4 jobs green: build macos/linux/windows + lint. Render-smoke ran & passed on macOS AND Linux (BALLView headless-rendered a non-blank PNG on each) — real cross-platform render validation, substantially de-risks RENDER-08. Even Windows built clean (non-blocking; closer to "required" than expected).
 - [Phase 03-language-modernization]: D-01: Dropped unary_function/binary_function base inheritance entirely — no typedef hand-rolling per LANG-02 D-01
 - [Phase 03-language-modernization]: D-02: Rewrote all adapter call sites (bind2nd/mem_fun/mem_fun_ref/not1) as lambdas in 3 files; LANG-02 grep gate passes
+- [Phase 03]: D-03/D-04/D-05/D-06: CMAKE_CXX_STANDARD 17 global; both raw -std= lines and stale C++14-bridge comment deleted; CMAKE_CXX_EXTENSIONS OFF retained; blanket -Wno-deprecated-declarations removed
 
 ### Roadmap Evolution
 
@@ -109,7 +111,7 @@ tool's decimal-phase bug; 05.1 depends on Phase 5. The real next phase is **Phas
 
 **Last action:** Phase 02.2 (CI and build-smoke matrix) marked COMPLETE — gsd-verifier passed 10/10, `phase complete 02.2` run. CI run 25859952862 (`1959d9b`) is fully green (build macos/linux/windows + lint); render-smoke ran & passed on macOS and Linux. Pushed branch `v1.6-modernization` is at `1959d9b`.
 
-**Stopped at:** Completed 03-01-PLAN.md (LANG-02 STL construct removal)
+**Stopped at:** Completed 03-02-PLAN.md (LANG-03 CMake C++17 configuration)
 
 **Next action:** Phase 3 — Language Modernization (`/gsd-discuss-phase 3` or `/gsd-plan-phase 3`). Move the codebase to C++17, remove C++17-removed constructs (`std::unary_function`/`bind2nd`/etc. across the 7 known files), and bump `CMAKE_CXX_STANDARD` 14→17 (the mechanism is already in CMakeLists.txt from the Phase 02.2 CI fix — Phase 3 just bumps the value and removes the legacy raw `-std=` lines from `BALLCompilerSpecific.cmake`). CI (Phase 02.2) is now the regression net for this work.
 
