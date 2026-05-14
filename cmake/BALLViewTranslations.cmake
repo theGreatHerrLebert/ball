@@ -1,5 +1,10 @@
+# Skip translation handling when Qt5LinguistTools is unavailable. RETURN()
+# takes no positional argument — RETURN(0) errors on CMake >= 3.25 unless
+# CMP0140 is OLD. This branch was previously never exercised because every
+# CI/dev environment shipped Qt5LinguistTools; the Windows vcpkg build does
+# not (qt5-tools is not in the manifest), which surfaced the bug.
 IF(NOT Qt5LinguistTools_FOUND)
-	RETURN (0)
+	RETURN()
 ENDIF()
 
 
