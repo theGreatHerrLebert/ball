@@ -109,25 +109,15 @@ jobs:
       - name: Configure (macOS)
         if: matrix.os == 'macos-arm64'
         run: |
-          # D-07: verbatim BUILD-macos.md configure. bison/flex are keg-only so
-          # their bin dirs go on PATH; ccache is wired via the launcher vars.
-          mkdir -p build && cd build
-          export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:$PATH"
-          cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-            -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;/opt/homebrew" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBISON_EXECUTABLE=/opt/homebrew/opt/bison/bin/bison \
-            -DFLEX_EXECUTABLE=/opt/homebrew/opt/flex/bin/flex \
-            -DBALL_PYTHON_SUPPORT=OFF -DUSE_RTFACT=OFF -DBALL_HAS_VIEW=ON \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          # D-07: preset is the single source of truth — mirrors BUILD-macos.md.
+          # bison/flex executable paths are embedded in the ci-macos preset.
+          cmake --preset ci-macos
 
       - name: Build (macOS)
         if: matrix.os == 'macos-arm64'
         run: |
           # D-07: the BUILD-macos.md target set, Release.
-          cd build
-          make BALL VIEW BALLView -j$(sysctl -n hw.ncpu)
+          cmake --build --preset ci-macos --target BALL VIEW BALLView -j$(sysctl -n hw.ncpu)
 
       # ======================================================================
       # Linux — apt deps + the BUILD-macos.md flow adapted to Linux paths.
@@ -164,25 +154,16 @@ jobs:
       - name: Configure (Linux)
         if: matrix.os == 'linux-x64'
         run: |
-          # D-07: same configure shape as macOS, Linux paths. No Homebrew
-          # CMAKE_PREFIX_PATH (apt installs into the system prefix); bison/flex
-          # come from /usr/bin. ccache wired via the launcher vars.
-          mkdir -p build && cd build
-          cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBISON_EXECUTABLE=/usr/bin/bison \
-            -DFLEX_EXECUTABLE=/usr/bin/flex \
-            -DBALL_PYTHON_SUPPORT=OFF -DUSE_RTFACT=OFF -DBALL_HAS_VIEW=ON \
-            -DUSE_LPSOLVE=OFF \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          # D-07: preset is the single source of truth for Linux paths.
+          # bison/flex at /usr/bin, USE_LPSOLVE=OFF (non-PIC liblpsolve55.a),
+          # ccache, and BALL_HAS_OPENBABEL=ON are all set by ci-linux preset.
+          cmake --preset ci-linux
 
       - name: Build (Linux)
         if: matrix.os == 'linux-x64'
         run: |
           # D-07: the BUILD-macos.md target set, Release.
-          cd build
-          make BALL VIEW BALLView -j$(nproc)
+          cmake --build --preset ci-linux --target BALL VIEW BALLView -j$(nproc)
 
       # ======================================================================
       # Windows — NON-BLOCKING best-effort placeholder (D-03).
@@ -212,10 +193,10 @@ jobs:
       - name: Render smoke check (macOS — native)
         if: matrix.smoke && matrix.os == 'macos-arm64'
         run: |
-          # Plan 01 script: autodetects the built BALLView, drives the existing
-          # Scene::exportPNG() path headless, asserts a non-blank PNG + the
-          # DIAG-01 BALLVIEW_GL_DIAG oracle line. No runner prefix on macOS.
-          bash .planning/phases/02.2-ci-and-build-smoke-matrix/scripts/render-smoke-check.sh
+          # Preset puts the binary at build/ci-macos/; pass explicitly so the
+          # script's autodetect (which looks in build/bin/) is not needed.
+          bash .planning/phases/02.2-ci-and-build-smoke-matrix/scripts/render-smoke-check.sh \
+            build/ci-macos/bin/BALLView.app/Contents/MacOS/BALLView
 
       - name: Render smoke check (Linux — xvfb + software Mesa)
         if: matrix.smoke && matrix.os == 'linux-x64'
@@ -226,7 +207,10 @@ jobs:
           # Plan 01 script honors this prefix; it does not hardcode xvfb.
           BALLVIEW_SMOKE_RUNNER: xvfb-run -a
         run: |
-          bash .planning/phases/02.2-ci-and-build-smoke-matrix/scripts/render-smoke-check.sh
+          # Preset puts the binary at build/ci-linux/; pass explicitly so the
+          # script's autodetect (which looks in build/bin/) is not needed.
+          bash .planning/phases/02.2-ci-and-build-smoke-matrix/scripts/render-smoke-check.sh \
+            build/ci-linux/bin/BALLView
 
       # On a smoke-check failure, upload the (blank) PNG + captured BALLView log
       # so the failure can be debugged without re-running CI. The Plan 01 script

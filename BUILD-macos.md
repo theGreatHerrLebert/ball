@@ -18,49 +18,71 @@ Install the required libraries and build tools with Homebrew:
 brew install qt@5 boost eigen fftw tbb glew open-babel lp_solve libsvm flex bison
 ```
 
-`bison` and `flex` are keg-only, so their `bin` directories must be put
-on `PATH` before configuring (see below).
+`bison` and `flex` are keg-only. Their `bin` directories must be put on
+`PATH` when using the manual configure command below. With the preset
+invocation the executable paths are set via `BISON_EXECUTABLE`/
+`FLEX_EXECUTABLE` cache variables, so the `export PATH=...` step is
+optional.
 
 ## Configure
 
-Create a build directory, put the keg-only `bison`/`flex` on `PATH`,
-and run CMake:
+Use the named preset:
 
 ```sh
-mkdir -p build && cd build
-export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:$PATH"
-cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-  -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;/opt/homebrew" \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DBISON_EXECUTABLE=/opt/homebrew/opt/bison/bin/bison \
-  -DFLEX_EXECUTABLE=/opt/homebrew/opt/flex/bin/flex \
-  -DBALL_PYTHON_SUPPORT=OFF -DUSE_RTFACT=OFF -DBALL_HAS_VIEW=ON
+cmake --preset macos-homebrew
 ```
+
+This configures into `build/macos-homebrew/` and sets `CMAKE_BUILD_TYPE`,
+`CMAKE_PREFIX_PATH`, `BISON_EXECUTABLE`, `FLEX_EXECUTABLE`, and the other
+required cache variables automatically (see `CMakePresets.json`).
 
 ## Build
 
-From the `build` directory, build the three targets:
-
 ```sh
-make BALL VIEW BALLView -j8
+cmake --build --preset macos-homebrew --target BALL VIEW BALLView
 ```
 
 ## Run
 
-Launch BALLView from the `build` directory, pointing the data-path
+Launch BALLView from the build directory, pointing the data-path
 environment variables at the source `data/` tree and the dynamic
 linker at the freshly built libraries:
 
 ```sh
-BALL_DATA_PATH=$PWD/../data BALLVIEW_DATA_PATH=$PWD/../data DYLD_LIBRARY_PATH=$PWD/lib bin/BALLView.app/Contents/MacOS/BALLView
+BALL_DATA_PATH=$PWD/data BALLVIEW_DATA_PATH=$PWD/data \
+  DYLD_LIBRARY_PATH=$PWD/build/macos-homebrew/lib \
+  build/macos-homebrew/bin/BALLView.app/Contents/MacOS/BALLView
 ```
+
+## Build presets
+
+`CMakePresets.json` (repo root) provides four named configure/build presets:
+
+| Preset | Platform | Use case |
+|--------|----------|----------|
+| `macos-homebrew` | macOS / Homebrew | Local contributor builds on macOS |
+| `linux-system` | Linux / system packages | Local contributor builds on Linux |
+| `windows-vcpkg` | Windows / vcpkg | Local contributor builds on Windows (requires `VCPKG_ROOT`) |
+| `ci-macos` / `ci-linux` / `ci-windows` | CI runners | GitHub Actions matrix jobs |
+
+The `ci-*` family (`ci-macos`, `ci-linux`, `ci-windows`) collectively satisfies
+D-07's fourth named preset ("ci"). A single `ci` preset cannot carry
+per-platform cache variables (compiler launchers, toolchain file), so it is
+split per-platform — see RESEARCH Open Question 2. The `ci-*` presets also
+enable ccache and set `BALL_HAS_OPENBABEL=ON` on macOS/Linux (the single
+source of truth for that flag — Plan 03 adds the smoke step, not this cache
+variable).
+
+All presets use `"binaryDir": "${sourceDir}/build/${presetName}"`, so the
+build tree is always `build/<preset-name>/`. Debug variants can be added as
+`*-debug` presets that inherit the release one and override `CMAKE_BUILD_TYPE`
+without rewriting anything (D-07).
 
 ## Notes
 
 - `ball_contrib` is NOT used and should not be revived — the build
   relies entirely on Homebrew/system packages.
 - Python bindings (`BALL_PYTHON_SUPPORT=OFF`), the RTfact raytracer
-  (`USE_RTFACT=OFF`), OpenBabel, and TBB are currently disabled or not
-  load-bearing; none of them block the build.
-- `CMAKE_POLICY_VERSION_MINIMUM=3.5` is required so CMake 3.31 accepts
-  the project's historical minimum policy version.
+  (`USE_RTFACT=OFF`), and VRPN/SpaceNavigator are disabled.
+- `CMAKE_POLICY_VERSION_MINIMUM=3.5` (set by the preset) is required so
+  CMake 3.21+ accepts the project's historical minimum policy version.
