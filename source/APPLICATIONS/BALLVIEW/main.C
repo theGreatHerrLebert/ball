@@ -6,10 +6,13 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMessageBox>
 #include <QtCore/QTranslator>
+#include <QtCore/QCoreApplication>
+#include <QtGui/QSurfaceFormat>
 
 #include "mainframe.h"
 #include <BALL/SYSTEM/path.h>
 #include <BALL/SYSTEM/directory.h>
+#include <BALL/VIEW/RENDERING/glRenderWindow.h>
 
 void logMessages(QtMsgType type, const QMessageLogContext& context, const QString& message)
 {
@@ -54,8 +57,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR cmd_line, int)
 
 	qInstallMessageHandler(logMessages);
 
-	// *sigh* this is required as long as Qt does not correctly paint on OpenGL 2 contexts
-	//QGL::setPreferredPaintEngine(QPaintEngine::OpenGL);
+	// QOpenGLWidget: all GL contexts must share (display lists / textures across
+	// multiple scene windows) and inherit the compatibility-profile 2.1 format.
+	// Both must be set BEFORE the QApplication is constructed.
+	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+	QSurfaceFormat::setDefaultFormat(BALL::VIEW::GLRenderWindow::gl_format_);
 
 	QApplication application(argc, argv);
 
@@ -77,13 +83,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR cmd_line, int)
 	}
 
 	// =============== testing for opengl support ======================================
-	if (!QGLFormat::hasOpenGL())
-	{
-		QMessageBox::critical(0, "Error while starting BALLView", 
-				"Your computer has no OpenGL support, please install the correct drivers. Aborting for now...",
-				QMessageBox::Ok, Qt::NoButton, Qt::NoButton);
-		return -1;
-	}
+	// QGLFormat::hasOpenGL() is removed with QGLWidget. QOpenGLWidget negotiates the
+	// context itself and reports failure at widget-creation time; an early static probe
+	// is no longer available nor necessary.
 
 	BALL::String home_dir = BALL::Directory::getUserHomeDir();
 

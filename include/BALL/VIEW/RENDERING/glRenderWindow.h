@@ -25,7 +25,8 @@
 # include <BALL/SYSTEM/mutex.h>
 #endif
 
-#include <QtOpenGL/qgl.h>
+#include <QtWidgets/QOpenGLWidget>
+#include <QtGui/QSurfaceFormat>
 
 namespace BALL
 {
@@ -34,9 +35,9 @@ namespace BALL
 		/**
 		 * Model of the \link RenderWindow \endlink which uses OpenGL to render its buffer to the screen
 		 */
-		class BALL_VIEW_EXPORT GLRenderWindow 
+		class BALL_VIEW_EXPORT GLRenderWindow
 			: public RenderWindow,
-				public QGLWidget
+				public QOpenGLWidget
 		{
 			
 		public:
@@ -93,8 +94,12 @@ namespace BALL
 			 */
 			virtual void customEvent(QEvent* evt);
 
-			void paintEvent(QPaintEvent* e);
-			static QGLFormat gl_format_;
+			/* QOpenGLWidget overrides — GL work runs here on the GUI thread */
+			virtual void initializeGL() override;
+			virtual void resizeGL(int w, int h) override;
+			virtual void paintGL() override;
+
+			static QSurfaceFormat gl_format_;
 
 			// ID of the fullscreen texture used to paste image into GPU framebuffer            
 			GLuint m_screenTexID;

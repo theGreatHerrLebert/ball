@@ -23,25 +23,33 @@ namespace BALL
 {
 	namespace VIEW 
 	{
-	  QGLFormat GLRenderWindow::gl_format_(
-				QGL::DepthBuffer 		 | 
+	  // QGLWidget gave a 2.1 compatibility context by default; QOpenGLWidget does not.
+	  // CompatibilityProfile + version 2.1 is required to keep glRenderer.C's ~100
+	  // fixed-function GL calls (glBegin/glMatrixMode/gluLookAt/...) working on macOS.
+	  QSurfaceFormat GLRenderWindow::gl_format_ = [] {
+				QSurfaceFormat fmt;
+				fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
+				fmt.setVersion(2, 1);                              // fixed-function pipeline
+				fmt.setDepthBufferSize(24);                        // QGL::DepthBuffer
+				fmt.setStencilBufferSize(8);                       // QGL::StencilBuffer
+				fmt.setSwapBehavior(QSurfaceFormat::DoubleBuffer);  // QGL::DoubleBuffer
+				fmt.setSamples(4);                                 // QGL::SampleBuffers
 #ifndef BALL_OS_DARWIN
 	/*
-	 * StereoBuffers on Linux/X11 are broken in QGLWidget 5.7.0 and 5.7.1
+	 * StereoBuffers on Linux/X11 are broken in 5.7.0 and 5.7.1
 	 * https://github.com/BALL-Project/ball/issues/630
 	 */
 #	if !defined(BALL_OS_LINUX) || QT_VERSION < QT_VERSION_CHECK(5, 7, 0) || QT_VERSION > QT_VERSION_CHECK(5, 7, 1)
-				QGL::StereoBuffers 	 |
+				fmt.setStereo(true);                               // QGL::StereoBuffers
 #	endif
 #endif
-				QGL::DoubleBuffer 	 | 
-				QGL::DirectRendering |
-				QGL::SampleBuffers   |
-				QGL::StencilBuffer);
+				// QGL::DirectRendering has no QSurfaceFormat equivalent — dropped (default behaviour)
+				return fmt;
+			}();
 
 
 		GLRenderWindow::GLRenderWindow()
-			: QGLWidget(gl_format_),
+			: QOpenGLWidget(),
 			  stereo_delta_(0.f),
 			  m_screenTexID(0),
 			  FB_TEXTURE_TARGET(GL_TEXTURE_2D),
@@ -50,14 +58,14 @@ namespace BALL
 			  FB_TEXTURE_DATATYPE(GL_FLOAT),
 			  ignore_events_(false),
 			  down_sampling_factor_(1.f)
-		{		
-			// we will swap buffers manually in the scene for synchronization
-			setAutoBufferSwap(false);
+		{
+			setFormat(gl_format_);          // must precede first show
 			setAutoFillBackground(false);
+			// QOpenGLWidget swaps buffers automatically after paintGL()
 		}
 
 		GLRenderWindow::GLRenderWindow(QWidget* parent_widget, const char* /*name*/, Qt::WindowFlags w_flags)
-			: QGLWidget(gl_format_, parent_widget, nullptr, w_flags),
+			: QOpenGLWidget(parent_widget, w_flags),
 			  stereo_delta_(0.f),
 			  m_screenTexID(0),
 			  FB_TEXTURE_TARGET(GL_TEXTURE_2D),
@@ -67,17 +75,13 @@ namespace BALL
 			  ignore_events_(false),
 			  down_sampling_factor_(1)
 		{
-			if (!QGLWidget::isValid())
-			{
-				Log.error() << "QGLWidget is not valid in Scene!" << std::endl;
-			}
-			// we will swap buffers manually in the scene for synchronization
-			setAutoBufferSwap(false);
+			setFormat(gl_format_);          // must precede first show
 			setAutoFillBackground(false);
+			// QOpenGLWidget swaps buffers automatically after paintGL()
 		}
 
-		GLRenderWindow::GLRenderWindow(const GLRenderWindow& window, QWidget* parent_widget, const char* /*name*/, Qt::WindowFlags w_flags)
-			: QGLWidget(gl_format_, parent_widget, &window, w_flags),
+		GLRenderWindow::GLRenderWindow(const GLRenderWindow& /*window*/, QWidget* parent_widget, const char* /*name*/, Qt::WindowFlags w_flags)
+			: QOpenGLWidget(parent_widget, w_flags),
 			  stereo_delta_(0.f),
 			  m_screenTexID(0),
 			  FB_TEXTURE_TARGET(GL_TEXTURE_2D),
@@ -87,9 +91,11 @@ namespace BALL
 			  ignore_events_(false),
 			  down_sampling_factor_(1.f)
 		{
-			// we will swap buffers manually in the scene for synchronization
-			setAutoBufferSwap(false);
+			// Context sharing is established globally via Qt::AA_ShareOpenGLContexts
+			// in BALLView main() — no per-widget share context constructor exists.
+			setFormat(gl_format_);          // must precede first show
 			setAutoFillBackground(false);
+			// QOpenGLWidget swaps buffers automatically after paintGL()
 		}
 
 		GLRenderWindow::~GLRenderWindow()
@@ -101,9 +107,7 @@ namespace BALL
 		{
 			checkGL();
 
-			// TODO: is this necessary?
-			if (!format().rgba())
-				Log.error() << "No RGBA mode for OpenGl available." << std::endl;
+			// QSurfaceFormat has no rgba() query — RGBA is always implied.
 
 			RenderWindow::init();
 			bool result = false;
@@ -138,7 +142,7 @@ namespace BALL
 			}
 			createTexture((int)ceil(width/down_sampling_factor_), (int)ceil(height/down_sampling_factor_));
 
-			QGLWidget::resize(width, height);
+			QOpenGLWidget::resize(width, height);
 
 			return true;
 		}						
