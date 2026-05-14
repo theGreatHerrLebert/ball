@@ -15,7 +15,11 @@
 #include <BALL/STRUCTURE/molecularSimilarity.h>
 #include <BALL/FORMAT/PDBFile.h>
 #include <BALL/STRUCTURE/fragmentDB.h>
+// OpenBabel 3.x: mol.h no longer includes atom.h/bond.h/obiter.h transitively.
 #include <openbabel/mol.h>
+#include <openbabel/atom.h>
+#include <openbabel/bond.h>
+#include <openbabel/obiter.h>
 #include <openbabel/obconversion.h>
 #include "version.h"
 
