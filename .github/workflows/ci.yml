@@ -111,7 +111,11 @@ jobs:
         run: |
           # D-07: preset is the single source of truth — mirrors BUILD-macos.md.
           # bison/flex executable paths are embedded in the ci-macos preset.
-          cmake --preset ci-macos
+          # -DBALL_LICENSE=GPL: OpenBabel is GPL-gated (maintainer decision, Plan 04-01).
+          # BALL_HAS_OPENBABEL=ON is already in the ci-macos preset's cacheVariables
+          # (Plan 04-02) — the -DBALL_LICENSE=GPL flag is what actually enables the
+          # GPL-block FIND_PACKAGE(OpenBabel3) call in CMakeLists.txt (Plan 04-03).
+          cmake --preset ci-macos -DBALL_LICENSE=GPL
 
       - name: Build (macOS)
         if: matrix.os == 'macos-arm64'
@@ -157,7 +161,8 @@ jobs:
           # D-07: preset is the single source of truth for Linux paths.
           # bison/flex at /usr/bin, USE_LPSOLVE=OFF (non-PIC liblpsolve55.a),
           # ccache, and BALL_HAS_OPENBABEL=ON are all set by ci-linux preset.
-          cmake --preset ci-linux
+          # -DBALL_LICENSE=GPL: OpenBabel is GPL-gated (maintainer decision, Plan 04-01).
+          cmake --preset ci-linux -DBALL_LICENSE=GPL
 
       - name: Build (Linux)
         if: matrix.os == 'linux-x64'
@@ -223,6 +228,37 @@ jobs:
           path: |
             ${{ runner.temp }}/ballview-smoke.*
             /tmp/ballview-smoke.*
+          if-no-files-found: ignore
+          retention-days: 7
+
+      # ======================================================================
+      # OpenBabel smoke check (D-05) — macOS + Linux only (matrix.smoke).
+      # Windows has OpenBabel OFF (not a vcpkg port) so this step is skipped
+      # for windows-x64. The script compiles the standalone driver against
+      # libBALL and asserts: (1) non-empty SMILES, (2) determinism, (3)
+      # aromaticity-correct canonical SMILES via OBConversion round-trip.
+      # Plan 04-03 (openbabel-smoke.C + openbabel-smoke.sh).
+      # ======================================================================
+      - name: OpenBabel smoke check (macOS)
+        if: matrix.smoke && matrix.os == 'macos-arm64'
+        run: |
+          bash .planning/phases/04-dependency-system-overhaul/scripts/openbabel-smoke.sh \
+            build/ci-macos 2>&1 | tee /tmp/04-03-smoke.log
+          grep -q OPENBABEL_SMOKE_OK /tmp/04-03-smoke.log
+
+      - name: OpenBabel smoke check (Linux)
+        if: matrix.smoke && matrix.os == 'linux-x64'
+        run: |
+          bash .planning/phases/04-dependency-system-overhaul/scripts/openbabel-smoke.sh \
+            build/ci-linux 2>&1 | tee /tmp/04-03-smoke.log
+          grep -q OPENBABEL_SMOKE_OK /tmp/04-03-smoke.log
+
+      - name: Upload openbabel-smoke artifacts on failure
+        if: failure() && matrix.smoke
+        uses: actions/upload-artifact@v4
+        with:
+          name: openbabel-smoke-${{ matrix.os }}
+          path: /tmp/04-03-smoke.log
           if-no-files-found: ignore
           retention-days: 7
 
