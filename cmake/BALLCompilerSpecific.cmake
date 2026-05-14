@@ -126,7 +126,10 @@ ELSEIF(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang") # matches Clang and AppleClang
 
 	SET(CXX_COMPILER_VERSION "${CXX_COMPILER_VERSION_MAJOR}.${CXX_COMPILER_VERSION_MINOR}")
 
-	SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -std=c++11")
+	# BALL's legacy code still uses std::unary_function/binary_function/bind2nd
+	# etc. which were removed in C++17. Build as C++14 (where they are merely
+	# deprecated) until the codebase is modernised for the 1.6 release.
+	SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -std=c++14")
 
 	IF(USE_ASAN)
 		SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -fsanitize=address -fno-omit-frame-pointer")

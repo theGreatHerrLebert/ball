@@ -33,7 +33,7 @@ ADD_CUSTOM_TARGET(translations DEPENDS ${PROJECT_QM_FILES})
 # Copy compiled .qm files into translations directory
 # Copying multiple files with a single 'cmake -E copy' works from CMake 3.5+
 FOREACH(PROJECT_QM_FILE ${PROJECT_QM_FILES})
-	ADD_CUSTOM_COMMAND(TARGET translations
+	ADD_CUSTOM_COMMAND(TARGET translations POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_QM_FILE} ${TRANSLATION_DIR}
 		)
 ENDFOREACH()
