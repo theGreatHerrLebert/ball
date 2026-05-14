@@ -48,8 +48,12 @@ INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/include")
 INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/include")
 
 # Handling user specified path to ball_contrib installation (-DBALL_CONTRIB_PATH)
-# TODO: Get rid of BALL_CONTRIB_PATH when globally refactoring build system
-SET(BALL_CONTRIB_PATH "" CACHE PATH "Path to the ball_contrib installation directory (optional)")
+# NOTE (BALL >= 1.6): ball_contrib is OBSOLETE on macOS and Linux. Build against
+# system / Homebrew packages instead (see BUILD-macos.md). BALL_CONTRIB_PATH is
+# retained only for legacy Windows builds until the vcpkg migration lands; it
+# should not be set on macOS or Linux.
+# TODO: Remove BALL_CONTRIB_PATH entirely once the Windows vcpkg manifest exists.
+SET(BALL_CONTRIB_PATH "" CACHE PATH "Path to the ball_contrib installation directory (legacy Windows only; obsolete on macOS/Linux)")
 IF(BALL_CONTRIB_PATH)
 	# Add include directoy from user specified BALL_CONTRIB_PATH
 	INCLUDE_DIRECTORIES("${BALL_CONTRIB_PATH}/include")
