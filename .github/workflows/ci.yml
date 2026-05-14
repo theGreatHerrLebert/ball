@@ -209,12 +209,14 @@ jobs:
       - name: Configure (Windows)
         if: matrix.os == 'windows-x64'
         shell: pwsh
-        env:
+        run: |
           # GitHub windows-2022 runners ship vcpkg at C:\vcpkg but expose it as
           # VCPKG_INSTALLATION_ROOT, not VCPKG_ROOT. The windows-vcpkg preset's
-          # toolchainFile uses $env{VCPKG_ROOT}, so bridge the two here.
-          VCPKG_ROOT: ${{ env.VCPKG_INSTALLATION_ROOT }}
-        run: |
+          # toolchainFile uses $env{VCPKG_ROOT}, so bridge the two here. (The
+          # runner OS env var is not visible via the ${{ env.* }} context, so
+          # it must be read inside the shell.)
+          $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
+          Write-Host "VCPKG_ROOT=$env:VCPKG_ROOT"
           # D-07: ci-windows preset inherits windows-vcpkg (vcpkg toolchainFile,
           # VCPKG_TARGET_TRIPLET=x64-windows, USE_LPSOLVE=OFF, BALL_HAS_OPENBABEL=OFF,
           # ccache) and installs vcpkg.json deps at configure time.
