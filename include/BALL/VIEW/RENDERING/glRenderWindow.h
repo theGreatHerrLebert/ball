@@ -75,17 +75,20 @@ namespace BALL
 				{stereo_delta_ = delta;}
 			
 			void setupStereo(float eye_separation, float focal_length);
-			
-			/// Call swapBuffers() but first make sure the window is exposed
-			void safeBufferSwap();
 
 			/// Get the window's downsampling factor.
 			float getDownsamplingFactor() const
 				{return down_sampling_factor_;}
-			
+
 			float stereo_delta_;
 
-		protected:	
+			/** The shared GL surface format (compatibility profile, GL 2.1).
+			 *  Public so BALLView's main() can install it as the default surface
+			 *  format via QSurfaceFormat::setDefaultFormat() before QApplication.
+			 */
+			static QSurfaceFormat gl_format_;
+
+		protected:
 
 			/** This function handles custom Qt Events.
 			 *  
@@ -99,9 +102,7 @@ namespace BALL
 			virtual void resizeGL(int w, int h) override;
 			virtual void paintGL() override;
 
-			static QSurfaceFormat gl_format_;
-
-			// ID of the fullscreen texture used to paste image into GPU framebuffer            
+			// ID of the fullscreen texture used to paste image into GPU framebuffer
 			GLuint m_screenTexID;
 			// type of the texture used
 			GLenum FB_TEXTURE_TARGET;

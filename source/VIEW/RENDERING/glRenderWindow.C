@@ -13,8 +13,9 @@
 #include <BALL/VIEW/KERNEL/mainControl.h>
 
 #include <QtCore/QEvent>
-#include <QtGui/QPaintEvent>
 #include <QtGui/QWindow>
+#include <QtGui/QPainter>
+#include <QtGui/QFont>
 
 //#define USE_GLPAINTPIXELS
 #undef USE_GLPAINTPIXELS
@@ -23,27 +24,28 @@ namespace BALL
 {
 	namespace VIEW 
 	{
-	  // QGLWidget gave a 2.1 compatibility context by default; QOpenGLWidget does not.
-	  // CompatibilityProfile + version 2.1 is required to keep glRenderer.C's ~100
-	  // fixed-function GL calls (glBegin/glMatrixMode/gluLookAt/...) working on macOS.
+	  // The old Qt4-era GL widget gave a 2.1 compatibility context by default;
+	  // QOpenGLWidget does not. CompatibilityProfile + version 2.1 is required to
+	  // keep glRenderer.C's ~100 fixed-function GL calls (glBegin/glMatrixMode/
+	  // gluLookAt/...) working on macOS.
 	  QSurfaceFormat GLRenderWindow::gl_format_ = [] {
 				QSurfaceFormat fmt;
 				fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
 				fmt.setVersion(2, 1);                              // fixed-function pipeline
-				fmt.setDepthBufferSize(24);                        // QGL::DepthBuffer
-				fmt.setStencilBufferSize(8);                       // QGL::StencilBuffer
-				fmt.setSwapBehavior(QSurfaceFormat::DoubleBuffer);  // QGL::DoubleBuffer
-				fmt.setSamples(4);                                 // QGL::SampleBuffers
+				fmt.setDepthBufferSize(24);                        // was DepthBuffer
+				fmt.setStencilBufferSize(8);                       // was StencilBuffer
+				fmt.setSwapBehavior(QSurfaceFormat::DoubleBuffer);  // was DoubleBuffer
+				fmt.setSamples(4);                                 // was SampleBuffers
 #ifndef BALL_OS_DARWIN
 	/*
-	 * StereoBuffers on Linux/X11 are broken in 5.7.0 and 5.7.1
+	 * Stereo buffers on Linux/X11 are broken in 5.7.0 and 5.7.1
 	 * https://github.com/BALL-Project/ball/issues/630
 	 */
 #	if !defined(BALL_OS_LINUX) || QT_VERSION < QT_VERSION_CHECK(5, 7, 0) || QT_VERSION > QT_VERSION_CHECK(5, 7, 1)
-				fmt.setStereo(true);                               // QGL::StereoBuffers
+				fmt.setStereo(true);                               // was StereoBuffers
 #	endif
 #endif
-				// QGL::DirectRendering has no QSurfaceFormat equivalent — dropped (default behaviour)
+				// DirectRendering has no QSurfaceFormat equivalent — dropped (default behaviour)
 				return fmt;
 			}();
 
@@ -101,6 +103,37 @@ namespace BALL
 		GLRenderWindow::~GLRenderWindow()
 		{
 			deleteTexture();
+		}
+
+		void GLRenderWindow::initializeGL()
+		{
+			// QOpenGLWidget guarantees the context is current here, on the GUI thread.
+#ifdef BALL_HAS_GLEW
+			glewInit();
+#endif
+			checkGL();
+			// One-time texture setup happens in init()/resize(), which RenderSetup
+			// drives from the GUI-thread event handler once the buffer size is known.
+		}
+
+		void GLRenderWindow::resizeGL(int w, int h)
+		{
+			// The actual texture (re)allocation lives in GLRenderWindow::resize(),
+			// a RenderWindow virtual driven by RenderSetup. Keep the GL viewport in
+			// sync with the widget's framebuffer here; paintGL() sets its own
+			// viewport for the texture blit.
+			glViewport(0, 0, w, h);
+		}
+
+		void GLRenderWindow::paintGL()
+		{
+			// QOpenGLWidget guarantees: context current + defaultFramebufferObject()
+			// bound. It swaps the buffers automatically when this returns — no manual
+			// buffer-swap call is needed or possible.
+			if (ignore_events_) return;
+
+			// Blit the CPU pixel buffer (raytracer) / renderer output as a texture.
+			refresh();
 		}
 
 		bool GLRenderWindow::init()
@@ -231,36 +264,30 @@ namespace BALL
 
 		void GLRenderWindow::renderText(int x, int y, const String& text, const ColorRGBA& color, Size size)
 		{
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
-
-			glViewport(0, 0, m_fmt.getWidth(), m_fmt.getHeight());
-
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
+			// The old Qt4 GL widget's renderText() is gone in QOpenGLWidget — draw
+			// the on-screen text via a QPainter overlay on the widget instead (see
+			// Scene::renderText_ for the same pattern). Must be called from within
+			// paintGL()'s paint cycle, after the raw fixed-function GL was issued.
+			QPainter painter(this);
+			painter.setRenderHint(QPainter::TextAntialiasing, true);
+			painter.setPen(QColor(color.getRed(),   color.getGreen(),
+			                      color.getBlue(),  color.getAlpha()));
 
 			QFont font;
 			font.setPixelSize(size);
 			font.setBold(true);
+			painter.setFont(font);
 
-			glDisable(GL_LIGHTING);
-			glColor4ub(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
-			QGLWidget::renderText(x, y, text.c_str(), font);
-			glEnable(GL_LIGHTING);
+			painter.drawText(x, y, QString::fromStdString(text));
+			painter.end();
 		}
 
-		void GLRenderWindow::renderText(float x, float y, float z, const String& text, const ColorRGBA& color, Size size)
+		void GLRenderWindow::renderText(float /*x*/, float /*y*/, float /*z*/, const String& /*text*/, const ColorRGBA& /*color*/, Size /*size*/)
 		{
-			// TEST!
+			// 3D-coordinate overload was already a dead no-op before the port
+			// (early return). Kept as a stub; world-space text would require a
+			// manual gluProject + QPainter overlay if ever revived.
 			return;
-			QFont font;
-			font.setPixelSize(size);
-			font.setBold(true);
-
-			glDisable(GL_LIGHTING);
-			glColor4ub(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
-			QGLWidget::renderText(x, y, z, text.c_str(), font);
-			glEnable(GL_LIGHTING);
 		}
 
 		void GLRenderWindow::createTexture(const unsigned int width, const unsigned int height)
@@ -339,24 +366,22 @@ namespace BALL
 		{
 			switch(static_cast<EventsIDs>(evt->type())) {
 				case RENDER_TO_BUFFER_FINISHED_EVENT:
-					refresh();
-					safeBufferSwap();
+					// A worker thread finished a fresh CPU buffer — schedule a
+					// repaint. paintGL() does the actual blit on the GUI thread and
+					// QOpenGLWidget swaps automatically. No manual refresh()/swap here.
+					update();
 					break;
 				default:
 					break;
 			}
 		}
 
-		void GLRenderWindow::paintEvent(QPaintEvent* e)
-		{
-			if (!ignore_events_) 
-			{
-				QGLWidget::paintEvent(e);
-			}
-		}
-
 		void GLRenderWindow::lockGLContext()
 		{
+			// makeCurrent()/doneCurrent() on a QOpenGLWidget are GUI-thread-only:
+			// its context and default FBO are GUI-thread-affine. Any caller of these
+			// from a non-GUI thread is a bug — the worker (raytracer) is CPU-only and
+			// must not touch GL. Callers are audited in Plans 03/04.
 			contex_mutex_.lock();
 			makeCurrent();
 		}
@@ -376,14 +401,6 @@ namespace BALL
 				//http://local.wasp.uwa.edu.au/~pbourke/miscellaneous/stereographics/stereorender/
 				stereo_delta_ = (fabs(eye_separation) * width) / (focal_length * tan(Angle(aperture, false).toRadian())); 
 				std::cout << stereo_delta_ << std::endl;
-		}
-
-		void GLRenderWindow::safeBufferSwap()
-		{
-			if(isVisible() && getMainControl()->windowHandle()->isExposed())
-			{
-				swapBuffers();
-			}
 		}
 	} // namespace VIEW
 } //namespace BALL
