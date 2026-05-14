@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
 status: planning
-stopped_at: Completed 03-03-PLAN.md (C++17 build-and-fix loop, CI green D-08)
-last_updated: "2026-05-14T13:43:05.868Z"
+stopped_at: Phase 4 context gathered
+last_updated: "2026-05-14T14:17:22.109Z"
 progress:
-  total_phases: 16
+  total_phases: 17
   completed_phases: 5
   total_plans: 13
   completed_plans: 13
@@ -119,7 +119,7 @@ roadmap/STATE after any gsd-tools phase op.
 
 **Last action:** Phase 3 (Language Modernization) marked COMPLETE — all 3 plans executed, code review clean (0 critical / 1 pre-existing warning), gsd-verifier passed 3/3 must-haves, `phase complete 03` run. CI run 25862456769 (`446cf10`) is fully green (build macos/linux/windows + lint); render-smoke passed on macOS and Linux. Branch `v1.6-modernization` is at `446cf10` + planning-doc commits.
 
-**Stopped at:** Phase 3 complete, verified
+**Stopped at:** Phase 4 context gathered
 
 **Next action:** Phase 4 — Dependency System Overhaul (`/gsd-discuss-phase 4` or `/gsd-plan-phase 4`). Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix. CI (Phase 02.2) remains the regression net.
 
