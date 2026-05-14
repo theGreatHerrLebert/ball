@@ -182,16 +182,17 @@ IF(${BALL_LICENSE_GPL})
 	ENDIF()
 
 
-	# OpenBabel
-	FIND_PACKAGE(OpenBabel2)
-	IF(OPENBABEL2_FOUND)
-		SET(BALL_HAS_OPENBABEL TRUE)
-		INCLUDE_DIRECTORIES(${OPENBABEL2_INCLUDE_DIRS})
-		LIST(APPEND BALL_DEP_LIBRARIES ${OPENBABEL2_LIBRARIES})
-	ELSE()
-		MESSAGE("Could not find a OpenBabel2 installation. Skipping OpenBabel dependencies.")
-	ENDIF()
+ENDIF()
 
+# OpenBabel (optional dep — searched in default LGPL build; GPL gating removed per D-05).
+# NOTE: BALL_HAS_OPENBABEL is not enabled here; the C++ API port from 2.x to 3.x is
+# done in Plan 03. Once that port lands, this block sets BALL_HAS_OPENBABEL TRUE.
+FIND_PACKAGE(OpenBabel3 3.0 CONFIG)
+IF(OpenBabel3_FOUND)
+	# Port is Plan 03 — link and enable there; for now only detect.
+	MESSAGE(STATUS "Found OpenBabel ${OpenBabel3_VERSION} (config mode) — C++ port pending (Plan 03)")
+ELSE()
+	MESSAGE(STATUS "OpenBabel not found — molecular file-format conversion disabled (optional dependency)")
 ENDIF()
 
 
@@ -232,27 +233,17 @@ IF(REQUIRE_RTFACT)
 ENDIF()
 
 IF(USE_TBB)
-	IF (REQUIRE_TBB)
-		FIND_PACKAGE(TBB REQUIRED)
+	IF(REQUIRE_TBB)
+		FIND_PACKAGE(TBB 2021.0 CONFIG REQUIRED)
 	ELSE()
-		FIND_PACKAGE(TBB)
-		IF (NOT TBB_FOUND)
-			MESSAGE(STATUS "Intel Threading Building Blocks not found!")
-		ENDIF()
+		FIND_PACKAGE(TBB 2021.0 CONFIG)
 	ENDIF()
-
-	IF(${BALL_LICENSE_GPL} OR NOT ${TBB_VERSION_MAJOR} VERSION_LESS 2017)
-
-		IF (TBB_FOUND)
-			INCLUDE_DIRECTORIES(${TBB_INCLUDE_DIRS})
-			BALL_COMBINE_LIBS(TBB_LIBRARIES "${TBB_LIBRARIES}" "${TBB_DEBUG_LIBRARIES}")
-			LIST(REMOVE_DUPLICATES TBB_LIBRARIES)
-
-			SET(BALL_HAS_TBB TRUE)
-		ENDIF()
-
+	IF(TBB_FOUND)
+		SET(BALL_HAS_TBB TRUE)
+		MESSAGE(STATUS "Found TBB ${TBB_VERSION} (config mode) — parallel speedups enabled")
+	ELSE()
+		MESSAGE(STATUS "TBB not found — building without parallel speedups (optional dependency)")
 	ENDIF()
-
 ENDIF()
 
 ## MPI
@@ -302,7 +293,7 @@ FIND_PACKAGE(Qt5 ${QT_MIN_VERSION} REQUIRED Core Network Xml)
 LIST(APPEND BALL_DEP_LIBRARIES Qt5::Core
                                Qt5::Network
                                Qt5::Xml)
-#LIST(APPEND BALL_PROJECT_COMPILE_DEFNS "-DQT_NO_KEYWORDS")
+LIST(APPEND BALL_PROJECT_COMPILE_DEFNS "-DQT_NO_KEYWORDS")
 
 IF (BALL_HAS_VIEW)
 	FIND_PACKAGE(Qt5 ${QT_MIN_VERSION} REQUIRED OpenGL PrintSupport Test Widgets)
@@ -356,9 +347,7 @@ IF(WIN32)
 	ENDIF()
 ENDIF()
 
-SET(EIGEN3_VERSION_OK "3.0.0")
-FIND_PACKAGE(Eigen3 REQUIRED)
-INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
+FIND_PACKAGE(Eigen3 3.4...6 REQUIRED NO_MODULE)
 
 ## VIEW dependent packages
 IF (BALL_HAS_VIEW)
@@ -543,6 +532,7 @@ LIST(APPEND BALL_DEP_LIBRARIES
 	${LPSOLVE_LIBRARIES}
 	${MPI_LIBRARIES}
 	${Python3_LIBRARIES}
+	Eigen3::Eigen
 )
 
 
@@ -551,7 +541,7 @@ IF(UNIX)
 ENDIF()
 
 IF(TBB_FOUND)
-	LIST(APPEND BALL_DEP_LIBRARIES ${TBB_LIBRARIES})
+	LIST(APPEND BALL_DEP_LIBRARIES TBB::tbb)
 ENDIF()
 
 IF(LIBSVM_FOUND)
