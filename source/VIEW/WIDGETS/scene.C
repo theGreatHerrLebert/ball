@@ -83,7 +83,9 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QInputDialog>
 #include <QtWidgets/QProgressBar>
-#include <QtOpenGL/QGLPixelBuffer>
+#include <QtGui/QSurfaceFormat>
+#include <QtGui/QOpenGLContext>
+#include <QtGui/QOffscreenSurface>
 #include <QtWidgets/QMessageBox>
 
 #include <boost/random/mersenne_twister.hpp>
@@ -1638,17 +1640,20 @@ namespace BALL
 				painter.drawPicture(0, 0, overlay_);
 				painter.end();
 			}
-			// implements a trivial synchronization mechanism: if
-			// two renderers depend on one another, their images will
-			// be swapped in at the same time
+			// Trivial synchronization mechanism: if two renderers depend on one
+			// another, their freshly-rendered buffers are presented together.
+			// QOpenGLWidget composites and presents automatically after paintGL(),
+			// so the former manual cross-renderer buffer-swap coordination is gone;
+			// a repaint request (update()) is the correct replacement. The
+			// RenderToBufferFinishedEvent handoff (worker -> GUI thread) is unchanged.
 			std::deque<boost::shared_ptr<RenderSetup> >& dependent_renderers = renderer->getDependentRenderers();
 
 			// find out if all renderers are ready
 			if (renderer->isReadyToSwap())
 			{
-				// paint all buffers
+				// request a repaint of this renderer's target
                 if (RTTI::isKindOf<GLRenderWindow>(renderer->target))
-					static_cast<GLRenderWindow*>(renderer->target)->safeBufferSwap();
+					static_cast<GLRenderWindow*>(renderer->target)->update();
 
 				if (renderer->isContinuous() && (renderer->getTimeToLive() != 0))
 				{
@@ -1660,10 +1665,10 @@ namespace BALL
 				for (std::deque<boost::shared_ptr<RenderSetup> >::iterator render_it  = dependent_renderers.begin();
 						render_it != dependent_renderers.end(); ++render_it)
 				{
-					(*render_it)->makeCurrent();
-
+					// request a repaint of each dependent renderer's target so the
+					// dependent images are presented together with this one
                     if (RTTI::isKindOf<GLRenderWindow>((*render_it)->target))
-						static_cast<GLRenderWindow*>((*render_it)->target)->swapBuffers();
+						static_cast<GLRenderWindow*>((*render_it)->target)->update();
 
 					if ((*render_it)->isContinuous() && ((*render_it)->getTimeToLive() != 0))
 					{
@@ -2093,7 +2098,7 @@ namespace BALL
 			if(!p.begin(&printer)) return;
 
 			// TODO: push into renderSetup
-			QImage pic = main_display_->grabFrameBuffer();
+			QImage pic = main_display_->grabFramebuffer();
 			p.drawImage(0,0, pic);
 			p.end();
 
@@ -3061,28 +3066,40 @@ namespace BALL
 		bool Scene::stereoBufferSupportTest()
 		{
 			// TODO: push into renderTarget!
-			/*
-				 QGLFormat test_format(QGL::DepthBuffer | QGL::StereoBuffers | QGL::DoubleBuffer);
-				 QGLWidget* gl_test = new QGLWidget(test_format, 0);
-				 gl_test->makeCurrent();
-				 bool supports =  gl_test->isValid();
-				 delete gl_test;
-				 if (!supports)
-				 {
-				 gl_format_ = (QGL::DepthBuffer | QGL::DoubleBuffer);
-				 gl_test = new QGLWidget(test_format, 0);
-				 gl_test->makeCurrent();
-				 supports =  gl_test->isValid();
-				 delete gl_test;
-				 if (!supports)
-				 {
-				 gl_format_ = QGLFormat(QGL::DepthBuffer);
-				 }
-				 }
+			//
+			// Probe whether the driver can give us a quad-buffered-stereo context.
+			// The legacy Qt4-era probe constructed throwaway GL widgets; the modern
+			// equivalent is a transient QOpenGLContext created against a requested
+			// QSurfaceFormat on an offscreen surface, then inspecting the format the
+			// driver actually granted. This keeps the original contract: on success
+			// the shared GLRenderWindow::gl_format_ is left requesting stereo; on
+			// failure it is downgraded to a non-stereo (depth + double buffer) format.
+			QSurfaceFormat test_format = GLRenderWindow::gl_format_;
+			test_format.setStereo(true);
+			test_format.setDepthBufferSize(24);
+			test_format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 
-				 return supports;
-				 */
-			return false;
+			QOpenGLContext ctx;
+			ctx.setFormat(test_format);
+
+			bool supports = ctx.create() && ctx.format().stereo();
+
+			if (supports)
+			{
+				// keep the stereo request in the shared format
+				GLRenderWindow::gl_format_.setStereo(true);
+			}
+			else
+			{
+				// downgrade to a plain depth + double-buffered format
+				QSurfaceFormat fallback = GLRenderWindow::gl_format_;
+				fallback.setStereo(false);
+				fallback.setDepthBufferSize(24);
+				fallback.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+				GLRenderWindow::gl_format_ = fallback;
+			}
+
+			return supports;
 		}
 
 		bool Scene::inMoveMode() const
