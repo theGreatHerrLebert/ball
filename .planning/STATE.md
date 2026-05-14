@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-05-14T07:46:51.912Z"
+stopped_at: 02-04-PLAN.md Tasks 1-2 complete; paused at Task 3 human-verify checkpoint
+last_updated: "2026-05-14T08:00:00.000Z"
 progress:
   total_phases: 9
   completed_phases: 1
@@ -26,8 +26,8 @@ progress:
 Phase: 2 (Rendering Port (4a)) — EXECUTING
 Plan: 4 of 4
 **Phase:** 2
-**Plan:** 03 complete; next is 04
-**Status:** Executing Phase 2
+**Plan:** 04 in progress — Tasks 1-2 complete and committed; paused at Task 3 (human-verify checkpoint)
+**Status:** Executing Phase 2 — awaiting human smoke check
 **Progress:** [████████░░] 80%
 
 ```
@@ -68,6 +68,7 @@ Phase 9  [ ]  CI & Tests
 - [Phase 02-rendering-port-4a]: A1 CONFIRMED: raytracer/BufferedRenderer worker path issues no GL — Plans 03/04 threading scope stays minimal (no QOffscreenSurface/shared context)
 - [Phase 02-rendering-port-4a]: GLRenderWindow rebased on QOpenGLWidget: compat-profile QSurfaceFormat, GL work in initializeGL/resizeGL/paintGL, manual swap deleted, QPainter text overlay, global context sharing in main()
 - [Phase 02-rendering-port-4a]: Plan 02-03: renderer-side files (renderSetup.C, glRenderer.C, glOffscreenTarget.{h,C}) ported to QOpenGLWidget API — QOpenGLContext, grabFramebuffer, Format_RGBA8888+mirrored label upload, QOpenGLFramebufferObject offscreen target; scene.C is the sole remaining VIEW build failure (Plan 04)
+- [Phase 02-rendering-port-4a]: Plan 02-04 Tasks 1-2: scene.C ported (QSurfaceFormat+QOpenGLContext stereo probe, swap-sync block -> update(), grabFramebuffer) and the 4 top-level stereo/multi-display paths (addGlWindow, enterStereo, enterDualStereo, enterDualStereoDifferentDisplays) guard-deferred per Pitfall 6. Full clean BALL+VIEW+BALLView build links bin/BALLView.app; grep gate clean across source/VIEW + include/BALL/VIEW except the known-deferred glDisplayList.h. Awaiting human smoke-check (Task 3 checkpoint)
 
 ### Todos
 
@@ -79,11 +80,11 @@ Phase 9  [ ]  CI & Tests
 
 ## Session Continuity
 
-**Last action:** Completed 02-03-PLAN.md — ported the renderer-side QOpenGLWidget API consumers: `renderSetup.C` (`QOpenGLContext::currentContext()`, GUI-thread-only `makeCurrent()` helper, `grabFramebuffer()`, `safeBufferSwap()`→`update()`), `glRenderer.C` (label-texture upload via `convertToFormat(Format_RGBA8888).mirrored()`), and `glOffscreenTarget.{h,C}` (`QGLPixelBuffer`→`QOpenGLFramebufferObject`, always-FBO path). All three source files compile clean; `scene.C` is the sole remaining `make VIEW` failure — expected, handed to Plan 04. Out-of-scope discovery `glDisplayList.h` (`QtOpenGL/qgl.h`) logged to `deferred-items.md`.
+**Last action:** Executing 02-04-PLAN.md — Tasks 1-2 complete and committed (`b4965b1` scene.C port, `f75dbc5` top-level stereo/multi-display guard-defer). Full clean `make BALL VIEW BALLView -j8` succeeds; `bin/BALLView.app` linked. Grep gate clean across `source/VIEW` + `include/BALL/VIEW` except the known-deferred `glDisplayList.h` (`QtOpenGL/qgl.h`, logged in `deferred-items.md`, a Qt6 blocker not a Qt5 build blocker). Paused at Task 3 — the blocking human-verify checkpoint.
 
-**Stopped at:** Completed 02-03-PLAN.md
+**Stopped at:** 02-04-PLAN.md Task 3 — human-verify checkpoint (embedded molecule smoke check on macOS)
 
-**Next action:** Execute 02-04-PLAN.md (scene.C — the final renderer file; QGLFormat/QGLWidget stereo probe, swapBuffers/safeBufferSwap sync block, grabFramebuffer rename, QtOpenGL/QGLPixelBuffer include).
+**Next action:** Human runs BALLView and verifies the smoke checklist (embedded molecule renders, rotate/zoom/pick, raytracer, text overlay, no GL error flood). On "approved", a continuation agent finalizes 02-04: creates `02-04-SUMMARY.md`, advances the plan counter, updates ROADMAP/REQUIREMENTS, makes the final docs commit.
 
 **Notes:**
 
