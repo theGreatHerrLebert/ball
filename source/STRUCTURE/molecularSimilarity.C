@@ -79,12 +79,18 @@ MolecularSimilarity::MolecularSimilarity(String smarts_file)
 #ifdef BALL_HAS_OPENBABEL
 OBMol* MolecularSimilarity::createOBMol(const Molecule& mol, bool ignore_hydrogen, bool suppress_warning)
 {
-	OBMol* obmol = new OBMol;
-	HashMap<const Atom*,OBAtom*> atoms;
-	HashMap<OBAtom*,HashSet<OBAtom*> > bonds;
-	HashMap<OBAtom*,HashSet<OBAtom*> >::iterator s_it;
-	HashSet<const Atom*> fixed_bonds;
-	bool warning_shown = false;
+  OBMol* obmol = new OBMol;
+  HashMap<const Atom*,OBAtom*> atoms;
+  HashMap<OBAtom*,HashSet<OBAtom*> > bonds;
+  HashMap<OBAtom*,HashSet<OBAtom*> >::iterator s_it;
+  HashSet<const Atom*> fixed_bonds;
+  bool warning_shown = false;
+
+  // OpenBabel 3.x: bracket the atom+bond-building loop with BeginModify/EndModify.
+  // EndModify() with nukePerceivedData=true (the default) resets all perception flags
+  // so implicit-H counts and aromaticity are freshly derived from the topology we build,
+  // rather than relying on 2.x's behavior of auto-clearing flags on modification.
+  obmol->BeginModify();
 
 	for(AtomConstIterator a_it=mol.beginAtom(); +a_it; a_it++)
 	{
@@ -246,15 +252,13 @@ OBMol* MolecularSimilarity::createOBMol(const Molecule& mol, bool ignore_hydroge
 		}
 	}
 
-  // OpenBabel 3.x: calling SetAromaticPerceived(false) clears the "already perceived"
-  // flag, which forces OpenBabel to re-run aromaticity perception the next time it is
-  // needed (e.g. by the SMARTS matcher). In 2.x, molecule modification auto-cleared this
-  // flag; in 3.x it does not, so we must clear it explicitly after building the molecule.
-  // We set bond orders explicitly above (including bond order 5 for aromatic bonds), so
-  // the re-perception will correctly identify aromatic systems from the topology we built.
-  obmol->SetAromaticPerceived(false); // force re-perception for SMARTS matching
+  // Close the modification block: EndModify(true) resets all perception flags so that
+  // implicit-H counts, aromaticity, and hybridisation are freshly re-perceived from
+  // the topology and bond orders we have just built. This replaces the 2.x behaviour
+  // where molecule modification auto-cleared the perception flags.
+  obmol->EndModify();
 
-	return obmol;
+  return obmol;
 }
 
 
