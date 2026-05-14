@@ -5,6 +5,7 @@
 #include <BALL/VIEW/RENDERING/RENDERERS/POVRenderer.h>
 #include <BALL/VIEW/RENDERING/RENDERERS/STLRenderer.h>
 #include <BALL/VIEW/RENDERING/glRenderWindow.h>
+#include <BALL/VIEW/RENDERING/renderSurface.h>
 
 #include <BALL/VIEW/WIDGETS/scene.h>
 
@@ -303,9 +304,9 @@ namespace BALL
 			// the GUI thread (init/resize/exportPNG/grid/texture/picking setup,
 			// all driven from Scene event handlers). The raytracer worker loop
 			// in run() never calls this -- it issues no GL (see 02-A1-FINDINGS).
-			if (gl_target_ &&
-				   (QOpenGLContext::currentContext() != gl_target_->context()))
-				gl_target_->makeCurrent();
+			RenderSurface* surface = dynamic_cast<RenderSurface*>(target);
+			if (surface)
+				surface->beginFrame();
 			else
 				target->prepareRendering();
 		}

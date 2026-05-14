@@ -36,6 +36,24 @@ namespace BALL
 				fbo_->bind();
 		}
 
+		void GLOffscreenTarget::beginFrame()
+		{
+			// An FBO has no context of its own -- making the shared
+			// GLRenderWindow context current and binding the FBO is exactly
+			// what prepareRendering() already does.
+			prepareRendering();
+		}
+
+		void GLOffscreenTarget::endFrame()
+		{
+			// Nothing to swap or submit for an offscreen FBO target.
+		}
+
+		void* GLOffscreenTarget::nativeHandle()
+		{
+			return static_cast<QPaintDevice*>(this);
+		}
+
 		bool GLOffscreenTarget::resize(const unsigned int width, const unsigned int height)
 		{
 			RenderWindow::resize(width, height);

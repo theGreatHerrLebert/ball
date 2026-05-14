@@ -7,6 +7,7 @@
 
 #include <BALL/COMMON/global.h>
 #include <BALL/VIEW/RENDERING/renderTarget.h>
+#include <BALL/VIEW/RENDERING/renderSurface.h>
 
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_same.hpp>
@@ -30,7 +31,7 @@ namespace BALL
 		 * \link RenderTarget \endlink interface can be displayed
 		 */
 		template<typename taPixelDatatype>
-			class BALL_VIEW_EXPORT TRenderWindow : public RenderTarget
+			class BALL_VIEW_EXPORT TRenderWindow : public RenderSurface
 		{
 			// only int or floats are allowed as template parameters
 			BALLVIEW_STATIC_ASSERT_TYPE_IS_CHAR_OR_FLOAT(taPixelDatatype);

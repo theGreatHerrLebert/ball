@@ -17,6 +17,10 @@
 # include <BALL/VIEW/RENDERING/renderWindow.h>
 #endif
 
+#ifndef BALL_VIEW_RENDERING_RENDERSURFACE_H
+# include <BALL/VIEW/RENDERING/renderSurface.h>
+#endif
+
 #ifndef BALL_VIEW_DATATYPE_COLORRGBA_H
 # include <BALL/VIEW/DATATYPE/colorRGBA.h>
 #endif
@@ -52,7 +56,16 @@ namespace BALL
 			/* RenderWindow methods */
 			virtual bool init();
 			virtual bool resize(const unsigned int width, const unsigned int height);
-			virtual void refresh();			
+			virtual void refresh();
+
+			/* RenderSurface methods -- context-lifecycle verbs.
+			 * beginFrame() holds the GL-context op that used to live inline in
+			 * RenderSetup::makeCurrent(). endFrame() is a deliberate no-op for
+			 * the GL backend (QOpenGLWidget swaps implicitly after paintGL()).
+			 */
+			virtual void beginFrame() override;
+			virtual void endFrame() override;
+			virtual void* nativeHandle() override;
 
 			// render the given text in the given color and size at window coordinates (x, y)
 			virtual void renderText(int x, int y, const String& text, const ColorRGBA& color, Size size = 16);

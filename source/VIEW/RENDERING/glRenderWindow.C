@@ -16,6 +16,7 @@
 
 #include <QtCore/QEvent>
 #include <QtGui/QWindow>
+#include <QtGui/QOpenGLContext>
 #include <QtGui/QPainter>
 #include <QtGui/QFont>
 
@@ -290,6 +291,25 @@ namespace BALL
 
 			glPopAttrib();
 			glPopAttrib();
+		}
+
+		void GLRenderWindow::beginFrame()
+		{
+			// GUI-thread-only: QOpenGLWidget's context + default FBO are GUI-thread-affine.
+			// This holds the GL-context op moved out of RenderSetup::makeCurrent().
+			if (QOpenGLContext::currentContext() != context())
+				makeCurrent();   // QOpenGLWidget::makeCurrent -- the GL-context op
+		}
+
+		void GLRenderWindow::endFrame()
+		{
+			// QOpenGLWidget swaps implicitly after paintGL(); nothing to submit here.
+			// Deliberate no-op for the GL backend; becomes meaningful for a QRhi backend.
+		}
+
+		void* GLRenderWindow::nativeHandle()
+		{
+			return static_cast<QOpenGLWidget*>(this);
 		}
 
 		void GLRenderWindow::renderText(int x, int y, const String& text, const ColorRGBA& color, Size size)
