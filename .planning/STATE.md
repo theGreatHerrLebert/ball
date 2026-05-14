@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-05-14T07:40:55.526Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-05-14T07:46:51.912Z"
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 5
-  completed_plans: 3
-  percent: 60
+  completed_plans: 4
+  percent: 80
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -24,11 +24,11 @@ progress:
 ## Current Position
 
 Phase: 2 (Rendering Port (4a)) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 **Phase:** 2
-**Plan:** 02 complete; next is 03
+**Plan:** 03 complete; next is 04
 **Status:** Executing Phase 2
-**Progress:** [██████░░░░] 60%
+**Progress:** [████████░░] 80%
 
 ```
 Phase 1  [x]  Build Baseline
@@ -53,6 +53,7 @@ Phase 9  [ ]  CI & Tests
 | Phase 01-build-baseline P01 | 3min | 3 tasks | 9 files |
 | Phase 02-rendering-port-4a P01 | 3min | 2 tasks | 2 files |
 | Phase 02-rendering-port-4a P02 | 12min | 2 tasks | 3 files |
+| Phase 02-rendering-port-4a P03 | 9min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,7 @@ Phase 9  [ ]  CI & Tests
 - [Phase 01-build-baseline]: CMake VERSION kept numeric (1.6.0); -dev pre-release marker carried as an inline comment
 - [Phase 02-rendering-port-4a]: A1 CONFIRMED: raytracer/BufferedRenderer worker path issues no GL — Plans 03/04 threading scope stays minimal (no QOffscreenSurface/shared context)
 - [Phase 02-rendering-port-4a]: GLRenderWindow rebased on QOpenGLWidget: compat-profile QSurfaceFormat, GL work in initializeGL/resizeGL/paintGL, manual swap deleted, QPainter text overlay, global context sharing in main()
+- [Phase 02-rendering-port-4a]: Plan 02-03: renderer-side files (renderSetup.C, glRenderer.C, glOffscreenTarget.{h,C}) ported to QOpenGLWidget API — QOpenGLContext, grabFramebuffer, Format_RGBA8888+mirrored label upload, QOpenGLFramebufferObject offscreen target; scene.C is the sole remaining VIEW build failure (Plan 04)
 
 ### Todos
 
@@ -77,11 +79,11 @@ Phase 9  [ ]  CI & Tests
 
 ## Session Continuity
 
-**Last action:** Completed 02-02-PLAN.md — rebased `GLRenderWindow` from `QGLWidget` onto `QOpenGLWidget`: compat-profile `QSurfaceFormat`, GL work moved into `initializeGL`/`resizeGL`/`paintGL`, manual buffer-swap machinery (`safeBufferSwap`/`setAutoBufferSwap`) deleted, on-screen text reimplemented as a `QPainter` overlay, and global context sharing + default surface format wired into BALLView `main()`. `glRenderWindow.{h,C}` + `main.C` compile clean as TUs; remaining `make VIEW` errors are isolated to the not-yet-ported downstream files (`glOffscreenTarget.C`, `renderSetup.C`) — expected, handed to Plans 03/04.
+**Last action:** Completed 02-03-PLAN.md — ported the renderer-side QOpenGLWidget API consumers: `renderSetup.C` (`QOpenGLContext::currentContext()`, GUI-thread-only `makeCurrent()` helper, `grabFramebuffer()`, `safeBufferSwap()`→`update()`), `glRenderer.C` (label-texture upload via `convertToFormat(Format_RGBA8888).mirrored()`), and `glOffscreenTarget.{h,C}` (`QGLPixelBuffer`→`QOpenGLFramebufferObject`, always-FBO path). All three source files compile clean; `scene.C` is the sole remaining `make VIEW` failure — expected, handed to Plan 04. Out-of-scope discovery `glDisplayList.h` (`QtOpenGL/qgl.h`) logged to `deferred-items.md`.
 
-**Stopped at:** Completed 02-02-PLAN.md
+**Stopped at:** Completed 02-03-PLAN.md
 
-**Next action:** Execute 02-03-PLAN.md.
+**Next action:** Execute 02-04-PLAN.md (scene.C — the final renderer file; QGLFormat/QGLWidget stereo probe, swapBuffers/safeBufferSwap sync block, grabFramebuffer rename, QtOpenGL/QGLPixelBuffer include).
 
 **Notes:**
 
