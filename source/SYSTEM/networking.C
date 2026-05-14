@@ -36,7 +36,7 @@ namespace BALL
 	void TCPServer::startAccepting()
 	{
 		connected_stream_.close();
-		acceptor_.accept(*connected_stream_.rdbuf());
+		acceptor_.accept(connected_stream_.socket());
 
 		handleConnection();
 	}
@@ -108,7 +108,7 @@ namespace BALL
 	void TCPServerThread::deactivate()
 	{
 		is_running_ = false;
-		io_service_.post(boost::bind(&TCPServerThread::handleClose, this));
+		boost::asio::post(io_service_, boost::bind(&TCPServerThread::handleClose, this));
 	}
 
 	void TCPServerThread::handleClose()
@@ -122,11 +122,11 @@ namespace BALL
 	{
 		connected_stream_.close();
 
-		acceptor_.async_accept(*connected_stream_.rdbuf(),
+		acceptor_.async_accept(connected_stream_.socket(),
 			boost::bind(&TCPServerThread::handleAsyncConnection, this));
 
 		io_service_.run();
-		io_service_.reset();
+		io_service_.restart();
 	}
 
 	void TCPServerThread::handleAsyncConnection()

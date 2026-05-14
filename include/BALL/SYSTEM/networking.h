@@ -36,12 +36,12 @@ namespace BALL
 			}
 
 			TCPIOStream(const String& hostname, const String& protocol)
-				: boost::asio::ip::tcp::iostream(hostname, protocol)
+				: boost::asio::ip::tcp::iostream(hostname.c_str(), protocol.c_str())
 			{
 			}
 
 			TCPIOStream(const String& hostname, Position port)
-				: boost::asio::ip::tcp::iostream(hostname, String(port))
+				: boost::asio::ip::tcp::iostream(hostname.c_str(), String(port).c_str())
 			{
 			}
 	};
@@ -59,12 +59,15 @@ namespace BALL
 	{
 		public:
 			TCPServer(Size port, bool restart = true)
-				: port_(port), 
+				: port_(port),
 					restart_(restart),
 					connected_stream_(),
 					io_service_(),
 					acceptor_(io_service_)
 			{};
+
+			// Boost >= 1.66 renamed io_service to io_context; keep io_service_
+			// as the member name for source compatibility within BALL.
 
 			virtual ~TCPServer();
 
@@ -84,7 +87,7 @@ namespace BALL
 
 			TCPIOStream connected_stream_;
 
-			boost::asio::io_service io_service_;
+			boost::asio::io_context io_service_;
 
 			boost::asio::ip::tcp::acceptor acceptor_;
 	};
