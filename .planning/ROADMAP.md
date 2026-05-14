@@ -15,7 +15,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 - [ ] **Phase 3: Language Modernization** - Move the codebase to C++17, remove C++17-removed constructs, set the standard via CMake
 - [ ] **Phase 4: Dependency System Overhaul** - Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix
 - [ ] **Phase 5: Qt 6 Migration** - Build against Qt 6 and replace deprecated VIEW APIs; keep the compat-profile GL path working *(split from the old oversized "Qt 6 + Pipeline")*
-- [x] **Phase 05.1: Renderer backend decision spike** - Prototype GL-core vs QRhi behind the Phase 02.1 boundary; produce a recorded decision with macOS/Windows acceptance criteria *(de-risks the v2 PIPE-01 full rewrite)* (completed 2026-05-14)
+- [ ] **Phase 05.1: Renderer backend decision spike** - Prototype GL-core vs QRhi behind the Phase 02.1 boundary; produce a recorded decision with macOS/Windows acceptance criteria *(de-risks the v2 PIPE-01 full rewrite)*
 - [ ] **Phase 6: Python Bindings** - Decide the binding generator via a vertical slice (5-10 core classes), then commit *(restructured per Codex review — was a single under-scoped criterion)*
 - [ ] ~~**Phase 7: Networking Rework**~~ - **Deferred to backlog 999.3** — not core value, the Asio code already compiles (Phase 1); the proper rework + test is 1.6.x polish
 - [ ] **Phase 8: Packaging & Distribution** - Notarizable macOS bundle (`data/` embedded, `macdeployqt`); documented build-from-source for Linux/Windows; license/distribution review
@@ -80,9 +80,11 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   2. A scripted render smoke check launches BALLView headless with a known molecule, captures the framebuffer, and asserts non-blank pixels at the expected viewport size
   3. BALLView logs a startup GL-capability diagnostic (GL vendor/version/profile, `QSurfaceFormat`, device-pixel ratio, default FBO size, selected renderer backend) — both a debugging aid and the smoke check's oracle
   4. The "no legacy Qt GL symbols" grep gate (`check-no-legacy-gl-symbols.sh`) runs as a CI lint
-**Note**: On macOS the build matrix uses Homebrew deps; Linux uses system packages; Windows is gated until Phase 4 lands the vcpkg manifest (Windows row may start as `allow-failure` and become required after Phase 4).
+**Note**: On macOS the build matrix uses Homebrew deps; Linux uses system packages; Windows is gated until Phase 4 lands the vcpkg manifest (Windows row starts as `continue-on-error` and becomes required after Phase 4).
 **UI hint**: no
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 02.2-01-PLAN.md — DIAG-01 startup GL-capability diagnostic line in `glRenderWindow.C` + the local render smoke-check script
+- [ ] 02.2-02-PLAN.md — The GitHub Actions 3-OS build matrix: Homebrew/apt deps + caching + ccache, render smoke check wired on macOS/Linux, legacy-GL grep lint job
 
 ### Phase 3: Language Modernization
 **Goal**: The whole project compiles under C++17 with the standard set the modern CMake way, removing the load-bearing C++14 bridge.
@@ -171,7 +173,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 | 1. Build Baseline | 1/1 | Complete | 2026-05-14 |
 | 2. Rendering Port (4a) | 4/4 | Complete — human-verified on macOS (RENDER-08 Linux/Windows carry-forward) | 2026-05-14 |
 | 02.1 Renderer boundary extraction | 3/3 | Complete    | 2026-05-14 |
-| 02.2 CI and build-smoke matrix | 0/0 | Not planned (inserted — Codex review) | - |
+| 02.2 CI and build-smoke matrix | 0/2 | Planned (2 plans, 2 waves) | - |
 | 3. Language Modernization | 0/0 | Not started | - |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
 | 5. Qt 6 Migration (4b) | 0/0 | Not started | - |
