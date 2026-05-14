@@ -45,8 +45,6 @@ IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		SET(USE_PEDANTIC OFF)
 	ENDIF()
 
-	SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -std=c++0x")
-
 	# Added -Wno-deprecated-declarations as Eigen3 currently uses binder2nd which spams the compiler output.
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
@@ -125,11 +123,6 @@ ELSEIF(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang") # matches Clang and AppleClang
 		CXX_COMPILER_VERSION_MINOR ${CXX_COMPILER_VERSION})
 
 	SET(CXX_COMPILER_VERSION "${CXX_COMPILER_VERSION_MAJOR}.${CXX_COMPILER_VERSION_MINOR}")
-
-	# BALL's legacy code still uses std::unary_function/binary_function/bind2nd
-	# etc. which were removed in C++17. Build as C++14 (where they are merely
-	# deprecated) until the codebase is modernised for the 1.6 release.
-	SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -std=c++14")
 
 	IF(USE_ASAN)
 		SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
