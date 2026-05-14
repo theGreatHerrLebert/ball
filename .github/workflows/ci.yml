@@ -179,12 +179,14 @@ jobs:
       #     as VCPKG_INSTALLATION_ROOT). The windows-vcpkg preset toolchainFile
       #     picks it up via $env{VCPKG_ROOT}, bridged in the Configure step.
       #     Build speed (T-04-17 mitigation):
-      #       - actions/cache@v4 of C:\vcpkg\installed keyed on the vcpkg.json
-      #         hash — restores the prebuilt port tree so a warm run skips the
-      #         Qt5/Boost source build entirely. (vcpkg's own x-gha binary
-      #         cache was tried and dropped: the current GitHub Actions cache
-      #         service no longer exposes ACTIONS_CACHE_URL, so x-gha silently
-      #         no-ops.)
+      #       - vcpkg's default file binary cache (%LOCALAPPDATA%\vcpkg\archives)
+      #         is cached via actions/cache. In MANIFEST mode vcpkg installs into
+      #         <binaryDir>/vcpkg_installed — NOT C:\vcpkg\installed — so caching
+      #         that path is useless; the binary archives dir is the reusable
+      #         artifact. Split restore/save with `save` at `if: always()` so a
+      #         failing Build step still persists the (expensive) port builds.
+      #         (vcpkg's x-gha cache was tried and dropped: the current GitHub
+      #         Actions cache service no longer exposes ACTIONS_CACHE_URL.)
       #       - the `x64-windows-release` overlay triplet (cmake/vcpkg-triplets)
       #         builds Release-only, skipping the debug half of every port —
       #         roughly halves a cold build.
@@ -197,11 +199,12 @@ jobs:
       #     IF(WIN32) FIND_PROGRAM doesn't shadow the cache values.
       # ======================================================================
 
-      - name: Cache vcpkg packages (Windows)
+      - name: Restore vcpkg binary cache (Windows)
+        id: vcpkg-cache
         if: matrix.os == 'windows-x64'
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
-          path: C:\vcpkg\installed
+          path: C:\Users\runneradmin\AppData\Local\vcpkg\archives
           key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'cmake/vcpkg-triplets/x64-windows-release.cmake') }}
           restore-keys: |
             vcpkg-${{ matrix.os }}-
@@ -235,6 +238,16 @@ jobs:
           cmake --preset ci-windows `
             -DBISON_EXECUTABLE="C:/ProgramData/chocolatey/bin/win_bison.exe" `
             -DFLEX_EXECUTABLE="C:/ProgramData/chocolatey/bin/win_flex.exe"
+
+      # Persist the vcpkg binary cache as soon as Configure finishes — runs
+      # even if a later Build step fails, so iterating on build errors does
+      # not re-pay the ~80min Qt5/Boost source build each time.
+      - name: Save vcpkg binary cache (Windows)
+        if: always() && matrix.os == 'windows-x64' && steps.vcpkg-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: C:\Users\runneradmin\AppData\Local\vcpkg\archives
+          key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'cmake/vcpkg-triplets/x64-windows-release.cmake') }}
 
       - name: Build (Windows)
         if: matrix.os == 'windows-x64'

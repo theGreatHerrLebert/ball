@@ -474,7 +474,10 @@ SET(BALL_EXECUTABLES "")
 
 # Add BALL project specific compiler flags and definitions
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BALL_PROJECT_COMPILE_FLAGS}")
-ADD_DEFINITIONS("${BALL_PROJECT_COMPILE_DEFNS}")
+# Unquoted: BALL_PROJECT_COMPILE_DEFNS is a CMake list — each element must
+# reach ADD_DEFINITIONS as its own argument (e.g. -DQT_NO_KEYWORDS /DNOMINMAX).
+# Quoting collapses the list into one mangled "-Dx;/Dy" argument.
+ADD_DEFINITIONS(${BALL_PROJECT_COMPILE_DEFNS})
 
 
 ## are we building a shared or static lib?! (BOTH within 

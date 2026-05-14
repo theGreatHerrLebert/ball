@@ -75,7 +75,11 @@ ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
 	## disable min and max macros by default
 	## see CGAL and BOOST configs for more elaborate explanations
-	SET(BALL_PROJECT_COMPILE_DEFNS "${BALL_PROJECT_COMPILE_DEFNS} /DNOMINMAX")
+	## NOTE: BALL_PROJECT_COMPILE_DEFNS is a CMake list (LIST(APPEND ...) is
+	## used elsewhere). Append a list element, not a space-joined string —
+	## otherwise ADD_DEFINITIONS receives one mangled argument and neither
+	## NOMINMAX nor QT_NO_KEYWORDS actually reaches the compiler.
+	LIST(APPEND BALL_PROJECT_COMPILE_DEFNS "/DNOMINMAX")
 
 	## if requested, produce a parallel solution
 	OPTION(BALL_BUILD_SOLUTION_PARALLEL OFF)
