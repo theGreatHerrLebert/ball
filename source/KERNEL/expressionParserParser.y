@@ -7,8 +7,7 @@ using namespace BALL;
 using namespace std;
 
 extern int ExpressionParserlex();
-extern void ExpressionParsererror(char const* s)
-	throw(Exception::ParseError);
+extern void ExpressionParsererror(char const* s);
 
 %}
 %union {
@@ -123,7 +122,6 @@ something:
 
 %%
 void ExpressionParsererror(char const* s)
-	throw(Exception::ParseError)
 {
 	throw Exception::ParseError(__FILE__, 0, 
 															ExpressionParser::state.buffer, 
