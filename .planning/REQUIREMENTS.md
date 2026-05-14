@@ -50,7 +50,7 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 ### CI & Diagnostics (Phase 02.2 — inserted)
 
 - [ ] **CI-01**: A GitHub Actions matrix builds BALL/VIEW/BALLView on macOS-arm64, Linux, and Windows on every push, plus a headless render smoke check (load a known molecule, capture the framebuffer, assert non-blank pixels) and the legacy-GL-symbol grep lint
-- [ ] **DIAG-01**: BALLView logs a startup GL-capability diagnostic — GL vendor/version/profile, `QSurfaceFormat`, device-pixel ratio, default FBO size, selected renderer backend — as a debugging aid and the render smoke check's oracle
+- [x] **DIAG-01**: BALLView logs a startup GL-capability diagnostic — GL vendor/version/profile, `QSurfaceFormat`, device-pixel ratio, default FBO size, selected renderer backend — as a debugging aid and the render smoke check's oracle
 
 ### Qt 6 Migration (Phase 5)
 
@@ -147,7 +147,7 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | ARCH-03 | Phase 02.1 — Renderer boundary extraction | Complete |
 | ARCH-04 | Phase 02.1 — Renderer boundary extraction | Complete |
 | CI-01 | Phase 02.2 — CI and build-smoke matrix | Pending |
-| DIAG-01 | Phase 02.2 — CI and build-smoke matrix | Pending |
+| DIAG-01 | Phase 02.2 — CI and build-smoke matrix | Complete |
 | LANG-01 | Phase 3 — Language Modernization | Pending |
 | LANG-02 | Phase 3 — Language Modernization | Pending |
 | LANG-03 | Phase 3 — Language Modernization | Pending |

@@ -83,7 +83,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 **Note**: On macOS the build matrix uses Homebrew deps; Linux uses system packages; Windows is gated until Phase 4 lands the vcpkg manifest (Windows row starts as `continue-on-error` and becomes required after Phase 4).
 **UI hint**: no
 **Plans**: 2 plans
-- [ ] 02.2-01-PLAN.md — DIAG-01 startup GL-capability diagnostic line in `glRenderWindow.C` + the local render smoke-check script
+- [x] 02.2-01-PLAN.md — DIAG-01 startup GL-capability diagnostic line in `glRenderWindow.C` + the local render smoke-check script
 - [ ] 02.2-02-PLAN.md — The GitHub Actions 3-OS build matrix: Homebrew/apt deps + caching + ccache, render smoke check wired on macOS/Linux, legacy-GL grep lint job
 
 ### Phase 3: Language Modernization
@@ -173,7 +173,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 | 1. Build Baseline | 1/1 | Complete | 2026-05-14 |
 | 2. Rendering Port (4a) | 4/4 | Complete — human-verified on macOS (RENDER-08 Linux/Windows carry-forward) | 2026-05-14 |
 | 02.1 Renderer boundary extraction | 3/3 | Complete    | 2026-05-14 |
-| 02.2 CI and build-smoke matrix | 0/2 | Planned (2 plans, 2 waves) | - |
+| 02.2 CI and build-smoke matrix | 1/2 | In Progress|  |
 | 3. Language Modernization | 0/0 | Not started | - |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
 | 5. Qt 6 Migration (4b) | 0/0 | Not started | - |
@@ -196,7 +196,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   3. Theme picker — ship one neutral theme, or Light/Dark/Follow-System? (handover recommends Follow-System)
   4. Translation churn — the menu re-org invalidates ~40% of `BALLView-de_DE.ts`; plan a community translation round.
 **Requirements:** TBD
-**Plans:** 3/3 plans complete
+**Plans:** 1/2 plans executed
 **Reference:** `.planning/DESIGN-HANDOVER-INTEGRATION.md`, `.planning/seeds/SEED-001-ballview-refresh-ui-milestone.md`
 
 Plans:

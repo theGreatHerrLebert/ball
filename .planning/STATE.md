@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
 status: executing
-stopped_at: "02.1-03 Task 3 — blocking `checkpoint:human-verify` (ARCH-04 identical render). SUMMARY.md deliberately NOT yet created — awaits checkpoint resolution."
-last_updated: "2026-05-14T11:46:52.904Z"
+stopped_at: Completed 02.2-01-PLAN.md
+last_updated: "2026-05-14T12:04:24.256Z"
 progress:
   total_phases: 16
   completed_phases: 3
   total_plans: 10
-  completed_plans: 8
-  percent: 80
+  completed_plans: 9
+  percent: 90
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -19,16 +19,16 @@ progress:
 
 **Core Value:** BALLView must build and visibly render molecules on macOS, Linux, and Windows from current, supported dependencies — the 3D scene working cross-platform is the non-negotiable outcome.
 
-**Current Focus:** Phase 02.1 — Renderer boundary extraction
+**Current Focus:** Phase 02.2 — CI and build-smoke matrix
 
 ## Current Position
 
-Phase: 02.1 (Renderer boundary extraction) — EXECUTING
-Plan: 3 of 3
+Phase: 02.2 (CI and build-smoke matrix) — EXECUTING
+Plan: 2 of 2
 **Phase:** 02.2
-**Plan:** Not started
-**Status:** Ready to execute
-**Progress:** [█████████░] 88%
+**Plan:** 02.2-01 complete; 02.2-02 next
+**Status:** Executing Phase 02.2
+**Progress:** [█████████░] 90%
 
 ```
 Phase 1     [x]  Build Baseline
@@ -58,6 +58,7 @@ Phase 9     [ ]  CI & Tests
 | Phase 02-rendering-port-4a P04 | ~4h (incl. 3 debug rounds + human verify) | 3 tasks | 7 files |
 | Phase 02.1-renderer-boundary-extraction P01 | 6min | 2 tasks | 7 files |
 | Phase 02.1 P02 | 8min | 2 tasks | 2 files |
+| Phase 02.2 P01 | 25min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,8 @@ Phase 9     [ ]  CI & Tests
 - [Phase 02.1-renderer-boundary-extraction]: Plan 02.1-01: RenderSurface interface owns beginFrame/endFrame/nativeHandle; RenderSetup::makeCurrent() delegates via dynamic_cast<RenderSurface*>. endFrame() is a deliberate GL-backend no-op (gains meaning for QRhi in Phase 5). GLOffscreenTarget also adopted the interface (it is a RenderWindow subclass too).
 - [Phase 02.1]: Plan 02.1-02: Renderer base gains batched renderRepresentations_(const RepresentationList&) + capabilities() Caps query (ARCH-03). capabilities() made NON-pure (deviation from boundary doc's = 0 sketch) to keep the change additive — pure would force-break all ~7 existing subclasses. Default renderRepresentations_() fans out to renderOneRepresentation(); not yet wired into RenderSetup/Scene (Phase 5 scope).
 - [Phase 02.1]: Plan 02.1-03 Tasks 1-2 (ARCH-02): RendererFactory namespace (enum Kind + makeRenderer/makeSurface) centralises construction; scene.C's non-deferred paths routed through it. gl_renderer_/main_display_ kept concrete-typed with one static_cast at the construction site only (fewest ripples). setDownsamplingFactor added to RenderSurface, setFogIntensity to Renderer base (no-op defaults) so the casts drop out. RTTI::isKindOf<GLRenderer> guards routed through RenderSetup::getRendererType(). dynamic_cast<GLRenderWindow> replaced with dynamic_cast<RenderSurface>+nativeHandle(). ~9 deferred-stereo 3-arg-ctor new GLRenderWindow + 8 new GLRenderer sites remain as expected guard-deferred residuals (all in stereo/multi-display methods, deferred to Phase 5). Build clean. PAUSED at Task 3 human-verify checkpoint (ARCH-04 identical render).
+- [Phase 02.2]: DIAG-01: BALLVIEW_GL_DIAG single-line stdout diagnostic emitted from GLRenderWindow::initializeGL(); fbo_size is pre-layout so the smoke check uses the line's presence + live gl_version as the GL-context oracle, not exact dimensions
+- [Phase 02.2]: Render smoke check uses the D-09 fallback (fixed PDB data/structures/bpti.pdb) + a minimal -export-png main.C flag; the auto-demo peptide is restored ~/.BALLView session state, not a deterministic CI input
 
 ### Roadmap Evolution
 
@@ -97,7 +100,7 @@ Phase 9     [ ]  CI & Tests
 
 **Last action:** Plan 02.1-03 Tasks 1-2 executed and committed (5498a48 factory, 0784585 scene.C routing). `make BALL VIEW BALLView -j8` builds clean, fully-linked BALLView.app. Grep gate passes: zero `new GLRenderWindow`/`dynamic_cast<GLRenderWindow|GLRenderer>`/`RTTI::isKindOf<GLRenderWindow|GLRenderer>` in scene.C's non-deferred paths; ~9 deferred-stereo 3-arg-ctor + 8 new GLRenderer residuals all confirmed inside guard-deferred stereo/multi-display methods.
 
-**Stopped at:** 02.1-03 Task 3 — blocking `checkpoint:human-verify` (ARCH-04 identical render). SUMMARY.md deliberately NOT yet created — awaits checkpoint resolution.
+**Stopped at:** Completed 02.2-01-PLAN.md
 
 **Next action:** Human verifies BALLView renders identically to post-Phase-2 (launch `build/BALLView.app/Contents/MacOS/BALLView`, load demo molecule, confirm embedded scene + representation + rotate/zoom/pick + clean startup log). On "approved", a continuation agent creates `02.1-03-SUMMARY.md`, completes STATE/ROADMAP/REQUIREMENTS updates, and the final metadata commit.
 
