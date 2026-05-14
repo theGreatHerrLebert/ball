@@ -9,15 +9,17 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 ## Phases
 
 - [x] **Phase 1: Build Baseline** - Commit the 8 modern-toolchain patches, bump version, document the macOS build flow
-- [x] **Phase 2: Rendering Port (4a)** - Port `GLRenderWindow` from `QGLWidget` to `QOpenGLWidget` so the embedded 3D scene renders on all 3 OSes *(complete — human-verified on macOS; RENDER-08 Linux/Windows render-check stays open pending Phase 4/9)*
+- [x] **Phase 2: Rendering Port (4a)** - Port `GLRenderWindow` from `QGLWidget` to `QOpenGLWidget` so the embedded 3D scene renders on all 3 OSes *(complete — human-verified on macOS; RENDER-08 Linux/Windows render-check carry-forward)*
 - [ ] **Phase 02.1: Renderer boundary extraction** - Extract a Qt-GL-free `RenderSurface`/`RendererFactory` boundary so Phase 5 is a contained backend swap *(inserted; depends on Phase 2, blocks Phase 5)*
+- [ ] **Phase 02.2: CI and build-smoke matrix** - Early GitHub Actions build matrix (macOS-arm64/Linux/Windows) + a non-blank render smoke check + a GL-capability diagnostics log *(inserted per Codex review — pulled forward so Phases 3-9 land with a regression net)*
 - [ ] **Phase 3: Language Modernization** - Move the codebase to C++17, remove C++17-removed constructs, set the standard via CMake
-- [ ] **Phase 4: Dependency System Overhaul** - Delete `ball_contrib`, adopt Homebrew/system + vcpkg, rewrite stale `Find*.cmake` as config-mode
-- [ ] **Phase 5: Qt 6 + Pipeline (4b)** - Build against Qt 6 and replace deprecated VIEW APIs *(NOTE: oversized — flagged for a split into Qt6-migration + renderer-backend in the next roadmap revision)*
-- [ ] **Phase 6: Python Bindings** - Replace the SIP 4 binding generator with SIP 6 or pybind11/nanobind against Python 3.12+
+- [ ] **Phase 4: Dependency System Overhaul** - Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix
+- [ ] **Phase 5: Qt 6 Migration** - Build against Qt 6 and replace deprecated VIEW APIs; keep the compat-profile GL path working *(split from the old oversized "Qt 6 + Pipeline")*
+- [ ] **Phase 05.1: Renderer backend decision spike** - Prototype GL-core vs QRhi behind the Phase 02.1 boundary; produce a recorded decision with macOS/Windows acceptance criteria *(de-risks the v2 PIPE-01 full rewrite)*
+- [ ] **Phase 6: Python Bindings** - Decide the binding generator via a vertical slice (5-10 core classes), then commit *(restructured per Codex review — was a single under-scoped criterion)*
 - [ ] ~~**Phase 7: Networking Rework**~~ - **Deferred to backlog 999.3** — not core value, the Asio code already compiles (Phase 1); the proper rework + test is 1.6.x polish
-- [ ] **Phase 8: macOS Packaging** - Embed `data/` into the `.app` bundle, wire `macdeployqt`, produce a notarizable universal binary
-- [ ] **Phase 9: CI & Tests** - GitHub Actions matrix (macOS-arm64/Linux/Windows) and wire the `test/` tree into `ctest`
+- [ ] **Phase 8: Packaging & Distribution** - Notarizable macOS bundle (`data/` embedded, `macdeployqt`); documented build-from-source for Linux/Windows; license/distribution review
+- [ ] **Phase 9: Test Suite Triage** - Wire the `test/` tree into `ctest` and triage failures *(the build matrix moved to Phase 02.2)*
 
 ## Phase Details
 
@@ -54,19 +56,30 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 
 **Goal**: Extract a clean, Qt-GL-free renderer/surface boundary so the Phase 5 pipeline modernization is a contained ~2-file backend swap behind a flag, not a re-touch of scene.C. Pure refactor — no behaviour change.
 **Depends on**: Phase 2 (the QOpenGLWidget port must land first so the extracted `RenderSurface` wraps the real post-port widget)
-**Blocks**: Phase 5 (Qt 6 + Pipeline) — the contained-swap boundary is its prerequisite
+**Blocks**: Phase 5, Phase 05.1 — the contained-swap boundary is their prerequisite
 **Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04
 **Success Criteria** (what must be TRUE):
   1. A `RenderSurface` interface owns the context-lifecycle verbs (`beginFrame`/`endFrame`); `RenderSetup::makeCurrent()`'s GL-specific body moves behind it
   2. A `RendererFactory` constructs renderers and surfaces by enum; `scene.C` contains zero `new GLRenderWindow` and zero `dynamic_cast<GLRenderWindow>`/`dynamic_cast<GLRenderer>` sites
   3. The `Renderer` interface gains a batched `renderRepresentations_()` + `capabilities()` entry point; existing immediate-mode renderers are untouched (default fan-out preserves behaviour)
-  4. BALLView builds and renders identically to post-Phase-2 (pure refactor — same pixels, verified by the Phase 2 smoke checklist)
+  4. BALLView builds and renders identically to post-Phase-2 (pure refactor — same pixels, verified by the Phase 02.2 smoke check)
 **UI hint**: no
 **Reference**: `.planning/RENDERER-INTERFACE-BOUNDARY.md` (full design)
-**Plans:** 4/4 plans complete
+**Plans**: TBD (not yet planned)
 
-Plans:
-- [ ] TBD (run /gsd-plan-phase 02.1 to break down)
+### Phase 02.2: CI and build-smoke matrix (INSERTED)
+
+**Goal**: Stand up an early automated regression net — a 3-platform build matrix plus a render smoke check — so every later phase (C++17, deps, Qt 6, packaging) lands against a gate instead of a promise. Pulled forward from the old Phase 9 per the Codex adversarial review (its #1 finding: "CI is catastrophically late").
+**Depends on**: Phase 2 (a building, rendering BALLView to gate on). Independent of Phases 02.1/3/4 — runs in parallel.
+**Requirements**: CI-01, DIAG-01
+**Success Criteria** (what must be TRUE):
+  1. A GitHub Actions matrix configures and builds BALL/VIEW/BALLView on macOS-arm64, Ubuntu, and Windows on every push
+  2. A scripted render smoke check launches BALLView headless with a known molecule, captures the framebuffer, and asserts non-blank pixels at the expected viewport size
+  3. BALLView logs a startup GL-capability diagnostic (GL vendor/version/profile, `QSurfaceFormat`, device-pixel ratio, default FBO size, selected renderer backend) — both a debugging aid and the smoke check's oracle
+  4. The "no legacy Qt GL symbols" grep gate (`check-no-legacy-gl-symbols.sh`) runs as a CI lint
+**Note**: On macOS the build matrix uses Homebrew deps; Linux uses system packages; Windows is gated until Phase 4 lands the vcpkg manifest (Windows row may start as `allow-failure` and become required after Phase 4).
+**UI hint**: no
+**Plans**: TBD
 
 ### Phase 3: Language Modernization
 **Goal**: The whole project compiles under C++17 with the standard set the modern CMake way, removing the load-bearing C++14 bridge.
@@ -79,62 +92,73 @@ Plans:
 **Plans**: TBD
 
 ### Phase 4: Dependency System Overhaul
-**Goal**: All dependencies come from current, supported sources (Homebrew/system on macOS/Linux, vcpkg on Windows) with `ball_contrib` fully removed from the build path.
+**Goal**: All dependencies come from current, supported sources (Homebrew/system on macOS/Linux, vcpkg on Windows) with `ball_contrib` fully removed from the build path, stable per-platform CMake presets, and an explicit feature matrix.
 **Depends on**: Phase 1 (build baseline). Benefits from Phase 3 (C++17) since modern dependency headers may require it.
-**Requirements**: DEPS-01, DEPS-02, DEPS-03, DEPS-04
+**Requirements**: DEPS-01, DEPS-02, DEPS-03, DEPS-04, DEPS-05, FEAT-01
 **Success Criteria** (what must be TRUE):
   1. CMake resolves every dependency via system/Homebrew packages with `ball_contrib` no longer on the build path
   2. A `vcpkg.json` manifest provides the complete Windows dependency set
   3. Stale bundled `Find*.cmake` modules (Boost, TBB, Eigen3, OpenBabel) are replaced with config-mode `find_package` wherever upstream ships a config
   4. Minimum dependency versions are pinned in CMake and documented
+  5. A `CMakePresets.json` provides stable configure presets for macOS-Homebrew, Linux-system, Windows-vcpkg, and CI — no more bespoke per-platform configure invocations
+  6. A feature matrix (REQUIREMENTS.md) classifies every optional dependency (OpenBabel, TBB, LPSolve, WebEngine, …) as required / optional / removed / deferred, and states what each one's absence disables
 **Plans**: TBD
 
-### Phase 5: Qt 6 + Pipeline (4b)
-**Goal**: BALLView builds and runs on Qt 6 with deprecated VIEW APIs removed. The compatibility-profile fixed-function GL path is *kept working under Qt 6* as the known-good backend; the full pipeline rewrite is explicitly NOT in this phase (see PIPE-01, v2).
+### Phase 5: Qt 6 Migration (4b)
+**Goal**: BALLView builds and runs on Qt 6 with deprecated VIEW APIs removed. The compatibility-profile fixed-function GL path is *kept working under Qt 6* as the known-good backend — the renderer-pipeline modernization is explicitly a separate phase (05.1 spike → v2 PIPE-01 rewrite). Split from the old oversized "Qt 6 + Pipeline" per the Codex review.
 **Depends on**: Phase 02.1 (the renderer boundary), Phase 2 (the `QOpenGLWidget` port), Phase 4 (Qt 6 from the modern dependency system)
 **Requirements**: QT6-01, QT6-02
 **Success Criteria** (what must be TRUE):
-  1. BALLView builds and launches against Qt 6 with all `QGLWidget`-era APIs removed
+  1. BALLView builds and launches against Qt 6 with all `QGLWidget`-era APIs removed (including `glDisplayList.h`'s `QtOpenGL/qgl.h`)
   2. The user-facing GUI behaves correctly with `QRegExp` and `QDesktopWidget` replaced by Qt 6 equivalents
-  3. The 3D scene still renders correctly under Qt 6 via the compatibility-profile fixed-function path (no pixel regression vs. Phase 2)
+  3. The 3D scene still renders correctly under Qt 6 via the compatibility-profile fixed-function path (no pixel regression vs. Phase 2, gated by the Phase 02.2 smoke check)
 **Plans**: TBD
 **UI hint**: yes
 
-> **NOTE (Codex review, to apply in the next roadmap revision):** This phase is
-> oversized and should be split — Qt 6 migration / renderer-backend decision spike /
-> new GL-core-or-QRhi backend. `QT6-03` ("pipeline modernized off fixed-function
-> GL") was **removed** because it contradicted `PIPE-01` (full pipeline rewrite =
-> v2/out-of-scope). The actual pipeline rewrite is `PIPE-01`, a separate future phase.
+### Phase 05.1: Renderer backend decision spike (INSERTED)
+
+**Goal**: De-risk the eventual pipeline modernization with a time-boxed prototype. Build one molecule render path on GL-core *and* QRhi behind the Phase 02.1 `Renderer`/`RenderSurface` boundary, evaluate picking, text overlay, offscreen export, and macOS + Windows driver behaviour, and produce a *recorded decision* (GL-core vs QRhi) with explicit per-platform acceptance criteria. This is a spike + decision, NOT the full rewrite — the full rewrite is `PIPE-01` (v2), which this phase makes estimable.
+**Depends on**: Phase 02.1 (the boundary the prototype plugs into), Phase 5 (prototype against Qt 6)
+**Requirements**: SPIKE-01, SPIKE-02
+**Success Criteria** (what must be TRUE):
+  1. A throwaway prototype renders the demo molecule through at least the leading backend candidate behind the `RendererFactory`, with picking and a text overlay demonstrated
+  2. macOS (Apple Silicon) and Windows driver behaviour are checked and recorded — no per-OS graphics code in the chosen design
+  3. A decision record (`.planning/` doc) names the chosen backend, the rationale, the per-platform acceptance criteria, and a scoped task list for the `PIPE-01` full rewrite
+**UI hint**: no
+**Plans**: TBD
 
 ### Phase 6: Python Bindings
-**Goal**: BALL's Python bindings build and import against a supported Python using a modern binding generator.
+**Goal**: Re-establish BALL's Python bindings on a supported Python (3.12+) and a maintained binding generator — via a decision-first vertical slice, not a blind full migration of all 237 `.sip` files. Restructured per the Codex review (SIP 6 migration vs a pybind11/nanobind rewrite are different projects; the generator must be *chosen* on evidence).
 **Depends on**: Phase 3 (C++17 codebase), Phase 4 (modern dependency system)
-**Requirements**: PY-01
+**Requirements**: PY-01, PY-02
 **Success Criteria** (what must be TRUE):
-  1. BALL's Python bindings build against Python 3.12+ using SIP 6 or pybind11/nanobind
-  2. The generated module imports and exercises core BALL classes from a Python interpreter
+  1. A vertical slice binds and imports 5-10 representative core BALL classes, proving ownership/lifetime, exception translation, STL-container handling, and build packaging — for the candidate generator(s)
+  2. A decision record names the chosen generator (SIP 6 or pybind11/nanobind) with rationale and a scoped plan for the remaining bindings
+  3. The chosen generator builds against Python 3.12+ and the slice module imports and exercises core BALL classes from a Python interpreter
 **Plans**: TBD
 
 ### Phase 7: Networking Rework — DEFERRED TO BACKLOG 999.3
 **Status**: Removed from the v1.6 active roadmap per the Codex review. Networking is not core value, and the Boost.Asio code already *compiles* (the API breakage was fixed in Phase 1). The proper `TCPServer` rework + unit test is 1.6.x polish, tracked as backlog **999.3**. `NET-01` moved to REQUIREMENTS.md "Deferred (1.6.x)".
 **Plans**: TBD
 
-### Phase 8: macOS Packaging
-**Goal**: `BALLView.app` is a self-contained, double-clickable, notarizable universal bundle.
+### Phase 8: Packaging & Distribution
+**Goal**: BALLView is shippable: a notarizable, self-contained macOS bundle, plus an honest, documented build-from-source story for Linux and Windows, plus a license/distribution review. Scope clarified per the Codex review — v1.6 ships a macOS *bundle*; Linux/Windows are build-from-source targets for this milestone (installers/AppImage are a later milestone).
 **Depends on**: Phase 5 (Qt 6 build is what gets packaged)
-**Requirements**: PKG-01, PKG-02
+**Requirements**: PKG-01, PKG-02, PKG-03
 **Success Criteria** (what must be TRUE):
   1. `BALLView.app` launches by double-click with no environment variables set, finding its `data/` in `Contents/Resources`
   2. The macOS build produces a `macdeployqt`-processed, notarizable universal (arm64 + x86_64) bundle
+  3. `BUILD-macos.md` is joined by `BUILD-linux.md` and `BUILD-windows.md` documenting the from-source build on each platform
+  4. A license/distribution review covers the FFTW GPL path, OpenBabel, Qt deployment mode, and bundled `data/` — recorded so notarization/distribution is unambiguous
 **Plans**: TBD
 
-### Phase 9: CI & Tests
-**Goal**: Every push is proven to build on all three platforms and the test suite runs automatically.
-**Depends on**: Phase 1 (build baseline). Most valuable once Phases 2-5 land, but can be stood up incrementally.
-**Requirements**: CI-01, CI-02
+### Phase 9: Test Suite Triage
+**Goal**: The existing `test/` tree is wired into `ctest` and its failures are triaged. (The 3-platform *build* matrix moved to Phase 02.2 per the Codex review — this phase is the remaining test-suite work.)
+**Depends on**: Phase 02.2 (the CI matrix this extends), Phase 3, Phase 4 (the test tree builds against the modernized toolchain/deps)
+**Requirements**: CI-02
 **Success Criteria** (what must be TRUE):
-  1. A GitHub Actions matrix builds BALL/VIEW/BALLView on macOS-arm64, Linux, and Windows
-  2. The `test/` tree is wired into the build and `ctest` runs in CI
+  1. The `test/` tree (currently `EXCLUDE_FROM_ALL`) is wired into the build and `ctest` runs in CI on all three platforms
+  2. Test failures are triaged — each is fixed, quarantined with a tracking note, or documented as a known modernization casualty
 **Plans**: TBD
 
 ## Progress
@@ -144,13 +168,15 @@ Plans:
 | 1. Build Baseline | 1/1 | Complete | 2026-05-14 |
 | 2. Rendering Port (4a) | 4/4 | Complete — human-verified on macOS (RENDER-08 Linux/Windows carry-forward) | 2026-05-14 |
 | 02.1 Renderer boundary extraction | 0/0 | Not planned | - |
+| 02.2 CI and build-smoke matrix | 0/0 | Not planned (inserted — Codex review) | - |
 | 3. Language Modernization | 0/0 | Not started | - |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
-| 5. Qt 6 + Pipeline (4b) | 0/0 | Not started | - |
+| 5. Qt 6 Migration (4b) | 0/0 | Not started | - |
+| 05.1 Renderer backend decision spike | 0/0 | Not planned (inserted — Codex review) | - |
 | 6. Python Bindings | 0/0 | Not started | - |
 | 7. Networking Rework | — | Deferred to backlog 999.3 | - |
-| 8. macOS Packaging | 0/0 | Not started | - |
-| 9. CI & Tests | 0/0 | Not started | - |
+| 8. Packaging & Distribution | 0/0 | Not started | - |
+| 9. Test Suite Triage | 0/0 | Not started | - |
 
 ---
 

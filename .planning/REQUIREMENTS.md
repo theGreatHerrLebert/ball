@@ -26,6 +26,8 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 - [ ] **DEPS-02**: A vcpkg manifest provides the Windows dependency set
 - [ ] **DEPS-03**: Stale bundled `Find*.cmake` modules (Boost, TBB, Eigen3, OpenBabel) are replaced with config-mode `find_package` where upstream provides it
 - [ ] **DEPS-04**: Minimum dependency versions are pinned and documented
+- [ ] **DEPS-05**: A `CMakePresets.json` provides stable configure presets for macOS-Homebrew, Linux-system, Windows-vcpkg, and CI
+- [ ] **FEAT-01**: A feature matrix classifies every optional dependency as required / optional / removed / deferred and states what each one's absence disables (see the "Feature Matrix" section below)
 
 ### Rendering — Phase 4a (IMMEDIATE PRIORITY)
 
@@ -45,7 +47,12 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 - [ ] **ARCH-03**: The `Renderer` interface gains a batched `renderRepresentations_()` + `capabilities()` entry point; existing immediate-mode renderers are untouched
 - [ ] **ARCH-04**: BALLView builds and renders identically to post-Phase-2 (pure refactor, no behaviour change)
 
-### Qt 6 + Pipeline
+### CI & Diagnostics (Phase 02.2 — inserted)
+
+- [ ] **CI-01**: A GitHub Actions matrix builds BALL/VIEW/BALLView on macOS-arm64, Linux, and Windows on every push, plus a headless render smoke check (load a known molecule, capture the framebuffer, assert non-blank pixels) and the legacy-GL-symbol grep lint
+- [ ] **DIAG-01**: BALLView logs a startup GL-capability diagnostic — GL vendor/version/profile, `QSurfaceFormat`, device-pixel ratio, default FBO size, selected renderer backend — as a debugging aid and the render smoke check's oracle
+
+### Qt 6 Migration (Phase 5)
 
 - [ ] **QT6-01**: BALLView builds against Qt 6, with `QGLWidget`-era APIs fully removed
 - [ ] **QT6-02**: Qt-deprecated APIs in VIEW (`QRegExp`, `QDesktopWidget`) are replaced with Qt 6 equivalents
@@ -55,19 +62,42 @@ Requirements for the v1.6 release. Derived from `/Users/kohlbach/Claude/BALL/ROA
 > v2/out-of-scope). The pipeline rewrite is `PIPE-01`, a separate future phase.
 > Phase 5 keeps the compatibility-profile fixed-function path working under Qt 6.
 
-### Python Bindings
+### Renderer Backend Spike (Phase 05.1 — inserted)
 
-- [ ] **PY-01**: BALL's Python bindings build against a supported Python (3.12+) using a modern binding generator (SIP 6 or pybind11/nanobind)
+- [ ] **SPIKE-01**: A throwaway prototype renders the demo molecule through at least the leading backend candidate (GL-core and/or QRhi) behind the Phase 02.1 `RendererFactory`, demonstrating picking and a text overlay
+- [ ] **SPIKE-02**: A decision record names the chosen backend, the rationale, per-platform (macOS/Windows) acceptance criteria, and a scoped task list for the `PIPE-01` full rewrite
 
-### Packaging
+### Python Bindings (Phase 6)
+
+- [ ] **PY-01**: A vertical slice binds and imports 5-10 representative core BALL classes for the candidate generator(s), proving ownership/lifetime, exception translation, STL-container handling, and build packaging
+- [ ] **PY-02**: A decision record names the chosen binding generator (SIP 6 or pybind11/nanobind) with rationale; the chosen generator builds against Python 3.12+ and the slice module imports and exercises core BALL classes
+
+### Packaging & Distribution (Phase 8)
 
 - [ ] **PKG-01**: `BALLView.app` embeds its `data/` directory into `Contents/Resources` and launches by double-click without environment variables set
 - [ ] **PKG-02**: The macOS build produces a `macdeployqt`-processed, notarizable universal (arm64 + x86_64) bundle
+- [ ] **PKG-03**: `BUILD-linux.md` + `BUILD-windows.md` document the from-source build per platform, and a license/distribution review covers the FFTW GPL path, OpenBabel, Qt deployment mode, and bundled `data/`
 
-### CI & Tests
+### Test Suite (Phase 9)
 
-- [ ] **CI-01**: A GitHub Actions matrix builds BALL/VIEW/BALLView on macOS-arm64, Linux, and Windows
-- [ ] **CI-02**: The `test/` tree is wired into the build and `ctest` runs in CI
+- [ ] **CI-02**: The `test/` tree is wired into the build and `ctest` runs in CI, with failures triaged (fixed / quarantined with a note / documented as a known modernization casualty)
+
+## Feature Matrix
+
+Status of optional components for v1.6 — produced/verified by **FEAT-01** in Phase 4. Initial classification from the Phase 1 review; Phase 4 confirms each and states the user-visible impact of absence.
+
+| Component | v1.6 status | If absent, disables |
+|-----------|-------------|---------------------|
+| Qt 5.15 (→ Qt 6 in Phase 5) | **Required** | Everything (BALLView is a Qt app) |
+| Boost, Eigen, FFTW, GLEW | **Required** | Core BALL/VIEW build |
+| OpenBabel | **Optional** (3.x; was OFF in Phase 1) | Extra molecular file-format import/export |
+| TBB | **Optional** (oneTBB; was OFF in Phase 1) | Parallel speedups; no functional loss |
+| LPSolve | **Optional** (was OFF in Phase 1) | LP-based features (e.g. bond-order assignment ILP path) |
+| libSVM | **Optional** (found in Phase 1) | SVM-based QSAR features |
+| QtWebEngine | **Optional / deferred** | PresentaBALL, BALLaxy, Jupyter plugins (already disabled — `qt@5` has no WebEngine) |
+| RTfact raytracer | **Removed** | Windows-only contrib; not built — the CPU raytracer path remains |
+| Python bindings (SIP) | **Deferred to Phase 6** | The Python interface (re-established via the Phase 6 generator decision) |
+| VRPN / SpaceNavigator | **Removed** | Exotic input-device plugins; not built |
 
 ## Deferred (1.6.x)
 
@@ -92,7 +122,7 @@ Deferred beyond v1.6.
 | Reviving `ball_contrib` source build | Dead end on modern toolchains; replaced by system/Homebrew/vcpkg deps |
 | New molecular-modelling features/algorithms | This milestone is modernization only |
 | RTfact raytracer revival | Windows-only contrib, not load-bearing |
-| Programmable-pipeline GL rewrite | Large; Phase 4a keeps fixed-function via compat profile, full rewrite is v2 |
+| Programmable-pipeline GL rewrite (`PIPE-01`) | Large; Phase 2 + Phase 5 keep fixed-function via a compat profile. The Phase 05.1 spike de-risks and scopes it; the full rewrite is v2 |
 
 ## Traceability
 
@@ -105,17 +135,19 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | BUILD-03 | Phase 1 — Build Baseline | Complete |
 | BUILD-04 | Phase 1 — Build Baseline | Complete |
 | RENDER-01 | Phase 2 — Rendering Port (4a) | Complete |
-| RENDER-02 | Phase 2 — Rendering Port (4a) | Pending — awaiting human visual recheck |
+| RENDER-02 | Phase 2 — Rendering Port (4a) | Complete — human-verified on macOS |
 | RENDER-03 | Phase 2 — Rendering Port (4a) | Complete |
-| RENDER-04 | Phase 2 — Rendering Port (4a) | Pending — awaiting human visual recheck |
+| RENDER-04 | Phase 2 — Rendering Port (4a) | Complete — human-verified on macOS |
 | RENDER-05 | Phase 2 — Rendering Port (4a) | Complete |
-| RENDER-06 | Phase 2 — Rendering Port (4a) | Pending — awaiting human visual recheck |
+| RENDER-06 | Phase 2 — Rendering Port (4a) | Complete — human-verified on macOS |
 | RENDER-07 | Phase 2 — Rendering Port (4a) | Complete |
-| RENDER-08 | Phase 2 — Rendering Port (4a) | Pending — needs CI/dependency model (cannot be verified before Phase 4/9) |
+| RENDER-08 | Phase 2 — Rendering Port (4a) | Carry-forward — Linux/Windows render verified via Phase 02.2 CI |
 | ARCH-01 | Phase 02.1 — Renderer boundary extraction | Pending |
 | ARCH-02 | Phase 02.1 — Renderer boundary extraction | Pending |
 | ARCH-03 | Phase 02.1 — Renderer boundary extraction | Pending |
 | ARCH-04 | Phase 02.1 — Renderer boundary extraction | Pending |
+| CI-01 | Phase 02.2 — CI and build-smoke matrix | Pending |
+| DIAG-01 | Phase 02.2 — CI and build-smoke matrix | Pending |
 | LANG-01 | Phase 3 — Language Modernization | Pending |
 | LANG-02 | Phase 3 — Language Modernization | Pending |
 | LANG-03 | Phase 3 — Language Modernization | Pending |
@@ -123,21 +155,26 @@ GSD phase numbers are the canonical scheme used everywhere. The original human-a
 | DEPS-02 | Phase 4 — Dependency System Overhaul | Pending |
 | DEPS-03 | Phase 4 — Dependency System Overhaul | Pending |
 | DEPS-04 | Phase 4 — Dependency System Overhaul | Pending |
-| QT6-01 | Phase 5 — Qt 6 (4b) | Pending |
-| QT6-02 | Phase 5 — Qt 6 (4b) | Pending |
+| DEPS-05 | Phase 4 — Dependency System Overhaul | Pending |
+| FEAT-01 | Phase 4 — Dependency System Overhaul | Pending |
+| QT6-01 | Phase 5 — Qt 6 Migration (4b) | Pending |
+| QT6-02 | Phase 5 — Qt 6 Migration (4b) | Pending |
+| SPIKE-01 | Phase 05.1 — Renderer backend decision spike | Pending |
+| SPIKE-02 | Phase 05.1 — Renderer backend decision spike | Pending |
 | PY-01 | Phase 6 — Python Bindings | Pending |
-| PKG-01 | Phase 8 — macOS Packaging | Pending |
-| PKG-02 | Phase 8 — macOS Packaging | Pending |
-| CI-01 | Phase 9 — CI & Tests | Pending |
-| CI-02 | Phase 9 — CI & Tests | Pending |
+| PY-02 | Phase 6 — Python Bindings | Pending |
+| PKG-01 | Phase 8 — Packaging & Distribution | Pending |
+| PKG-02 | Phase 8 — Packaging & Distribution | Pending |
+| PKG-03 | Phase 8 — Packaging & Distribution | Pending |
+| CI-02 | Phase 9 — Test Suite Triage | Pending |
 | NET-01 | Deferred (1.6.x) — backlog 999.3 | Deferred |
 
 **Coverage:**
-- v1 requirements: 30 active (BUILD ×4, RENDER ×8, ARCH ×4, LANG ×3, DEPS ×4, QT6 ×2, PY ×1, PKG ×2, CI ×2) + NET-01 deferred to 1.6.x
-- Mapped to phases: 30 ✓
+- v1 requirements: 37 active (BUILD ×4, RENDER ×8, ARCH ×4, CI/DIAG ×2, LANG ×3, DEPS ×6, QT6 ×2, SPIKE ×2, PY ×2, PKG ×3, CI-02 ×1) + NET-01 deferred to 1.6.x
+- Mapped to phases: 37 ✓
 - Unmapped: 0
-- Note: QT6-03 removed (contradicted PIPE-01); ARCH-01..04 added (Phase 02.1 insertion)
+- v2: PIPE-01 (full pipeline rewrite — now de-risked by the Phase 05.1 spike)
 
 ---
 *Requirements defined: 2026-05-14*
-*Last updated: 2026-05-14 — Codex adversarial review cheap-fixes applied (QT6-03 removed, NET-01 deferred, ARCH-01..04 traced, numbering normalized)*
+*Last updated: 2026-05-14 — Codex structural changes applied: Phase 02.2 (CI) + Phase 05.1 (backend spike) inserted; Phase 5 split (Qt6-only); Phase 6 restructured (decision+slice); Phase 8 scope clarified; DEPS-05/FEAT-01/DIAG-01/SPIKE/PY-02/PKG-03 added; feature matrix added.*

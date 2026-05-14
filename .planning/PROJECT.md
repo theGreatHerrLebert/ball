@@ -30,16 +30,18 @@ non-negotiable outcome.
      The original ROADMAP-1.6.md "4a/4b" labels are kept only as aliases. -->
 
 - [x] **GSD Phase 1** — Build baseline: commit the 8 modern-toolchain patches, bump version, BUILD-macos.md *(done)*
-- [~] **GSD Phase 2** *(orig. "4a")* — Port `GLRenderWindow` `QGLWidget`→`QOpenGLWidget`; hybrid threading; keep fixed-function GL via a compat profile *(code + HiDPI fix done; awaiting human visual recheck)*
-- [ ] **GSD Phase 02.1** — Renderer boundary extraction (`RenderSurface`/`RendererFactory`); makes Phase 5 a contained swap *(inserted; depends on 2, blocks 5)*
+- [x] **GSD Phase 2** *(orig. "4a")* — Port `GLRenderWindow` `QGLWidget`→`QOpenGLWidget`; hybrid threading; keep fixed-function GL via a compat profile *(done — human-verified on macOS; RENDER-08 Linux/Windows carry-forward to 02.2)*
+- [ ] **GSD Phase 02.1** — Renderer boundary extraction (`RenderSurface`/`RendererFactory`); makes Phase 5/05.1 a contained swap *(inserted; depends on 2)*
+- [ ] **GSD Phase 02.2** — CI & build-smoke matrix: early 3-OS GitHub Actions build + render smoke check + GL-capability diagnostics *(inserted per Codex review — regression net before Phases 3-9)*
 - [ ] **GSD Phase 3** — Language modernization: move off the C++14 bridge to C++17, remove `std::unary_function`/`bind2nd`/etc. (7 known files)
-- [ ] **GSD Phase 4** — Dependency system overhaul: delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`
-- [ ] **GSD Phase 5** *(orig. "4b")* — Qt 6 migration; deprecated VIEW APIs replaced. Keeps the compat-profile GL path working *(flagged oversized — split pending)*
-- [ ] **GSD Phase 6** — Replace SIP 4 Python bindings (SIP 6 or pybind11/nanobind)
-- [ ] **GSD Phase 8** — macOS packaging: embed `data/` into the `.app` bundle, wire `macdeployqt`, notarizable universal binary
-- [ ] **GSD Phase 9** — CI (GitHub Actions matrix: macOS-arm64/Linux/Windows) + wire up the `test/` tree
+- [ ] **GSD Phase 4** — Dependency system overhaul: delete `ball_contrib`, Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix
+- [ ] **GSD Phase 5** *(orig. "4b")* — Qt 6 migration; deprecated VIEW APIs replaced; compat-profile GL path kept working *(split from the old oversized "Qt 6 + Pipeline")*
+- [ ] **GSD Phase 05.1** — Renderer backend decision spike: prototype GL-core vs QRhi behind the 02.1 boundary; recorded decision *(de-risks the v2 `PIPE-01` rewrite)*
+- [ ] **GSD Phase 6** — Python bindings: decision-first vertical slice (5-10 core classes), then commit to a generator
+- [ ] **GSD Phase 8** — Packaging & distribution: notarizable macOS bundle; documented Linux/Windows build-from-source; license review
+- [ ] **GSD Phase 9** — Test suite triage: wire the `test/` tree into `ctest`, triage failures *(the build matrix moved to 02.2)*
 
-*(GSD Phase 7 "Networking Rework" deferred to backlog 999.3 per the Codex review — not core value, the Asio code already compiles.)*
+*(GSD Phase 7 "Networking Rework" deferred to backlog 999.3 per the Codex review — not core value, the Asio code already compiles. Backlog also: 999.1 UI maintainer questions, 999.2 Ninja generator.)*
 
 ### Release Policy
 
