@@ -19,24 +19,22 @@ progress:
 
 **Core Value:** BALLView must build and visibly render molecules on macOS, Linux, and Windows from current, supported dependencies — the 3D scene working cross-platform is the non-negotiable outcome.
 
-**Current Focus:** Phase 03 — language-modernization
+**Current Focus:** Phase 4 — Dependency System Overhaul (next to plan)
 
 ## Current Position
 
-Phase: 03 (language-modernization) — EXECUTING
-Plan: 1 of 3
-**Phase:** 05.1
+**Phase:** 4 — Dependency System Overhaul
 **Plan:** Not started
 **Status:** Ready to plan
-**Progress:** [██████████] 100%
+**Progress:** Phases 1, 2, 02.1, 02.2, 3 complete
 
 ```
 Phase 1     [x]  Build Baseline
 Phase 2     [x]  Rendering Port (4a)        — human-verified on macOS
 Phase 02.1  [x]  Renderer boundary extraction
 Phase 02.2  [x]  CI and build-smoke matrix  — CI green on all 4 jobs
-Phase 3     [ ]  Language Modernization     <- NEXT
-Phase 4     [ ]  Dependency System Overhaul
+Phase 3     [x]  Language Modernization     — C++17, CI green on all 4 jobs
+Phase 4     [ ]  Dependency System Overhaul <- NEXT
 Phase 5     [ ]  Qt 6 Migration (4b)
 Phase 05.1  [ ]  Renderer backend decision spike  (depends on Phase 5)
 Phase 6     [ ]  Python Bindings
@@ -45,15 +43,15 @@ Phase 9     [ ]  Test Suite Triage
 (Phase 7 Networking → backlog 999.3)
 ```
 
-NOTE: gsd-tools `phase complete 02.2` reported `next_phase: 05.1` — that is the
-tool's decimal-phase bug; 05.1 depends on Phase 5. The real next phase is **Phase 3**.
+NOTE: gsd-tools `phase complete 03` reported `next_phase: 05.1` — that is the
+tool's decimal-phase bug; 05.1 depends on Phase 5. The real next phase is **Phase 4**.
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases complete | 4 (1, 2, 02.1, 02.2) of 11 active (excl. backlog) |
-| Plans complete | 10 |
+| Phases complete | 5 (1, 2, 02.1, 02.2, 3) of 11 active (excl. backlog) |
+| Plans complete | 13 |
 | Requirements | 37 active + NET-01 deferred |
 | Milestone | v1.6 |
 | Phase 01-build-baseline P01 | 3min | 3 tasks | 9 files |
@@ -113,16 +111,17 @@ tool's decimal-phase bug; 05.1 depends on Phase 5. The real next phase is **Phas
 
 ## Session Continuity
 
-**Last action:** Phase 02.2 (CI and build-smoke matrix) marked COMPLETE — gsd-verifier passed 10/10, `phase complete 02.2` run. CI run 25859952862 (`1959d9b`) is fully green (build macos/linux/windows + lint); render-smoke ran & passed on macOS and Linux. Pushed branch `v1.6-modernization` is at `1959d9b`.
+**Last action:** Phase 3 (Language Modernization) marked COMPLETE — all 3 plans executed, code review clean (0 critical / 1 pre-existing warning), gsd-verifier passed 3/3 must-haves, `phase complete 03` run. CI run 25862456769 (`446cf10`) is fully green (build macos/linux/windows + lint); render-smoke passed on macOS and Linux. Branch `v1.6-modernization` is at `446cf10` + planning-doc commits.
 
-**Stopped at:** Completed 03-03-PLAN.md (C++17 build-and-fix loop, CI green D-08)
+**Stopped at:** Phase 3 complete, verified
 
-**Next action:** Phase 3 — Language Modernization (`/gsd-discuss-phase 3` or `/gsd-plan-phase 3`). Move the codebase to C++17, remove C++17-removed constructs (`std::unary_function`/`bind2nd`/etc. across the 7 known files), and bump `CMAKE_CXX_STANDARD` 14→17 (the mechanism is already in CMakeLists.txt from the Phase 02.2 CI fix — Phase 3 just bumps the value and removes the legacy raw `-std=` lines from `BALLCompilerSpecific.cmake`). CI (Phase 02.2) is now the regression net for this work.
+**Next action:** Phase 4 — Dependency System Overhaul (`/gsd-discuss-phase 4` or `/gsd-plan-phase 4`). Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix. CI (Phase 02.2) remains the regression net.
 
 **Notes:**
 
 - CI ownership: I trigger + `gh run watch` CI myself after build-relevant pushes, diagnose failures from `gh`-fetched logs, fix, re-push, iterate to green. (See memory: feedback_ci_supervision.md.)
-- gsd-tools has a recurring decimal-phase bug — `phase complete` mis-marks/mis-reports decimal phases (it spuriously flipped 05.1 once; reported `next_phase: 05.1` wrongly). Hand-verify roadmap/STATE after gsd-tools phase ops.
+- gsd-tools has a recurring decimal-phase bug — `phase complete` mis-marks/mis-reports decimal phases (it spuriously flipped 05.1 once; reported `next_phase: 05.1` wrongly after both 02.2 and 03). Hand-verify roadmap/STATE after gsd-tools phase ops.
+- Phase 3 code review surfaced WR-01: a pre-existing compile bug in `HashGrid3::apply(UnaryProcessor<Item>&)` (`hashGrid.h:~1684`) — out of scope for the C++17 migration, spun off as a separate task.
 - Build files: BALL uses per-directory `sources.cmake`, NOT `source/VIEW/CMakeLists.txt`. Headers are implicit, not listed.
 - Renderer boundary (Phase 02.1) is in place: `RenderSurface`/`RendererFactory` + additive `Renderer::renderRepresentations_()`/`capabilities()`. Phase 5/05.1 backend swap is now contained — no scene.C edits.
 - A1 CONFIRMED (Phase 2): raytracer worker issues no GL. `TilingRenderer`'s GL path is GUI-thread-only.
