@@ -93,7 +93,7 @@ namespace BALL
 			void setRenderSetup(RenderSetup* rs) { render_setup_ = rs; }
 			
 			/// Set the window's downsampling factor. This is a speed up factor.
-			void setDownsamplingFactor(float dsfactor)
+			void setDownsamplingFactor(float dsfactor) override
 				{down_sampling_factor_ = dsfactor;}
 			
 			/// Set the stereo delta for raytracing in pixels.

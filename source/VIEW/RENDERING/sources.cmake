@@ -5,6 +5,7 @@ SET(SOURCES_LIST
 	camera.C
 	glDisplayList.C
 	renderSetup.C
+	rendererFactory.C
 	vertexBuffer.C
 	glRenderWindow.C
 	glOffscreenTarget.C

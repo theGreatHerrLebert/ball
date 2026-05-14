@@ -35,6 +35,12 @@ namespace BALL
 
 				/// Opaque native handle; only the matching backend casts it.
 				virtual void* nativeHandle() = 0;
+
+				/// Set a downsampling (speed-up) factor for this surface.
+				/// Default is a no-op; only surfaces that support downsampling
+				/// (GLRenderWindow) override it. Declared here so callers (Scene)
+				/// need not know the concrete surface type.
+				virtual void setDownsamplingFactor(float /*dsfactor*/) {}
 		};
 
 	} //namespace VIEW

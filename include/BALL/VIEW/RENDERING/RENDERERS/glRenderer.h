@@ -172,7 +172,7 @@ namespace BALL
 
 			/** Set the GL_FOG intensity
 			 */
-			void setFogIntensity(float intensity);
+			void setFogIntensity(float intensity) override;
 
 			///
 			void enterPickingMode();

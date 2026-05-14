@@ -212,6 +212,13 @@ namespace BALL
 			virtual void renderRepresentations_(const RepresentationList& representations);
 
 
+			/** Set the fog intensity.
+			 *  Default is a no-op; only fog-capable backends (GLRenderer) override
+			 *  it. Declared on the base so callers (Scene) need not know the
+			 *  concrete renderer type to set fog.
+			 */
+			virtual void setFogIntensity(float /*intensity*/) {}
+
 			/** Buffer a Representation for later rendering.
 			 */
 			virtual void bufferRepresentation(const Representation& /*rep*/) {};
