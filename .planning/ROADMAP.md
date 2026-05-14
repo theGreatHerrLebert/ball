@@ -42,7 +42,11 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   3. The user can rotate, zoom, pick, and select in the scene with mouse and keyboard
   4. The raytracer renderer still produces output via its CPU pixel-buffer path, and on-screen text appears via a `QPainter` overlay
   5. `RenderSetup`, `scene.C`, `glOffscreenTarget.C`, `glRenderer.C`, and `glRenderWindow.{h,C}` compile with zero `QGLWidget`/`QGLContext`/`QGLFormat` references
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 02-01-PLAN.md — Wave 0: grep symbol gate + resolve raytracer-GL open question A1
+- [ ] 02-02-PLAN.md — Core port: GLRenderWindow base-class swap, QSurfaceFormat compat profile, paintGL, QPainter text overlay, main.C context sharing
+- [ ] 02-03-PLAN.md — Renderer subsystem cleanup: renderSetup.C, glRenderer.C, glOffscreenTarget.C
+- [ ] 02-04-PLAN.md — scene.C port + stereo/multi-display guard-defer + human smoke check
 **UI hint**: yes
 
 ### Phase 3: Language Modernization
@@ -118,7 +122,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Build Baseline | 0/1 | Planned | - |
-| 2. Rendering Port (4a) | 0/0 | Not started | - |
+| 2. Rendering Port (4a) | 0/4 | Planned | - |
 | 3. Language Modernization | 0/0 | Not started | - |
 | 4. Dependency System Overhaul | 0/0 | Not started | - |
 | 5. Qt 6 + Pipeline (4b) | 0/0 | Not started | - |
