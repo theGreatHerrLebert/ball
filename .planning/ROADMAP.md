@@ -143,7 +143,28 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
   5. A decision record (`.planning/` doc) names the chosen backend, the rationale, per-platform (macOS/Windows) acceptance criteria, and a scoped task list for the `PIPE-01` full rewrite
 **Sequencing note**: the Qt 6 migration (criteria 1-3) lands first; the spike (criteria 4-5) runs against the working Qt 6 build. Split into separate plan waves accordingly.
 **UI hint**: yes
-**Plans**: TBD
+**Plans**: 8 plans, 6 waves
+
+Plans:
+**Wave 1**
+- [ ] 05-01-cmake-qt6-bringup-PLAN.md — Wave 1: Rename CMake to Qt 6.5 + add Qt6::OpenGLWidgets; macOS preset + vcpkg manifest port (QT6-01)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 05-02-source-api-renames-PLAN.md — Wave 2: Inline QRegExp → QRegularExpression + QDesktopWidget → QScreen + Qt::SkipEmptyParts (D-05 clean break) (QT6-02)
+- [ ] 05-03-qsurfaceformat-compat-profile-PLAN.md — Wave 2: QSurfaceFormat::DeprecatedFunctions + QtOpenGLWidgets include (D-06/D-07/D-08/D-09) (QT6-01)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 05-04-ci-matrix-and-lint-PLAN.md — Wave 3: ubuntu-24.04 + jurplel/install-qt-action + GL profile assertion + new Qt5-holdout lint (QT6-01/QT6-02)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 05-05-glcore-spike-PLAN.md — Wave 4: CoreGLRenderer + RendererFactory::Kind::OpenGL_Core + color-buffer FBO picking + spike CI variant (SPIKE-01)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 05-06-qrhi-spike-PLAN.md — Wave 5: QRhiRenderer + QtRhiSurface + RendererFactory::Kind::QRhi (gated on Qt >= 6.7) (SPIKE-01)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 05-07-driver-behaviour-record-PLAN.md — Wave 6: 05-DRIVER-BEHAVIOUR.md — per-platform DIAG + picking/overlay records (SPIKE-01)
+- [ ] 05-08-spike-decision-record-PLAN.md — Wave 6: 05-SPIKE-DECISION.md — chosen backend + rationale + per-platform criteria + scoped PIPE-01 task list (SPIKE-02)
 
 ### Phase 5.1: Build Warnings & Latent Bug Cleanup (INSERTED)
 **Goal**: Remove the latent bugs and tame the warning surface surfaced by Phase 4's CI matrix once it reached green on all three OSes (run [25899905204](https://github.com/BALL-Project/ball/actions/runs/25899905204), 2026-05-15). Tier A real bugs first — C4717 `getline` infinite recursion, C4311 pointer truncation on 64-bit Windows (MMFF94 force-field code), `-Wself-assign-field`, `-Wformat-overflow` in the CIF parser, `-Wtautological-constant-out-of-range-compare`. Tier B Windows DLL hygiene — C4910 `extern template class BALL_EXPORT` mismatch in `vector3.h`/`atom.h`, broaden the C4251 pragma. Tier C style cleanup deferred until Phase 5 (Qt 6) lands and strips `-Wdeprecated-declarations`.

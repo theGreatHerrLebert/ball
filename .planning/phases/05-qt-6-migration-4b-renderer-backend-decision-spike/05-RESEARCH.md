@@ -721,22 +721,25 @@ There is no unit test framework (gtest etc.) wired for VIEW rendering. All Qt 6 
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Qt version on ubuntu-24.04 via `jurplel/install-qt-action`: which minor to pin?**
    - What we know: Qt 6.5 is the minimum (D-01); Qt 6.8 is the current LTS.
    - What's unclear: Whether to pin `6.5.*` (closest to floor) or `6.8.*` (current LTS, longer support) for Linux CI.
    - Recommendation: Pin `6.5.3` (last Qt 6.5 LTS patch as of research date) to stay at the floor; this maximises compatibility with the macOS Homebrew `qt` version the user actually builds against. If Homebrew is on 6.9, pin Linux to `6.8.*` instead to reduce the gap.
+   - **Resolution:** Pin Linux CI to Qt 6.5.3 via `jurplel/install-qt-action` (floor-matching policy). If `brew info qt` reports >= 6.8 at execution time, bump Linux pin to 6.8.x to reduce cross-platform drift.
 
 2. **QRhi spike: Qt 6.7 vs 6.8 minimum?**
    - What we know: `QRhiWidget` added in Qt 6.7 as tech preview; Qt 6.8 is an LTS.
    - What's unclear: Whether the macOS Homebrew `qt` bottle at plan time is 6.7+ (enabling QRhi spike) or needs a version pin.
    - Recommendation: The planner should verify `brew info qt` at plan time. If it's >= 6.7, prototype both GL-core and QRhi. If not, GL-core only.
+   - **Resolution:** Plan 06 (QRhi spike) is gated by `#if QT_VERSION >= QT_VERSION_CHECK(6,7,0)`. Homebrew `qt` at plan-execution time provides Qt >= 6.7, so the QRhi arm is feasible; if a CI host reports < 6.7, the QRhi spike Kind is omitted at CMake configure time with a documented note.
 
 3. **Stereo/multi-display `QDesktopWidget::screen()` → `QScreen*` type mismatch: stub or fix?**
    - What we know: These are the 9 guard-deferred stereo sites from Phase 02.1; they already don't execute in the normal path.
    - What's unclear: Whether to fully fix them in Phase 5 (adds scope) or leave a compile-time `#if QT_VERSION >= 0x060000 TODO` stub.
    - Recommendation: Fix them correctly (per the code example above) since they are already in the files Phase 5 touches; the fix is ~5 lines per site. Do not defer further.
+   - **Resolution:** Fix the 9 stereo `QDesktopWidget::screen(int)` sites correctly per the code example in §Stereo / Multi-Display QDesktopWidget Sites — handled inside Plan 02. No `#if QT_VERSION` stubs.
 
 ---
 
