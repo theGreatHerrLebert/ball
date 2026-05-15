@@ -96,11 +96,34 @@ milestone (likely v2) so v1.6 can ship without it.
 5. **~100 fixed-function GL calls in `glRenderer.C`** — each needs a shader
    replacement (vertex+fragment GLSL via qsb, or raw modern GLSL for GL-core)
    + VBO/VAO management. This is the bulk of the rewrite.
-6. **Text overlay** — currently `QPainter` over the QOpenGLWidget framebuffer.
-   QRhi has no documented direct QPainter-onto-QRhi path. Options: render text
-   to QImage in QPainter, upload as texture, draw textured quad; or move text
-   onto a separate Qt Quick scene-graph overlay. **Open question for the
-   spike.**
+6. **Text overlay — TWO distinct paths in BALL, migrate differently** (deep-dive 2026-05-15):
+
+   **Path 1 — HUD/screen-space text** ([`source/VIEW/RENDERING/glRenderWindow.C:364`](../../../source/VIEW/RENDERING/glRenderWindow.C#L364), Phase 2). Current pattern uses Qt 5's "overpainting": `QPainter painter(this); painter.drawText(x, y, text)` directly on the `QOpenGLWidget` framebuffer after `paintGL()`. This relies on `QOpenGLPaintDevice` — `QPainter`-over-widget. **This path does NOT transfer to QRhi** — there is no equivalent QRhiWidget overpainting mechanism documented anywhere.
+
+   **Path 2 — 3D world-space labels** ([`source/VIEW/RENDERING/RENDERERS/glRenderer.C:1128-1170`](../../../source/VIEW/RENDERING/RENDERERS/glRenderer.C#L1128), `GLRenderer::renderLabel_`). Current pattern is already 90% in the QRhi-friendly shape:
+   - Creates `QImage(QImage::Format_ARGB32_Premultiplied)` ← already the format Qt docs flag as fastest for QPainter
+   - Renders text via `QPainter::drawText` into the QImage
+   - Converts to `Format_RGBA8888.mirrored()`
+   - **BUT** positions via `glRasterPos3f` (fixed-function — dead in QRhi and GL-core 3.2+)
+   - **AND** draws via `glDrawPixels` (fixed-function — dead in QRhi and GL-core 3.2+)
+
+   **Migration strategies (PIPE-01 picks the right combination, not the spike — the spike just verifies the chosen strategy works):**
+
+   - **Strategy A — Textured-quad rendering** (3D labels, Path 2). Reuse the existing QPainter→QImage step. Replace `glRasterPos3f` with manual projection-matrix math to compute screen-space anchor from the 3D label vertex. Replace `glDrawPixels` with a textured quad: `QRhiTexture` from the QImage via `QRhiResourceUpdateBatch::uploadTexture()`, then draw a 2-triangle quad with a simple textured fragment shader. Dirty-flag cache the texture per-label so re-upload only happens when the label text/font changes. **Verdict: clean fit, low risk, BALL is already 90% of the way there.**
+
+   - **Strategy B — Glyph atlas** (any text path, highest performance). Pre-render glyphs at common sizes into a large `QRhiTexture` atlas. Per-text: build a VBO of one textured-quad-per-glyph. Single draw call per label, optional batch-multi-label draw calls. **Verdict: best performance ceiling, but Qt's internal atlas isn't exposed — BALL would roll its own or vendor a third-party (e.g. `msdf-atlas-gen`). Defer until profiling shows per-label upload cost matters.**
+
+   - **Strategy C — QQuickWidget overlay** (HUD, Path 1). Compose a sibling `QQuickWidget` over the `QRhiWidget` with `Text { … }` Qt Quick items for HUD content. Qt Quick uses QRhi internally and already has a production-grade glyph atlas. **Constraint:** the "single API per window" rule applies to BOTH widgets — they must agree on backend (both Metal on macOS, both D3D11 on Windows). Doable since BALL picks one backend anyway. **Verdict: best HUD performance with least new code, but adds Qt Quick/QML dependency to a project that has none today.**
+
+   - **Strategy D — Transparent QWidget overlay** (HUD, Path 1). Place a normal transparent `QWidget` over the `QRhiWidget` and use `paintEvent` + `QPainter` for HUD text. Qt's widget compositor handles the overlay. The QRhiWidget docs explicitly note: *"some widgets, with semi-transparency even, can be placed on top of the QRhiWidget"*. **Verdict: simplest HUD migration, no new dependency, may be lower-performance than Strategy C (CPU-rendered QPainter onto a software-composited overlay) but acceptable for low-update HUDs (FPS counter, mode indicator).**
+
+   **Recommended combination (to verify in the spike):** A + D. Path 2 migrates to A (cleanest fit for BALL's existing pattern), Path 1 migrates to D (least change, no new dependency). Escalate to B or C only if profiling shows A/D doesn't meet the frame-budget.
+
+   **Known risks specific to text rendering:**
+   - **Per-frame QPainter is a known bottleneck** — Qt docs explicitly say *"QPainter is currently designed for software rendering, will likely be a bottleneck in a graphics-intensive project"*. Must use dirty-flag caching everywhere; HUDs that animate per-frame (live FPS counter) need a different path (e.g. pre-rendered digit atlas).
+   - **`QImage::Format` matters** — `Format_ARGB32_Premultiplied`, `Format_RGB32`, `Format_RGB16` are the fast paths; plain `Format_ARGB32` is documented as significantly slower. BALL's current code uses `Format_ARGB32_Premultiplied` for labels ✓ — keep.
+   - **Glyph cache corruption on FBO readback** is a known historical Qt bug (env var `QML_USE_GLYPHCACHE_WORKAROUND` exists); unlikely to hit BALL but worth knowing.
+   - **`glRasterPos` + `glDrawPixels` removal** is the deepest source-level change — affects every world-space label site, not just Path 2 above. Need to audit for any other callers.
 7. **Picking** — currently a color-buffer FBO approach in
    [`source/VIEW/RENDERING/RENDERERS/glRenderer.C`](../../../source/VIEW/RENDERING/RENDERERS/glRenderer.C).
    The algorithm is backend-agnostic (render-to-FBO, read pixel). QRhi supports
@@ -198,8 +221,7 @@ not this doc.)
    correctly post-Phase-5 across Apple Silicon GPUs? If yes for 1-2 years,
    GL-core might be acceptable. If marginal, QRhi-via-Metal is the
    forcing function.
-3. **QPainter text overlay strategy on QRhi** — texture upload of pre-rendered
-   text, or migrate text onto a separate scene-graph layer?
+3. **Text overlay strategy** — the surface analysis above (touch point #6) recommends Strategy A (textured-quad) for 3D world-space labels and Strategy D (transparent QWidget overlay) for HUD text, escalating to Strategy B (glyph atlas) or C (QQuickWidget) only if profiling demands it. Spike verifies the A+D combination renders correctly on Metal/D3D11/Vulkan via QRhi and meets the FPS baseline on `bpti.pdb` viewports. Also verifies the "single API per window" rule doesn't trip Strategy D unexpectedly.
 4. **Picking** — color-buffer FBO (current idiom) or 32-bit integer color
    attachment (more robust, supported in QRhi via `QRhiTexture` formats)?
 5. **Stereo / multi-display** — does QRhiWidget's "single API per window"
@@ -262,5 +284,12 @@ External sources consulted via WebSearch + WebFetch:
 - [Apple Developer — OpenGL deprecation](https://developer.apple.com/forums/thread/725247) — macOS OpenGL stuck at 4.1, deprecated since 10.14, Apple Silicon support not guaranteed long-term
 - [OGLDev tutorial 29 — 3D color-buffer picking](https://ogldev.org/www/tutorial29/tutorial29.html) — picking algorithm (backend-agnostic)
 - [Qt RHI Window Example](https://www.idedoc.com/archive/cpp/qt/Qt-6.7.2/qtgui/qtgui-rhiwindow-example.html) — minimal QRhi scaffolding reference
+
+**Text overlay deep-dive (2026-05-15):**
+- [Cube RHI Widget Example](https://doc.qt.io/Qt-6/qtwidgets-rhi-cuberhiwidget-example.html) — the documented QPainter→QImage→QRhiTexture pattern (dirty-flag cached, `QRhiResourceUpdateBatch::uploadTexture()`); explicit note that *"some widgets, with semi-transparency even, can be placed on top of the QRhiWidget"* (Strategy D)
+- [QRhiTexture / QRhiTextureUploadDescription docs](https://doc.qt.io/qt-6/qrhitextureuploaddescription.html) — batched-upload support for glyph-atlas pattern (Strategy B)
+- [QQuickWidget docs](https://doc.qt.io/qt-6/qquickwidget.html) — Strategy C overlay path; "single API per window" constraint applies to both QQuickWidget and QRhiWidget when stacked
+- [QPainter performance note (Qt Forum)](https://forum.qt.io/topic/160428/performance-of-qpainter) — software-rendering bottleneck warning; `Format_ARGB32_Premultiplied` / `Format_RGB32` / `Format_RGB16` are the fast formats
+- [QImage class docs](https://doc.qt.io/qt-6/qimage.html) — format performance ordering; `Format_ARGB32` is significantly slower than the premultiplied variant
 
 No molecular-viz-specific QRhi case study found in the searches. BALL would be doing something close to net-new in this domain on QRhi.
