@@ -267,6 +267,25 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
+### Phase 999.6: PIPE-01 — Pipeline Rewrite (OpenGL fixed-function → modern backend) (BACKLOG · DORMANT)
+
+**Goal:** Replace BALL's ~100 fixed-function OpenGL calls in `glRenderer.C` with a modern programmable-pipeline backend (QRhi via Metal/D3D11/Vulkan/OpenGL, or GL-core), eliminating the macOS-OpenGL-dead-end risk and matching Qt's strategic direction. **The transition itself, not its scope** — the scope (backend choice, task list, per-platform acceptance criteria) is **Phase 5 SPIKE-02's deliverable**, not this entry's.
+**Why DORMANT, not active:**
+  - Phase 5's spike (SPIKE-01) is what decides QRhi vs GL-core. Pre-scoping PIPE-01 before the spike locks in a backend assumption the spike would refute.
+  - Phase 5 also closes the ~17 deferred stereo/multi-display sites in `scene.C` — without those, PIPE-01 cannot swap the backend cleanly through `RendererFactory`.
+**Why this exists at all (1.6 release rationale):** macOS deprecated OpenGL in 10.14 (Mojave, 2018) — stuck at OpenGL 4.1, Apple Silicon support is not guaranteed long-term. Windows OpenGL drivers receive less vendor attention than D3D11/12 or Vulkan. v1.6 keeps fixed-function via the compat profile because that's enough for a shippable release; v2 is when the underlying pipeline catches up to current platform direction.
+**Depends on:**
+  - Phase 02.1 — Renderer boundary (DONE 2026-05-14): the `Renderer` / `RenderSurface` / `RendererFactory` seam PIPE-01 swaps behind
+  - Phase 5 — Qt 6 Migration: must land first; QRhi backend needs Qt 6.7+ (QRhiWidget) or Qt 6's modern OpenGL bindings
+  - Phase 5 SPIKE-01 — throwaway prototype against the boundary
+  - Phase 5 SPIKE-02 — decision record + scoped task list (this fills in the dormant entry)
+**Reference:** [`.planning/phases/999.6-pipe-01-pipeline-rewrite/PIPE-01-BACKLOG.md`](phases/999.6-pipe-01-pipeline-rewrite/PIPE-01-BACKLOG.md) — full known transition surface (4 documented leaks + 6 additional touch points), QRhi vs GL-core research, 8 open questions for the spike to resolve, research provenance.
+**Requirements:** TBD (Phase 5 SPIKE-02 emits them)
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (do NOT promote before Phase 5 + SPIKE-02 complete)
+
 ---
 *Roadmap created: 2026-05-14*
 *Mirrors `/Users/kohlbach/Claude/BALL/ROADMAP-1.6.md` (phases 1, 2, 3, 4a, 4b, 5, 6, 7, 8). Revised 2026-05-14 after Codex adversarial review — cheap fixes applied; structural changes (early CI phase, Phase 5 split, diagnostics requirement, feature matrix) pending a deliberate roadmap revision.*
