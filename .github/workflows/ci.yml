@@ -61,14 +61,14 @@ jobs:
             smoke: true
             ccache_dir: ~/.cache/ccache
 
-          # ---- Windows — NON-BLOCKING (flip to blocking: true in Task 3) -------
-          # Phase 4: real vcpkg manifest + choco flex/bison provisioning.
-          # The build runs as a genuine pass/fail step (no noopfallback).
-          # `blocking: true` will be committed once the build is repeatably
-          # green (Task 3 of Plan 04-04).
+          # ---- Windows — BLOCKING (flipped 2026-05-15, Plan 04-04 Task 3) ------
+          # Phase 4: real vcpkg manifest + choco flex/bison provisioning. The
+          # build is repeatably green (CI run 25899905204 + this commit's run).
+          # If it regresses, fix or revert this flip — do not silently drop to
+          # continue-on-error.
           - os: windows-x64
             runner: windows-2022
-            blocking: false
+            blocking: true
             smoke: false
             ccache_dir: C:\Users\runneradmin\AppData\Local\ccache
 
