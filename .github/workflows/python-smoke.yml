@@ -54,15 +54,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install system dependencies
-        # Qt6 + Boost + Eigen + FFTW are BALL's hard deps (the zomball
-        # branch's modernization commits explicitly target Qt6). Package
-        # names follow Ubuntu 22.04 (jammy) — `qt6-base-dev` not
-        # `libqt6base-dev`, the latter does not exist on jammy.
+        # Boost + Eigen + FFTW are libBALL's deps. The bindings build
+        # with BALL_HAS_VIEW=OFF (see the Configure step), so Qt is not
+        # needed — VIEW is the only Qt consumer. flex/bison ship
+        # pre-installed on GitHub's ubuntu-22.04 runner image.
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
               build-essential cmake \
-              qt6-base-dev libqt6core5compat6-dev qt6-tools-dev qt6-tools-dev-tools \
               libboost-all-dev \
               libeigen3-dev \
               libfftw3-dev
@@ -77,6 +76,8 @@ jobs:
           cmake .. \
               -DBALL_BUILD_PYTHON=ON \
               -DBUILD_TESTING=OFF \
+              -DBALL_HAS_VIEW=OFF \
+              -DBALL_PYTHON_SUPPORT=OFF \
               -DCMAKE_BUILD_TYPE=Release
 
       - name: Build BALL + ball_py module
