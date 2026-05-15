@@ -1681,7 +1681,7 @@ namespace BALL
 		for (Position i=0; i<27; ++i)
 		{
 			HashGridBox3<Item>* box = &box_[i];
-			for (typename HashGridBox3<Item>::DataIterator *item = box->beginData(); +item; ++item)
+			for (typename HashGridBox3<Item>::DataIterator item = box->beginData(); +item; ++item)
 			{
 				result = processor(*item);
 
@@ -1692,7 +1692,7 @@ namespace BALL
 			}
 		}
 
-		return processor->finish();
+		return processor.finish();
 	}
 
 	template <typename Item>
@@ -1716,7 +1716,7 @@ namespace BALL
 			}
 		}
 
-		return processor->finish();
+		return processor.finish();
 	}
 
 	template <typename Item>
