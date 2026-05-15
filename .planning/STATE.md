@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
-status: executing
-stopped_at: "Phase 4 (Dependency System Overhaul) COMPLETE — Windows CI green and blocking on run 25899905204; Phase 5.1 scaffolded for Phase 4 follow-ups (Codex-cross-checked warning + latent bug backlog)"
-last_updated: "2026-05-15T05:30:00.000Z"
+status: Phase 4 closed
+stopped_at: Phase 5 context gathered
+last_updated: "2026-05-15T07:05:10.766Z"
 progress:
-  total_phases: 17
+  total_phases: 18
   completed_phases: 6
-  total_plans: 18
+  total_plans: 17
   completed_plans: 17
-  percent: 94
+  percent: 33
 ---
 
 # STATE: BALLView 1.6 Modernization
@@ -134,7 +134,7 @@ roadmap/STATE after any gsd-tools phase op.
 
 **Last action:** Phase 4 (Dependency System Overhaul) marked COMPLETE — all 4 plans executed, Windows CI brought up on vcpkg manifest + choco provisioning over ~14 iterations, final green on run [25899905204](https://github.com/BALL-Project/ball/actions/runs/25899905204) (HEAD `6056f74`, GLU include fix), Windows job flipped `blocking: false` → `blocking: true`. Phase 5.1 spawned to capture the warning + latent bug backlog surfaced by the green build (~10k warning lines bucketed; Codex-cross-checked fix proposals in `.planning/phases/05.1-build-warnings-and-latent-bugs/05.1-BACKLOG.md`).
 
-**Stopped at:** Phase 4 closed; awaiting next-phase decision.
+**Stopped at:** Phase 5 context gathered
 
 **Next action:** Either **Phase 4.1** (Config Color-Defaults Fix, promoted backlog 999.4 — real user-facing bug, see roadmap) via `/gsd-plan-phase 4.1`, or **Phase 5** (Qt 6 Migration + Renderer Backend Spike) via `/gsd-discuss-phase 5`. Phase 5.1 (warnings cleanup) waits for Phase 5 to land first so Qt5-deprecation noise clears.
 
