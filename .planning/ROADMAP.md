@@ -13,9 +13,10 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 - [x] **Phase 02.1: Renderer boundary extraction** - Extract a Qt-GL-free `RenderSurface`/`RendererFactory` boundary so Phase 5 is a contained backend swap *(inserted; depends on Phase 2, blocks Phase 5)* (completed 2026-05-14)
 - [x] **Phase 02.2: CI and build-smoke matrix** - Early GitHub Actions build matrix (macOS-arm64/Linux/Windows) + a non-blank render smoke check + a GL-capability diagnostics log *(inserted per Codex review — pulled forward so Phases 3-9 land with a regression net)* (completed 2026-05-14)
 - [x] **Phase 3: Language Modernization** - Move the codebase to C++17, remove C++17-removed constructs, set the standard via CMake (completed 2026-05-14)
-- [ ] **Phase 4: Dependency System Overhaul** - Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix
+- [x] **Phase 4: Dependency System Overhaul** - Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix (completed 2026-05-15; Windows CI green + blocking on run 25899905204)
 - [ ] **Phase 4.1: Config Color-Defaults Fix** - Stop persisted `~/.BALLView` config from silently shadowing compiled element/residue color defaults *(promoted from backlog 999.4 — real user-facing bug)*
 - [ ] **Phase 5: Qt 6 Migration + Renderer Backend Spike** - Build against Qt 6 and replace deprecated VIEW APIs (keep the compat-profile GL path working), then a time-boxed renderer-backend decision spike behind the Phase 02.1 boundary *(former Phase 05.1 folded in — it must prototype against Qt 6)*
+- [ ] **Phase 5.1: Build Warnings & Latent Bug Cleanup** - Fix latent bugs and tame the warning surface surfaced by Phase 4's tri-OS CI (C4717 `getline` recursion, C4311 pointer truncation on Windows, C4910 dll-export mismatch, `-Wself-assign-field`, `-Wformat-overflow`); Codex CLI cross-checked. *(inserted 2026-05-15 — captures Phase 4 follow-ups; runs after Phase 5 so Qt 6 deprecation noise clears first)*
 - [ ] **Phase 6: Python Bindings** - Decide the binding generator via a vertical slice (5-10 core classes), then commit *(restructured per Codex review — was a single under-scoped criterion)*
 - [ ] ~~**Phase 7: Networking Rework**~~ - **Deferred to backlog 999.3** — not core value, the Asio code already compiles (Phase 1); the proper rework + test is 1.6.x polish
 - [ ] **Phase 8: Packaging & Distribution** - Notarizable macOS bundle (`data/` embedded, `macdeployqt`); documented build-from-source for Linux/Windows; license/distribution review
@@ -114,7 +115,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 - [x] 04-01-PLAN.md — Wave 1: config-mode finder migration (Eigen3/TBB/OpenBabel), ball_contrib de-referencing, min-version pinning (DEPS-01/03/04)
 - [x] 04-02-PLAN.md — Wave 1: CMakePresets.json (4 presets) + CI/BUILD-macos.md preset migration + FEAT-01 feature matrix annotation (DEPS-05/FEAT-01)
 - [x] 04-03-PLAN.md — Wave 2: OpenBabel 2.x→3.x API port across the 5-file surface + CI exercises it + chemistry smoke check (D-05)
-- [ ] 04-04-PLAN.md — Wave 2: vcpkg.json manifest + Windows CI provisioning to required-green (DEPS-02)
+- [x] 04-04-PLAN.md — Wave 2: vcpkg.json manifest + Windows CI provisioning to required-green (DEPS-02)
 
 ### Phase 4.1: Config Color-Defaults Fix (PROMOTED from backlog 999.4)
 
@@ -143,6 +144,14 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 **Sequencing note**: the Qt 6 migration (criteria 1-3) lands first; the spike (criteria 4-5) runs against the working Qt 6 build. Split into separate plan waves accordingly.
 **UI hint**: yes
 **Plans**: TBD
+
+### Phase 5.1: Build Warnings & Latent Bug Cleanup (INSERTED)
+**Goal**: Remove the latent bugs and tame the warning surface surfaced by Phase 4's CI matrix once it reached green on all three OSes (run [25899905204](https://github.com/BALL-Project/ball/actions/runs/25899905204), 2026-05-15). Tier A real bugs first — C4717 `getline` infinite recursion, C4311 pointer truncation on 64-bit Windows (MMFF94 force-field code), `-Wself-assign-field`, `-Wformat-overflow` in the CIF parser, `-Wtautological-constant-out-of-range-compare`. Tier B Windows DLL hygiene — C4910 `extern template class BALL_EXPORT` mismatch in `vector3.h`/`atom.h`, broaden the C4251 pragma. Tier C style cleanup deferred until Phase 5 (Qt 6) lands and strips `-Wdeprecated-declarations`.
+**Depends on**: Phase 4 (the Windows CI green run that surfaced the warnings), Phase 5 (resolves the bulk of Tier C deprecation noise)
+**Requirements**: TBD
+**Reference**: [`.planning/phases/05.1-build-warnings-and-latent-bugs/05.1-BACKLOG.md`](phases/05.1-build-warnings-and-latent-bugs/05.1-BACKLOG.md) — full warning census, per-task fix proposals, Codex CLI cross-check verdicts
+**UI hint**: no
+**Plans**: TBD (promote with /gsd-review-backlog or scope inline when starting work)
 
 ### Phase 6: Python Bindings
 **Goal**: Re-establish BALL's Python bindings on a supported Python (3.12+) and a maintained binding generator — via a decision-first vertical slice, not a blind full migration of all 237 `.sip` files. Restructured per the Codex review (SIP 6 migration vs a pybind11/nanobind rewrite are different projects; the generator must be *chosen* on evidence).
@@ -187,7 +196,7 @@ This roadmap mirrors the human-authored `/Users/kohlbach/Claude/BALL/ROADMAP-1.6
 | 02.1 Renderer boundary extraction | 3/3 | Complete    | 2026-05-14 |
 | 02.2 CI and build-smoke matrix | 2/2 | Complete    | 2026-05-14 |
 | 3. Language Modernization | 3/3 | Complete   | 2026-05-14 |
-| 4. Dependency System Overhaul | 0/4 | Planned (4 plans, 2 waves) | - |
+| 4. Dependency System Overhaul | 4/4 | Complete — CI green on all 4 jobs (incl. Windows blocking) on run 25899905204 | 2026-05-15 |
 | 4.1 Config Color-Defaults Fix | 0/0 | Not started (promoted from backlog 999.4) | - |
 | 5. Qt 6 Migration (4b) + Renderer Backend Spike | 0/0 | Not started (former Phase 05.1 folded in) | - |
 | 6. Python Bindings | 0/0 | Not started | - |

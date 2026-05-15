@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-05-14T16:16:39.711Z"
+stopped_at: "Phase 4 (Dependency System Overhaul) COMPLETE — Windows CI green and blocking on run 25899905204; Phase 5.1 scaffolded for Phase 4 follow-ups (Codex-cross-checked warning + latent bug backlog)"
+last_updated: "2026-05-15T05:30:00.000Z"
 progress:
   total_phases: 17
-  completed_phases: 5
-  total_plans: 17
-  completed_plans: 16
+  completed_phases: 6
+  total_plans: 18
+  completed_plans: 17
   percent: 94
 ---
 
@@ -19,16 +19,15 @@ progress:
 
 **Core Value:** BALLView must build and visibly render molecules on macOS, Linux, and Windows from current, supported dependencies — the 3D scene working cross-platform is the non-negotiable outcome.
 
-**Current Focus:** Phase 04 — dependency-system-overhaul
+**Current Focus:** Phase 4 closed — ready to start Phase 4.1 (Config Color-Defaults Fix, promoted backlog) or Phase 5 (Qt 6 Migration)
 
 ## Current Position
 
-Phase: 04 (dependency-system-overhaul) — EXECUTING
-Plan: 1 of 4
+Phase: 04 (dependency-system-overhaul) — COMPLETE (2026-05-15)
 **Phase:** 4 — Dependency System Overhaul
-**Plan:** Not started
-**Status:** Executing Phase 04
-**Progress:** [█████████░] 94%
+**Plans:** 4 of 4 complete (04-01, 04-02, 04-03, 04-04)
+**Status:** Phase 4 closed
+**Progress:** [██████████] 100% of Phase 4; overall 94% of v1.6 active phases
 
 ```
 Phase 1     [x]  Build Baseline
@@ -36,9 +35,10 @@ Phase 2     [x]  Rendering Port (4a)        — human-verified on macOS
 Phase 02.1  [x]  Renderer boundary extraction
 Phase 02.2  [x]  CI and build-smoke matrix  — CI green on all 4 jobs
 Phase 3     [x]  Language Modernization     — C++17, CI green on all 4 jobs
-Phase 4     [ ]  Dependency System Overhaul <- NEXT
-Phase 4.1   [ ]  Config Color-Defaults Fix  (promoted from backlog 999.4)
+Phase 4     [x]  Dependency System Overhaul — CI green on all 4 jobs incl. Windows blocking
+Phase 4.1   [ ]  Config Color-Defaults Fix  (promoted from backlog 999.4) <- NEXT (or skip to Phase 5)
 Phase 5     [ ]  Qt 6 Migration (4b) + Renderer Backend Spike  (former Phase 05.1 folded in)
+Phase 5.1   [ ]  Build Warnings & Latent Bug Cleanup  (inserted 2026-05-15 — Phase 4 follow-ups, Codex-cross-checked)
 Phase 6     [ ]  Python Bindings
 Phase 8     [ ]  Packaging & Distribution
 Phase 9     [ ]  Test Suite Triage
@@ -132,11 +132,11 @@ roadmap/STATE after any gsd-tools phase op.
 
 ## Session Continuity
 
-**Last action:** Phase 3 (Language Modernization) marked COMPLETE — all 3 plans executed, code review clean (0 critical / 1 pre-existing warning), gsd-verifier passed 3/3 must-haves, `phase complete 03` run. CI run 25862456769 (`446cf10`) is fully green (build macos/linux/windows + lint); render-smoke passed on macOS and Linux. Branch `v1.6-modernization` is at `446cf10` + planning-doc commits.
+**Last action:** Phase 4 (Dependency System Overhaul) marked COMPLETE — all 4 plans executed, Windows CI brought up on vcpkg manifest + choco provisioning over ~14 iterations, final green on run [25899905204](https://github.com/BALL-Project/ball/actions/runs/25899905204) (HEAD `6056f74`, GLU include fix), Windows job flipped `blocking: false` → `blocking: true`. Phase 5.1 spawned to capture the warning + latent bug backlog surfaced by the green build (~10k warning lines bucketed; Codex-cross-checked fix proposals in `.planning/phases/05.1-build-warnings-and-latent-bugs/05.1-BACKLOG.md`).
 
-**Stopped at:** Completed 04-03-PLAN.md
+**Stopped at:** Phase 4 closed; awaiting next-phase decision.
 
-**Next action:** Phase 4 — Dependency System Overhaul (`/gsd-discuss-phase 4` or `/gsd-plan-phase 4`). Delete `ball_contrib`, adopt Homebrew/system + vcpkg, config-mode `Find*.cmake`, `CMakePresets.json`, feature matrix. CI (Phase 02.2) remains the regression net.
+**Next action:** Either **Phase 4.1** (Config Color-Defaults Fix, promoted backlog 999.4 — real user-facing bug, see roadmap) via `/gsd-plan-phase 4.1`, or **Phase 5** (Qt 6 Migration + Renderer Backend Spike) via `/gsd-discuss-phase 5`. Phase 5.1 (warnings cleanup) waits for Phase 5 to land first so Qt5-deprecation noise clears.
 
 **Notes:**
 
