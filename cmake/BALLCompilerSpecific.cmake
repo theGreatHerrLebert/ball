@@ -81,24 +81,6 @@ ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	## NOMINMAX nor QT_NO_KEYWORDS actually reaches the compiler.
 	LIST(APPEND BALL_PROJECT_COMPILE_DEFNS "/DNOMINMAX")
 
-	## Silence the high-volume MSVC-only diagnostics that are noise for a
-	## library exporting STL types from DLLs (BALL's design):
-	##   C4251 — STL member in a dll-exported class needs dll-interface.
-	##           Legitimate for every BALL container; fixing each call site
-	##           would mean wrapping every std::vector<T>/std::map<...> in
-	##           BALL — out of scope and not what BALL was designed for.
-	##   C4244 — narrowing conversion (mostly in MSVC <utility> when STL
-	##           templates are instantiated with BALL types).
-	##   C4267 — size_t → smaller-type narrowing (same source as C4244).
-	##   C4996 — "deprecated" — fires for the BALL_DEPRECATED class
-	##           GeneticIndividual whenever the STL touches it from inside
-	##           vector<>; also covers MSVC's strcpy/sprintf deprecations
-	##           which are red herrings for portable code.
-	## Real bugs (C4717 string.iC recursion, C4910 dllexport+extern, C4311
-	## pointer truncation, C4834 nodiscard) are fixed at the source, not
-	## suppressed here.
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251 /wd4244 /wd4267 /wd4996")
-
 	## if requested, produce a parallel solution
 	OPTION(BALL_BUILD_SOLUTION_PARALLEL OFF)
 	IF (BALL_BUILD_SOLUTION_PARALLEL)
