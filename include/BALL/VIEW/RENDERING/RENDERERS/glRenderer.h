@@ -32,6 +32,15 @@
 
 #ifdef BALL_HAS_GLEW
 # include <GL/glew.h>
+// GLEW only exposes GL, not GLU — pull GLU in explicitly. On Linux/macOS
+// this previously worked through transitive system-header includes; on
+// Windows the vcpkg glew.h does not pull <GL/glu.h>, so gluSphere /
+// gluNewQuadric / GLUquadricObj end up undeclared without this.
+# ifdef BALL_OS_DARWIN
+#  include <OpenGL/glu.h>
+# else
+#  include <GL/glu.h>
+# endif
 #elif defined(BALL_OS_DARWIN)
 # include <OpenGL/gl.h>
 # include <OpenGL/glu.h>
