@@ -52,6 +52,20 @@ set_target_properties(ball_py PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python"
 )
 
+# Runtime search path for the installed extension. The install rule
+# below places ball_py and libBALL side by side at the wheel root, so
+# point the loader at the extension's own directory. Without this the
+# installed .so has an empty RPATH and `import ball` fails with
+# "libBALL.so.1.6: cannot open shared object file" until a wheel
+# repair tool (auditwheel / delocate) patches it. Setting $ORIGIN /
+# @loader_path makes the unrepaired wheel importable too, and leaves
+# the repair tools nothing to fix.
+if(APPLE)
+    set_target_properties(ball_py PROPERTIES INSTALL_RPATH "@loader_path")
+else()
+    set_target_properties(ball_py PROPERTIES INSTALL_RPATH "$ORIGIN")
+endif()
+
 # Install rule for the wheel build (scikit-build-core / pyproject.toml).
 #
 # Both targets install to the wheel root:

@@ -77,6 +77,18 @@ cmake.version      = ">=3.30"
 cmake.build-type   = "Release"
 build-dir          = "build/{wheel_tag}"
 wheel.packages     = []
+# `cmake --install` runs BALL's full install rules, which stage the
+# entire SDK — ~800 headers, docs/examples, CMake export configs, and
+# a second copy of libBALL under lib/. None of that belongs in a
+# Python wheel. Keep only what `import ball` needs at runtime: the
+# extension module, the root-level libBALL, and the share/BALL data
+# tree (Fragments.db, force-field parameters, rotamer library).
+wheel.exclude = [
+    "include/**",        # C++ headers — dev-only
+    "share/doc/**",      # Doxygen docs + EXAMPLES/*.C
+    "lib/cmake/**",      # BALLConfig*.cmake export package
+    "lib/libBALL.so*",   # duplicate libBALL — the root copy is kept
+]
 # Leave wheel.install-dir at its default (top-level site-packages).
 # Setting it to "ball" placed the extension at
 # site-packages/ball/ball.cpython-3X-...so, where `import ball`
