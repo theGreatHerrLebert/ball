@@ -59,10 +59,10 @@ set_target_properties(ball_py PROPERTIES
 # - ball_py provides the importable extension module
 #   `ball.cpython-3X-*.so` — without this, `import ball` after
 #   `pip install` fails with ModuleNotFoundError.
-# - BALL provides `libBALL.so.1.5`, the shared library the extension
+# - BALL provides `libBALL.so.1.6`, the shared library the extension
 #   links against. Without it in the wheel, `auditwheel repair`
 #   aborts with "Cannot repair wheel, because required library
-#   `libBALL.so.1.5` could not be located" — the build-tree path is
+#   `libBALL.so.1.6` could not be located" — the build-tree path is
 #   not on auditwheel's search path, so the only durable fix is to
 #   install the library into the wheel itself.
 #
