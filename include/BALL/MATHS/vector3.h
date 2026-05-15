@@ -1142,10 +1142,13 @@ namespace BALL
 // required for visual studio
 #ifdef BALL_COMPILER_MSVC
 #include <vector>
-extern template class BALL_EXPORT std::vector<Vector3>;
+// BALL_EXPORT belongs on the explicit instantiation DEFINITION (in
+// vector3.C); attaching __declspec(dllexport) to an `extern template`
+// DECLARATION is what triggers MSVC C4910.
+extern template class std::vector<Vector3>;
 #endif
 
-extern template class BALL_EXPORT TVector3<float>;
+extern template class TVector3<float>;
 
 }// namespace BALL
 

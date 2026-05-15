@@ -1759,13 +1759,17 @@ istream& getline(istream& is, BALL::String& str)
 BALL_INLINE
 istream& getline(istream& is, BALL::String&& str, char delim)
 {
-	return getline(is, move((string&)str), delim);
+	// Explicit template arguments force dispatch to the std::getline
+	// function template, not to this non-template overload itself —
+	// without them MSVC picks the non-template and warns C4717
+	// ("recursive on all control paths").
+	return getline<char, char_traits<char>, allocator<char> >(is, move((string&)str), delim);
 }
 
 BALL_INLINE
 istream& getline(istream& is, BALL::String&& str)
 {
-	return getline(is, move((string&)str));
+	return getline<char, char_traits<char>, allocator<char> >(is, move((string&)str));
 }
 
 } // namespace std

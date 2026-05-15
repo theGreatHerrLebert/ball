@@ -255,7 +255,8 @@ namespace BALL
 			
 			if (!descriptor_IDs_.empty())  // write descriptors and information about their transformation
 			{
-				descriptor_IDs_.begin();
+				// Removed dead `descriptor_IDs_.begin();` — its discarded
+				// iterator return value triggered C4834 with no side effect.
 				bool trained = (training_result_.rows() == descriptor_IDs_.size());
 				
 				std::multiset<unsigned int>::iterator d_it = descriptor_IDs_.begin();

@@ -7,20 +7,26 @@
 #include <BALL/COMMON/hash.h>
 
 #include <cmath>
+#include <cstdint>
 
 using std::sqrt;
 
-namespace BALL 
+namespace BALL
 {
 
 	/* Summary: Algorithm to do fast hashing of a pointer
-	 * The result of the hash function is a number in the range 
+	 * The result of the hash function is a number in the range
 	 * [0..(number_of_slots-1)].
+	 *
+	 * Note: use uintptr_t (pointer-width) instead of `unsigned long`, which
+	 * is 32-bit on MSVC LLP64 and would truncate 64-bit pointers (C4311) —
+	 * silently halving the hash quality of every pointer-keyed BALL HashMap
+	 * on Windows.
 	 */
 	HashIndex hashPointer(void *const void_ptr)
 	{
-		double d = ((double)((unsigned long)void_ptr)) * 0.6180339887;
-		Index index = (Index)(5832641097.37287 * (d - (double)((unsigned long)d)));
+		double d = ((double)((std::uintptr_t)void_ptr)) * 0.6180339887;
+		Index index = (Index)(5832641097.37287 * (d - (double)((std::uintptr_t)d)));
 
 		return ((index < 0) ? -index : index);
 	}

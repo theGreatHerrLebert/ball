@@ -7,10 +7,13 @@
 
 namespace BALL
 {
-template class TVector3<float>;
+// Explicit instantiation DEFINITION carries BALL_EXPORT (dllexport on MSVC);
+// the matching `extern template` declarations in vector3.h must NOT — that
+// combination triggers MSVC C4910.
+template class BALL_EXPORT TVector3<float>;
 
 #ifdef BALL_COMPILER_MSVC
-	template class std::vector<Vector3>;
+	template class BALL_EXPORT std::vector<Vector3>;
 #endif
 
 }
