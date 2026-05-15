@@ -22,15 +22,20 @@ SET(Boost_DETAILED_FAILURE_MSG ON)
 # Invoke Boost's config-mode package
 FIND_PACKAGE(Boost 1.70 REQUIRED COMPONENTS ${BALL_BOOST_COMPONENTS})
 
-# Provide the variables the rest of the BALL build expects
-IF(NOT Boost_LIBRARIES)
-	SET(Boost_LIBRARIES
-		Boost::chrono
-		Boost::date_time
-		Boost::iostreams
-		Boost::regex
-		Boost::serialization
-		Boost::thread
-		Boost::system
-	)
-ENDIF()
+# Link the explicit imported component targets unconditionally. Modern
+# BoostConfig favors Boost::<component> targets and may leave Boost_LIBRARIES
+# empty — or, on vcpkg/MSVC, populate it WITHOUT the compiled regex import
+# library. The latter surfaces only at link time as unresolved regcompA /
+# regexecA / regfreeA (the Boost.Regex POSIX C API used via <boost/regex.h>
+# by BALL::RegularExpression) when linking BALL.dll. Setting the targets
+# explicitly here guarantees every requested component reaches the link.
+# (Boost::system is omitted: header-only since Boost 1.69, not requested
+# above, so its imported target may not exist.)
+SET(Boost_LIBRARIES
+	Boost::chrono
+	Boost::date_time
+	Boost::iostreams
+	Boost::regex
+	Boost::serialization
+	Boost::thread
+)
