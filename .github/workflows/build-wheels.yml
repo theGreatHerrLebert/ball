@@ -95,7 +95,7 @@ jobs:
                 eigen3-devel \
                 fftw-devel \
                 flex bison \
-                bzip2-devel libzstd-devel
+                bzip2-devel libzstd-devel xz-devel zlib-devel
           # Repair: bundle libBALL.so + Qt5 + Boost into the wheel
           # so end users do not need them at install time. auditwheel
           # walks the .so's NEEDED list and pulls referenced libs.
@@ -103,7 +103,7 @@ jobs:
           # libBALL.so lives in scikit-build-core's per-wheel build
           # dir (`build/{wheel_tag}/lib`); auditwheel does not search
           # there by default, so the bare `auditwheel repair` aborts
-          # with "required library libBALL.so.1.5 could not be
+          # with "required library libBALL.so.1.6 could not be
           # located" even though the file exists. Prepend every such
           # directory under /project/build to LD_LIBRARY_PATH at
           # repair time so auditwheel can resolve the wheel's NEEDED
