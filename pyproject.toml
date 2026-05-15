@@ -93,9 +93,18 @@ wheel.packages     = []
 # runs ctest manually after install.
 
 [tool.scikit-build.cmake.define]
+# Build the pybind11 binding module (python/) and skip the test tree.
 BALL_BUILD_PYTHON  = "ON"
 BUILD_TESTING      = "OFF"
-# Disable the pieces of BALL we do not need for the bindings — keeps
-# the wheel lean and the build fast. Toggle BACK on locally if a
-# binding starts using something from these subsystems.
-BALL_BUILD_BENCHMARKS = "OFF"
+# Disable the pieces of BALL the bindings do not need — keeps the
+# wheel lean, the build fast, and the dependency closure small.
+# Toggle BACK on locally if a binding starts using one of these.
+#
+# BALL_PYTHON_SUPPORT — legacy SIP bindings. Dead, and a hard SIP
+#   dependency that aborts CMake configure when SIP is absent.
+#   Unrelated to the pybind11 path (BALL_BUILD_PYTHON above).
+# BALL_HAS_VIEW       — Qt/OpenGL VIEW + BALLView GUI. The pybind11
+#   module links only libBALL and includes nothing from VIEW, so
+#   building it just drags the whole Qt tree into the wheel.
+BALL_PYTHON_SUPPORT   = "OFF"
+BALL_HAS_VIEW         = "OFF"
