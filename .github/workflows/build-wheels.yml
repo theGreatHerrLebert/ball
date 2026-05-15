@@ -28,7 +28,7 @@ on:
       - "pyproject.toml"
       - ".github/workflows/build-wheels.yml"
   push:
-    branches: [zomball, master]
+    branches: [main]
     tags: ["v*"]
   workflow_dispatch:
 

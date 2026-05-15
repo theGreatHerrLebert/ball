@@ -12,7 +12,7 @@ name: Python smoke
 
 on:
   push:
-    branches: [zomball, master, "pybind11-bindings"]
+    branches: [main]
     paths:
       - "python/**"
       - "source/**"
