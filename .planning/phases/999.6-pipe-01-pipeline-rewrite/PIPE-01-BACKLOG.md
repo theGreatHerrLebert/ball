@@ -107,7 +107,11 @@ milestone (likely v2) so v1.6 can ship without it.
    - **BUT** positions via `glRasterPos3f` (fixed-function — dead in QRhi and GL-core 3.2+)
    - **AND** draws via `glDrawPixels` (fixed-function — dead in QRhi and GL-core 3.2+)
 
-   **Migration strategies (PIPE-01 picks the right combination, not the spike — the spike just verifies the chosen strategy works):**
+   **Decision (2026-05-15):**
+   - **Path 1 (HUD/screen-space): Strategy D — transparent QWidget overlay. LOCKED.** Rationale: no new dependency (no Qt Quick / QML pulled in), no glyph-atlas infrastructure to build, Qt's docs explicitly support this composition (semi-transparent widgets on top of QRhiWidget). HUD text in BALL is low-update by design (mode indicators, status text, not animated metrics), so Strategy C's higher performance ceiling isn't load-bearing. If a future feature needs a per-frame-animated HUD (live FPS counter, real-time energy readout), revisit B (glyph atlas) or C (Qt Quick overlay) for that specific surface — but the default path stays D.
+   - **Path 2 (3D world-space labels): Strategy A — textured-quad rendering. WORKING ASSUMPTION.** The spike verifies it renders correctly via QRhi (manual projection math + textured quad shader replaces `glRasterPos3f` + `glDrawPixels`); only escalates to B if per-label upload cost dominates.
+
+   **Migration strategies (rationale for the decision above):**
 
    - **Strategy A — Textured-quad rendering** (3D labels, Path 2). Reuse the existing QPainter→QImage step. Replace `glRasterPos3f` with manual projection-matrix math to compute screen-space anchor from the 3D label vertex. Replace `glDrawPixels` with a textured quad: `QRhiTexture` from the QImage via `QRhiResourceUpdateBatch::uploadTexture()`, then draw a 2-triangle quad with a simple textured fragment shader. Dirty-flag cache the texture per-label so re-upload only happens when the label text/font changes. **Verdict: clean fit, low risk, BALL is already 90% of the way there.**
 
@@ -117,7 +121,7 @@ milestone (likely v2) so v1.6 can ship without it.
 
    - **Strategy D — Transparent QWidget overlay** (HUD, Path 1). Place a normal transparent `QWidget` over the `QRhiWidget` and use `paintEvent` + `QPainter` for HUD text. Qt's widget compositor handles the overlay. The QRhiWidget docs explicitly note: *"some widgets, with semi-transparency even, can be placed on top of the QRhiWidget"*. **Verdict: simplest HUD migration, no new dependency, may be lower-performance than Strategy C (CPU-rendered QPainter onto a software-composited overlay) but acceptable for low-update HUDs (FPS counter, mode indicator).**
 
-   **Recommended combination (to verify in the spike):** A + D. Path 2 migrates to A (cleanest fit for BALL's existing pattern), Path 1 migrates to D (least change, no new dependency). Escalate to B or C only if profiling shows A/D doesn't meet the frame-budget.
+   **Spike's job on text overlay:** verify the locked Strategy D HUD path actually composites correctly on Metal (macOS), D3D11 (Windows), and Vulkan/OpenGL (Linux) — the single-API-per-window rule only constrains stacked QRhi-rendering widgets, but a non-rendering transparent QPainter overlay shouldn't trip it. Confirm focus/event routing through the transparent overlay reaches the QRhiWidget underneath (mouse/keyboard in the 3D scene must still work). And verify Strategy A handles the world-space label workload at the bpti.pdb baseline.
 
    **Known risks specific to text rendering:**
    - **Per-frame QPainter is a known bottleneck** — Qt docs explicitly say *"QPainter is currently designed for software rendering, will likely be a bottleneck in a graphics-intensive project"*. Must use dirty-flag caching everywhere; HUDs that animate per-frame (live FPS counter) need a different path (e.g. pre-rendered digit atlas).
@@ -221,7 +225,7 @@ not this doc.)
    correctly post-Phase-5 across Apple Silicon GPUs? If yes for 1-2 years,
    GL-core might be acceptable. If marginal, QRhi-via-Metal is the
    forcing function.
-3. **Text overlay strategy** — the surface analysis above (touch point #6) recommends Strategy A (textured-quad) for 3D world-space labels and Strategy D (transparent QWidget overlay) for HUD text, escalating to Strategy B (glyph atlas) or C (QQuickWidget) only if profiling demands it. Spike verifies the A+D combination renders correctly on Metal/D3D11/Vulkan via QRhi and meets the FPS baseline on `bpti.pdb` viewports. Also verifies the "single API per window" rule doesn't trip Strategy D unexpectedly.
+3. **Text overlay strategy — DECIDED 2026-05-15.** HUD/screen-space text locked to Strategy D (transparent QWidget overlay with QPainter); 3D world-space labels assumed Strategy A (textured-quad), spike verifies. Surface analysis at touch point #6 above. Spike validates: (a) Strategy D composites correctly through QRhiWidget on all 3 OSes; (b) focus/event routing through the transparent overlay reaches the underlying 3D scene; (c) Strategy A meets FPS baseline on bpti.pdb. Escalation paths (B, C) documented for revisit if a future feature needs per-frame-animated HUD.
 4. **Picking** — color-buffer FBO (current idiom) or 32-bit integer color
    attachment (more robust, supported in QRhi via `QRhiTexture` formats)?
 5. **Stereo / multi-display** — does QRhiWidget's "single API per window"
