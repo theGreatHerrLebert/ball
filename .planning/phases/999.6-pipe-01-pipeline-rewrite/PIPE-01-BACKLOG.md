@@ -215,6 +215,17 @@ not this doc.)
    viewport sizes? Spike measures both backends against this baseline on
    macOS arm64 + Windows D3D11/Vulkan.
 
+## TODOs (backend-independent prerequisites)
+
+These are known concrete tasks that hold regardless of whether the spike picks QRhi or GL-core. They are *not* the PIPE-01 task list (SPIKE-02 still owns that), but they will land *inside* PIPE-01 (or as a small dedicated phase ahead of it) because they have to be true before the rewrite can start.
+
+- [ ] **Qt 6.5 LTS → Qt 6.8 LTS migration** — Phase 5 lands on Qt 6.5 (the SEED-001 minimum for Milestone 2 "BALLView Refresh"). PIPE-01 requires Qt 6.8 LTS:
+  - **If QRhi wins:** Qt 6.7 added `QRhiWidget`; Qt 6.8 LTS is the current stable LTS with the longest support window — production-grade target.
+  - **If GL-core wins:** bump still pays off — Qt 6.8 LTS has the most mature OpenGL bindings, fewer deprecation surprises, longer security-support runway.
+  - **Surface to expect:** vcpkg `qtbase` version pin bump (currently Phase 4 sets it at the Qt 5.15 era; Phase 5 bumps to Qt 6.5; this bumps to 6.8); Homebrew `qt@6` is already at 6.8.x so macOS is essentially free; Linux distro packages vary (Ubuntu 24.04 LTS ships 6.4, so vcpkg / aqtinstall may be needed on Linux CI too); `CMakePresets.json` Qt-finder version constraints; any deprecation warnings introduced between 6.5 → 6.8 (typically minimal across an LTS-to-LTS hop).
+  - **Risk:** low. LTS-to-LTS Qt 6 hops are designed to be source-compatible. The cost is mostly CI dep-provisioning + presets, not source-code change.
+  - **Sequencing:** lands either as the first wave of PIPE-01 itself, or as a tiny dedicated sub-phase between Phase 5 and PIPE-01 (e.g. `999.6.1` or `5.2`) — SPIKE-02 decides which is cleaner.
+
 ## Acceptance criteria (filled in by Phase 5 SPIKE-02 — empty here)
 
 **TBD by the spike.** Expected shape (from Phase 5 success criterion #4-5):
