@@ -54,14 +54,17 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install system dependencies
-        # Boost + Eigen + FFTW are libBALL's deps. The bindings build
-        # with BALL_HAS_VIEW=OFF (see the Configure step), so Qt is not
-        # needed — VIEW is the only Qt consumer. flex/bison ship
+        # Qt5 + Boost + Eigen + FFTW are libBALL's deps. BALL v1.6
+        # links Qt5 5.15 Core/Network/Xml unconditionally
+        # (CMakeLists.txt FIND_PACKAGE(Qt5) — not gated by
+        # BALL_HAS_VIEW), so qtbase5-dev is required even though the
+        # bindings build with BALL_HAS_VIEW=OFF. flex/bison ship
         # pre-installed on GitHub's ubuntu-22.04 runner image.
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
               build-essential cmake \
+              qtbase5-dev \
               libboost-all-dev \
               libeigen3-dev \
               libfftw3-dev

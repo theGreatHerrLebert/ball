@@ -44,7 +44,7 @@ jobs:
       matrix:
         os: [ubuntu-22.04]
         # macos / windows can join later once the manylinux story is
-        # stable; BALL's Qt6 + Boost + Eigen dependency chain is
+        # stable; BALL's Qt5 + Boost + Eigen dependency chain is
         # heavier on those runners and is not v0.
 
     steps:
@@ -65,10 +65,10 @@ jobs:
           # proteon's >=3.11 floor and shave ~25% off wheel-build
           # wall time; 3.10 reaches EOL 2026-10 anyway.
           CIBW_BUILD: "cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64"
-          # manylinux_2_34 = AlmaLinux 9, glibc 2.34. Qt6 ships in EL9
-          # AppStream / CRB; the older manylinux_2_28 (AlmaLinux 8) only
-          # has Qt5, which BALL no longer supports on the zomball line.
-          # Cost of the bump: the resulting wheels require glibc >= 2.34
+          # manylinux_2_34 = AlmaLinux 9, glibc 2.34. EL9 ships Qt5
+          # (qt5-qtbase-devel, AppStream), which is what BALL v1.6
+          # links against — see CIBW_BEFORE_ALL_LINUX below.
+          # Cost of the image choice: the resulting wheels require glibc >= 2.34
           # on consumer systems, i.e. Ubuntu 22.04+ / Debian 12+ /
           # RHEL 9+ / Fedora 36+. Older distros fall back to building
           # from source via pyproject.toml + scikit-build-core.
@@ -80,21 +80,23 @@ jobs:
           # was built. The explicit quay.io image path is kept — it
           # resolves on any cibuildwheel version.
           CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux_2_34_x86_64:latest"
-          # System deps inside the container — Qt6 / Boost / Eigen /
-          # FFTW are not in the manylinux image by default. CRB
-          # (CodeReady Builder, the EL9 equivalent of bookworm
-          # contrib) carries some Qt6 component packages.
+          # System deps inside the container — Qt5 / Boost / Eigen /
+          # FFTW are not in the manylinux image by default. BALL v1.6
+          # links Qt5 5.15 (CMakeLists.txt FIND_PACKAGE(Qt5), required
+          # unconditionally for Core/Network/Xml). epel-release is
+          # added for eigen3-devel; CRB (CodeReady Builder) for the
+          # remaining -devel packages.
           CIBW_BEFORE_ALL_LINUX: |
             dnf install -y epel-release
             /usr/bin/crb enable
             dnf install -y \
-                qt6-qtbase-devel qt6-qt5compat-devel \
+                qt5-qtbase-devel \
                 boost-devel \
                 eigen3-devel \
                 fftw-devel \
                 flex bison \
                 bzip2-devel libzstd-devel
-          # Repair: bundle libBALL.so + Qt6 + Boost into the wheel
+          # Repair: bundle libBALL.so + Qt5 + Boost into the wheel
           # so end users do not need them at install time. auditwheel
           # walks the .so's NEEDED list and pulls referenced libs.
           #
