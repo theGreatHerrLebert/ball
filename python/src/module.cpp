@@ -58,6 +58,14 @@
 #include <BALL/STRUCTURE/buildBondsProcessor.h>
 #include <BALL/STRUCTURE/defaultProcessors.h>
 #include <BALL/STRUCTURE/numericalSAS.h>
+#include <BALL/STRUCTURE/reducedSurface.h>
+#include <BALL/STRUCTURE/solventExcludedSurface.h>
+#include <BALL/STRUCTURE/triangulatedSES.h>
+#include <BALL/STRUCTURE/analyticalSES.h>
+#include <BALL/MATHS/surface.h>
+#include <BALL/MATHS/sphere3.h>
+#include <BALL/MATHS/vector3.h>
+#include <BALL/KERNEL/molecule.h>
 #include <BALL/STRUCTURE/secondaryStructureProcessor.h>
 #include <BALL/STRUCTURE/RMSDMinimizer.h>
 #include <BALL/STRUCTURE/atomBijection.h>
@@ -908,6 +916,120 @@ py::dict rmsd(const std::string& pdb_a,
     });
 }
 
+// ---------------------------------------------------------------------------
+// Solvent-Excluded Surface: reduced surface -> SES -> singularity-cleaned ->
+// triangulated mesh. Oracle for proteon's SES port (TO_SES_TRIANGULATION.md).
+//
+// Both entry points take RAW SPHERES ([x,y,z,radius]) — the same input
+// proteon-core's surface pipeline takes — so synthetic fixtures and per-atom
+// radius choices are identical on both sides. The mesh path (ReducedSurface ->
+// SolventExcludedSurface -> TriangulatedSES -> exportSurface) and the analytic
+// area (Connolly's calculateSESArea) are INDEPENDENT BALL code lineages, so the
+// analytic area is a genuine cross-check on the mesh, not a restatement of it.
+// ---------------------------------------------------------------------------
+
+// Triangulated SES mesh from raw spheres. Returns vertices (V x 3), outward
+// normals (V x 3), triangles (T x 3, indices into vertices), plus metadata.
+// `density` is BALL's triangulation resolution (default 4.5; ~vertex density,
+// subdivision scales with sqrt(density)).
+py::dict ses_mesh(const std::vector<std::array<double, 4>>& spheres,
+                  double probe_radius,
+                  double density)
+{
+    std::vector<BALL::TSphere3<double>> balls;
+    balls.reserve(spheres.size());
+    for (const auto& s : spheres)
+    {
+        balls.emplace_back(BALL::TVector3<double>(s[0], s[1], s[2]), s[3]);
+    }
+
+    py::dict d;
+    try
+    {
+        BALL::ReducedSurface rs(balls, probe_radius);
+        rs.compute();
+
+        BALL::SolventExcludedSurface ses(&rs);
+        ses.compute();  // includes the singularity-cleaner loop (see Q1)
+
+        BALL::TriangulatedSES tses(&ses, density);
+        tses.compute();
+
+        BALL::Surface surf;
+        tses.exportSurface(surf);
+
+        std::vector<std::array<double, 3>> vertices;
+        std::vector<std::array<double, 3>> normals;
+        vertices.reserve(surf.vertex.size());
+        normals.reserve(surf.normal.size());
+        for (const auto& v : surf.vertex) vertices.push_back({v.x, v.y, v.z});
+        for (const auto& n : surf.normal) normals.push_back({n.x, n.y, n.z});
+
+        std::vector<std::array<int, 3>> triangles;
+        triangles.reserve(surf.triangle.size());
+        for (const auto& t : surf.triangle)
+        {
+            triangles.push_back({static_cast<int>(t.v1),
+                                 static_cast<int>(t.v2),
+                                 static_cast<int>(t.v3)});
+        }
+
+        d["vertices"]     = vertices;
+        d["normals"]      = normals;
+        d["triangles"]    = triangles;
+        d["n_vertices"]   = vertices.size();
+        d["n_triangles"]  = triangles.size();
+        // RS combinatorics (an L1 cross-check that travels with the mesh).
+        d["n_rs_vertices"] = rs.numberOfVertices();
+        d["n_rs_edges"]    = rs.numberOfEdges();
+        d["n_rs_faces"]    = rs.numberOfFaces();
+        d["probe_radius"] = probe_radius;
+        d["density"]      = density;
+        d["n_spheres"]    = spheres.size();
+    }
+    catch (BALL::Exception::GeneralException& e)
+    {
+        throw py::value_error(std::string("BALL SES mesh failed: ")
+                              + e.getName() + ": " + e.getMessage());
+    }
+    return d;
+}
+
+// Analytic SES area + volume (Connolly) from raw spheres. Independent of the
+// triangulation path above. Builds a minimal System from the spheres so the
+// AtomContainer-based analytic API can run.
+py::dict ses_area(const std::vector<std::array<double, 4>>& spheres,
+                  double probe_radius)
+{
+    BALL::System sys;
+    BALL::Molecule* mol = new BALL::Molecule;
+    for (const auto& s : spheres)
+    {
+        BALL::Atom* atom = new BALL::Atom;
+        atom->setPosition(BALL::Vector3(static_cast<float>(s[0]),
+                                        static_cast<float>(s[1]),
+                                        static_cast<float>(s[2])));
+        atom->setRadius(static_cast<float>(s[3]));
+        mol->insert(*atom);
+    }
+    sys.insert(*mol);
+
+    py::dict d;
+    try
+    {
+        d["area"]   = BALL::calculateSESArea(sys, static_cast<float>(probe_radius));
+        d["volume"] = BALL::calculateSESVolume(sys, static_cast<float>(probe_radius));
+        d["probe_radius"] = probe_radius;
+        d["n_spheres"]    = spheres.size();
+    }
+    catch (BALL::Exception::GeneralException& e)
+    {
+        throw py::value_error(std::string("BALL analytic SES failed: ")
+                              + e.getName() + ": " + e.getMessage());
+    }
+    return d;
+}
+
 }  // namespace
 
 PYBIND11_MODULE(ball, m) {
@@ -1054,6 +1176,40 @@ PYBIND11_MODULE(ball, m) {
           "'radii/PARSE.siz' is the standard implicit-solvent radius\n"
           "set. Use 'radii/amber94.siz' for AMBER-consistent radii.\n"
           "Areas in A^2; volume in A^3.");
+
+    m.def("ses_mesh",
+          &ses_mesh,
+          py::arg("spheres"),
+          py::arg("probe_radius") = 1.5,
+          py::arg("density") = 4.5,
+          "Triangulated Solvent-Excluded Surface mesh from raw spheres.\n"
+          "\n"
+          "spheres: sequence of [x, y, z, radius]. Runs BALL's\n"
+          "ReducedSurface -> SolventExcludedSurface (singularity-cleaned)\n"
+          "-> TriangulatedSES -> exportSurface.\n"
+          "\n"
+          "Returns a dict: vertices (V x 3), normals (V x 3), triangles\n"
+          "(T x 3 indices), n_vertices, n_triangles, n_rs_vertices/edges/\n"
+          "faces, probe_radius, density, n_spheres.\n"
+          "\n"
+          "density is BALL's triangulation resolution (default 4.5);\n"
+          "subdivision scales with sqrt(density). Oracle for proteon's\n"
+          "SES port — gate on invariants (area, watertightness, volume),\n"
+          "not vertex-exact equality (triangulation is non-unique).");
+
+    m.def("ses_area",
+          &ses_area,
+          py::arg("spheres"),
+          py::arg("probe_radius") = 1.5,
+          "Analytic SES area + volume (Connolly) from raw spheres.\n"
+          "\n"
+          "spheres: sequence of [x, y, z, radius]. Returns a dict:\n"
+          "area (A^2), volume (A^3), probe_radius, n_spheres.\n"
+          "\n"
+          "This is an INDEPENDENT BALL code path from ses_mesh (analytic,\n"
+          "not the reduced-surface/triangulation classes), so it is a\n"
+          "genuine cross-check on the mesh's surface area rather than a\n"
+          "restatement of the same intermediate state.");
 
     m.def("build_bonds",
           &build_bonds_in_pdb,
