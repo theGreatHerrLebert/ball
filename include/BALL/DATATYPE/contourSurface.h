@@ -302,7 +302,7 @@ namespace BALL
 	bool TContourSurface<T>:: operator == (const TContourSurface<T>& data) const
 	{
 		return ((threshold_    == data.threshold_)
-						 && Surface::operator == (data.data_));
+						 && Surface::operator == (data));
 	}
 
   template <typename T>

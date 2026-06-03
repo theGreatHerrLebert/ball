@@ -158,7 +158,7 @@ namespace BALL
 		// lead our parser to try and read another MOLFile, which won't succeed.
 		if (good())
 		{
-			streampos current_pos = tellg();
+			std::streampos current_pos = tellg();
 			String current_line = getLine();
 			Position current_line_number = line_number_;
 

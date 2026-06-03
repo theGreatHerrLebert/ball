@@ -11,22 +11,18 @@
 
 #include <functional>
 
-namespace BALL 
+namespace BALL
 {
-	using std::unary_function;
-	using std::binary_function;
-		
 	/**	@name	Predicates
-			
+
 			\ingroup ConceptsMiscellaneous
 	*/
 	//@{
-	
+
 	/**	Generic Unary Predicate Class
 	*/
-	template <typename T> 
-	class UnaryPredicate 
-		: public unary_function<T, bool> 
+	template <typename T>
+	class UnaryPredicate
 	{
 		public:
 		///
@@ -39,9 +35,8 @@ namespace BALL
 
 	/**	Generic Binary Predicate Class
 	*/
-	template <typename T1, typename T2> 
-	class BinaryPredicate 
-		: public binary_function<T1, T2, bool> 
+	template <typename T1, typename T2>
+	class BinaryPredicate
 	{
 		public:
 

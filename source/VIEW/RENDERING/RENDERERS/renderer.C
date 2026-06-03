@@ -86,6 +86,32 @@ namespace BALL
 		}
 
 
+		Renderer::Caps Renderer::capabilities() const
+		{
+			// Default matches the existing immediate-mode GLRenderer behaviour.
+			Caps caps;
+			caps.retained_mode = false;
+			caps.offscreen     = false;
+			caps.picking       = true;
+			caps.stereo        = true;
+			return caps;
+		}
+
+
+		void Renderer::renderRepresentations_(const RepresentationList& representations)
+		{
+			// Default: fan out to the existing per-representation immediate-mode path.
+			// Existing renderers (GLRenderer, POVRenderer, ...) inherit this unchanged,
+			// so behaviour is identical. A retained-mode backend overrides this.
+			for (RepresentationList::const_iterator it = representations.begin();
+			     it != representations.end(); ++it)
+			{
+				if (*it != 0)
+					renderOneRepresentation(**it);
+			}
+		}
+
+
 		void Renderer::render_(const GeometricObject* object)
 		{
 			// most used geometric objects first

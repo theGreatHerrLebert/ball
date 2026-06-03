@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "ball",
+  "version-string": "1.6.0-dev",
+  "dependencies": [
+    "qt5-base",
+    "qt5-tools",
+    "boost-any",
+    "boost-asio",
+    "boost-bind",
+    "boost-chrono",
+    "boost-core",
+    "boost-date-time",
+    "boost-foreach",
+    "boost-functional",
+    "boost-graph",
+    "boost-iostreams",
+    "boost-random",
+    "boost-regex",
+    "boost-serialization",
+    "boost-smart-ptr",
+    "boost-static-assert",
+    "boost-thread",
+    "boost-type-traits",
+    "boost-unordered",
+    "boost-variant",
+    "eigen3",
+    "fftw3",
+    "glew",
+    "tbb",
+    "libsvm"
+  ]
+}

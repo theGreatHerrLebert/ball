@@ -1,3 +1,6 @@
+// -*- Mode: C++; tab-width: 2; -*-
+// vi: set ts=2:
+//
 // ----------------------------------------------------
 // $Maintainer: Marcel Schumann $
 // $Authors: Marcel Schumann $
@@ -13,11 +16,19 @@
 #include <sstream>
 
 #ifdef BALL_HAS_OPENBABEL
-	#include <openbabel/obconversion.h>
-	#include <openbabel/parsmart.h>
-	#include <BALL/FORMAT/SDFile.h>
-	#include <openbabel/atom.h>
-	using namespace OpenBabel;
+  // OpenBabel 3.x explicit includes — mol.h no longer pulls these transitively.
+  // obiter.h: OBAtomIterator, OBBondIterator
+  // mol.h: OBMol
+  // atom.h: OBAtom
+  // bond.h: OBBond
+  #include <openbabel/mol.h>
+  #include <openbabel/atom.h>
+  #include <openbabel/bond.h>
+  #include <openbabel/obiter.h>
+  #include <openbabel/obconversion.h>
+  #include <openbabel/parsmart.h>
+  #include <BALL/FORMAT/SDFile.h>
+  using namespace OpenBabel;
 #endif
 
 using namespace BALL;
@@ -68,12 +79,18 @@ MolecularSimilarity::MolecularSimilarity(String smarts_file)
 #ifdef BALL_HAS_OPENBABEL
 OBMol* MolecularSimilarity::createOBMol(const Molecule& mol, bool ignore_hydrogen, bool suppress_warning)
 {
-	OBMol* obmol = new OBMol;
-	HashMap<const Atom*,OBAtom*> atoms;
-	HashMap<OBAtom*,HashSet<OBAtom*> > bonds;
-	HashMap<OBAtom*,HashSet<OBAtom*> >::iterator s_it;
-	HashSet<const Atom*> fixed_bonds;
-	bool warning_shown = false;
+  OBMol* obmol = new OBMol;
+  HashMap<const Atom*,OBAtom*> atoms;
+  HashMap<OBAtom*,HashSet<OBAtom*> > bonds;
+  HashMap<OBAtom*,HashSet<OBAtom*> >::iterator s_it;
+  HashSet<const Atom*> fixed_bonds;
+  bool warning_shown = false;
+
+  // OpenBabel 3.x: bracket the atom+bond-building loop with BeginModify/EndModify.
+  // EndModify() with nukePerceivedData=true (the default) resets all perception flags
+  // so implicit-H counts and aromaticity are freshly derived from the topology we build,
+  // rather than relying on 2.x's behavior of auto-clearing flags on modification.
+  obmol->BeginModify();
 
 	for(AtomConstIterator a_it=mol.beginAtom(); +a_it; a_it++)
 	{
@@ -235,9 +252,13 @@ OBMol* MolecularSimilarity::createOBMol(const Molecule& mol, bool ignore_hydroge
 		}
 	}
 
-	obmol->SetAromaticPerceived(); // make sure that detection of aromatic atoms/bonds will work later when using smarts-matcher
+  // Close the modification block: EndModify(true) resets all perception flags so that
+  // implicit-H counts, aromaticity, and hybridisation are freshly re-perceived from
+  // the topology and bond orders we have just built. This replaces the 2.x behaviour
+  // where molecule modification auto-cleared the perception flags.
+  obmol->EndModify();
 
-	return obmol;
+  return obmol;
 }
 
 

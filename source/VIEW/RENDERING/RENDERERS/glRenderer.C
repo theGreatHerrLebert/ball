@@ -105,7 +105,8 @@ namespace BALL
 				drawed_other_object_(false),
 				drawed_mesh_(false),
 				GLU_quadric_obj_(0),
-				orthographic_zoom_(10.f)
+				orthographic_zoom_(10.f),
+				pixel_ratio_(1.f)
 		{
 		}
 
@@ -1152,7 +1153,11 @@ namespace BALL
 				p.drawText(-r.x() + border, -r.y() + border, text);
 			p.end();
 
-			QImage gldata = QGLWidget::convertToGLFormat(pm);
+			// The legacy Qt4-era GL-widget format helper was removed. It did
+			// two things: convert to GL-native byte order and flip vertically.
+			// Format_RGBA8888 is GL byte order on little-endian (all targets);
+			// mirrored() supplies the vertical flip.
+			QImage gldata = pm.convertToFormat(QImage::Format_RGBA8888).mirrored();
 
 			glPushAttrib(GL_BLEND);
 			glEnable(GL_BLEND);
@@ -1963,8 +1968,13 @@ namespace BALL
 			single_pick_ = (width <= 3 && height <= 3);
 			clearNames_();
 
-			// calculate picking matrix
-			gluPickMatrix(center_x, viewport[3] - center_y, width, height, viewport);
+			// The mouse coordinates arrive in logical pixels, but the GL viewport
+			// (and hence gluPickMatrix's reference frame) is in device pixels on
+			// HiDPI targets. Scale the pick rectangle into device pixels so it
+			// lines up with what was rendered. pixel_ratio_ is 1.0 on non-HiDPI.
+			float pr = pixel_ratio_;
+			gluPickMatrix(center_x * pr, viewport[3] - center_y * pr,
+			              width * pr, height * pr, viewport);
 
 			// prepare camera
 			setProjection();
@@ -2070,6 +2080,15 @@ namespace BALL
 		// TODO: shouldn't we use a camera aperture angle?
 		void GLRenderer::setSize(float width, float height)
 		{
+			// A degenerate 0-sized resize (Qt can emit one before the widget has
+			// a real geometry) would divide by zero below and leave a NaN
+			// frustum. Ignore it — a real resize follows and recomputes
+			// everything.
+			if (width < 1.f || height < 1.f)
+			{
+				return;
+			}
+
 			width_ 	= width;
 			height_ = height;
 
@@ -2084,7 +2103,11 @@ namespace BALL
 				y_scale_ = height / (width * 2);
 			}
 
-			glViewport(0, 0, (int)width_, (int)height_);
+			// width_/height_ are logical pixels; the GL framebuffer of a HiDPI
+			// QOpenGLWidget is device-pixel sized. Upload the viewport in device
+			// pixels so the scene fills the whole framebuffer (x_scale_/y_scale_
+			// and the frustum are aspect-ratio based and unaffected by the scale).
+			glViewport(0, 0, (int)(width_ * pixel_ratio_), (int)(height_ * pixel_ratio_));
 
 			initPerspective();
 		}
@@ -2138,10 +2161,10 @@ namespace BALL
 			if (stage_->getCamera().getProjectionMode() == Camera::PERSPECTIVE)
 				glFrustum(new_left, new_right, new_bottom, new_top, near_, far_);
 			else
-				glOrtho(new_left   * orthographic_zoom_, new_right * orthographic_zoom_, 
+				glOrtho(new_left   * orthographic_zoom_, new_right * orthographic_zoom_,
 				        new_bottom * orthographic_zoom_, new_top   * orthographic_zoom_, near_, far_);
 
-			glViewport(0, 0, width_, height_);
+			glViewport(0, 0, (int)(width_ * pixel_ratio_), (int)(height_ * pixel_ratio_));
 
 			glMatrixMode(GL_MODELVIEW);
 		}

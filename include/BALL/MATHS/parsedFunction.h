@@ -11,8 +11,6 @@
 
 #include <numeric>
 
-using std::unary_function;
-
 extern double ParsedFunctionResult;
 extern int ParsedFunctionparse();
 extern void ParsedFunction_initBuffer(const char*);
@@ -33,9 +31,8 @@ namespace BALL
 			the argument of the operator call and the function string
 			is parsed and evaluated.
 	*/
-	template <typename arg> 
-	class ParsedFunction 
-		: public unary_function<arg, double> 
+	template <typename arg>
+	class ParsedFunction
 	{
 		public:
 			/** @name Constructors and Destructors

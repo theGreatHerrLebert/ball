@@ -255,7 +255,6 @@ namespace BALL
 
 		
 		struct RotamerProbabilityGreaterThan_
-			: std::binary_function<Rotamer, Rotamer, bool>
 		{
 			bool operator () (const Rotamer& r1, const Rotamer& r2)
 			{

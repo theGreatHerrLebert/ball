@@ -9,6 +9,13 @@
 #	include <BALL/common.h>
 #endif
 
+// Boost.Regex C++ API for the actual matching engine; <boost/regex.h>
+// (the POSIX C-API compatibility header) is kept only for the POSIX flag
+// constants (REG_EXTENDED, REG_NOSUB, ...) still exposed in this class's
+// public default arguments. The POSIX C functions themselves (regcomp/
+// regexec/regfree) are no longer linkable from modern Boost — the engine
+// uses boost::regex / boost::regex_search instead.
+#include <boost/regex.hpp>
 #include <boost/regex.h>
 
 #if !defined(__GNUC__) && !defined(__KAI__) && defined(IRIX)
@@ -268,8 +275,8 @@ namespace BALL
 
 		void toExtendedRegularExpression_();
 
-		regex_t regex_;
-		
+		boost::regex regex_;
+
 		String 	pattern_;
 		bool 		valid_pattern_;
 	};

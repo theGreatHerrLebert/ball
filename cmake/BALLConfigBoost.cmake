@@ -1,25 +1,41 @@
 # Find and configure Boost library
-SET(Boost_NO_BOOST_CMAKE ON)
+# Use Boost's own BoostConfig.cmake (config mode) for modern Boost (>= 1.70)
+IF(POLICY CMP0167)
+	CMAKE_POLICY(SET CMP0167 NEW)
+ENDIF()
 
 # Mandatory boost components
+# Note: 'system' is header-only since Boost 1.69 and no longer a findable
+# compiled component in recent Boost CMake configs.
 SET(BALL_BOOST_COMPONENTS
 	chrono
 	date_time
 	iostreams
 	regex
 	serialization
-	system
 	thread
 )
-
-
-# Additional Boost versions that should be included by CMake
-# CMake 3.1, which is minimum for configuring BALL, already knowns versions 1.33 up to 1.56
-SET(Boost_ADDITIONAL_VERSIONS "1.65.0" "1.65" "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61"
-                              "1.60.0" "1.60" "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57")
 
 # Detailed messaging in case of failures
 SET(Boost_DETAILED_FAILURE_MSG ON)
 
-# Invoke CMake FindBoost module
-FIND_PACKAGE(Boost 1.55 REQUIRED COMPONENTS ${BALL_BOOST_COMPONENTS})
+# Invoke Boost's config-mode package
+FIND_PACKAGE(Boost 1.70 REQUIRED COMPONENTS ${BALL_BOOST_COMPONENTS})
+
+# Link the explicit imported component targets unconditionally. Modern
+# BoostConfig favors Boost::<component> targets and may leave Boost_LIBRARIES
+# empty — or, on vcpkg/MSVC, populate it WITHOUT the compiled regex import
+# library. The latter surfaces only at link time as unresolved regcompA /
+# regexecA / regfreeA (the Boost.Regex POSIX C API used via <boost/regex.h>
+# by BALL::RegularExpression) when linking BALL.dll. Setting the targets
+# explicitly here guarantees every requested component reaches the link.
+# (Boost::system is omitted: header-only since Boost 1.69, not requested
+# above, so its imported target may not exist.)
+SET(Boost_LIBRARIES
+	Boost::chrono
+	Boost::date_time
+	Boost::iostreams
+	Boost::regex
+	Boost::serialization
+	Boost::thread
+)

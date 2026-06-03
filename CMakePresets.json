@@ -1,0 +1,84 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_POLICY_VERSION_MINIMUM": "3.5",
+        "BALL_PYTHON_SUPPORT": "OFF",
+        "USE_RTFACT": "OFF",
+        "BALL_HAS_VIEW": "ON"
+      }
+    },
+    {
+      "name": "macos-homebrew",
+      "displayName": "macOS / Homebrew",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "/opt/homebrew/opt/qt@5;/opt/homebrew",
+        "BISON_EXECUTABLE": "/opt/homebrew/opt/bison/bin/bison",
+        "FLEX_EXECUTABLE": "/opt/homebrew/opt/flex/bin/flex"
+      }
+    },
+    {
+      "name": "linux-system",
+      "displayName": "Linux / system packages",
+      "inherits": "base",
+      "cacheVariables": {
+        "BISON_EXECUTABLE": "/usr/bin/bison",
+        "FLEX_EXECUTABLE": "/usr/bin/flex",
+        "USE_LPSOLVE": "OFF"
+      }
+    },
+    {
+      "name": "windows-vcpkg",
+      "displayName": "Windows / vcpkg",
+      "inherits": "base",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-release",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/cmake/vcpkg-triplets",
+        "USE_LPSOLVE": "OFF",
+        "BALL_HAS_OPENBABEL": "OFF"
+      }
+    },
+    {
+      "name": "ci-macos",
+      "inherits": "macos-homebrew",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "BALL_HAS_OPENBABEL": "ON"
+      }
+    },
+    {
+      "name": "ci-linux",
+      "inherits": "linux-system",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "BALL_HAS_OPENBABEL": "ON"
+      }
+    },
+    {
+      "name": "ci-windows",
+      "inherits": "windows-vcpkg",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "macos-homebrew", "configurePreset": "macos-homebrew" },
+    { "name": "linux-system", "configurePreset": "linux-system" },
+    { "name": "windows-vcpkg", "configurePreset": "windows-vcpkg" },
+    { "name": "ci-macos", "configurePreset": "ci-macos" },
+    { "name": "ci-linux", "configurePreset": "ci-linux" },
+    { "name": "ci-windows", "configurePreset": "ci-windows" }
+  ]
+}

@@ -1,5 +1,10 @@
+# Skip translation handling when Qt5LinguistTools is unavailable. RETURN()
+# takes no positional argument — RETURN(0) errors on CMake >= 3.25 unless
+# CMP0140 is OLD. This branch was previously never exercised because every
+# CI/dev environment shipped Qt5LinguistTools; the Windows vcpkg build does
+# not (qt5-tools is not in the manifest), which surfaced the bug.
 IF(NOT Qt5LinguistTools_FOUND)
-	RETURN (0)
+	RETURN()
 ENDIF()
 
 
@@ -33,7 +38,7 @@ ADD_CUSTOM_TARGET(translations DEPENDS ${PROJECT_QM_FILES})
 # Copy compiled .qm files into translations directory
 # Copying multiple files with a single 'cmake -E copy' works from CMake 3.5+
 FOREACH(PROJECT_QM_FILE ${PROJECT_QM_FILES})
-	ADD_CUSTOM_COMMAND(TARGET translations
+	ADD_CUSTOM_COMMAND(TARGET translations POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_QM_FILE} ${TRANSLATION_DIR}
 		)
 ENDFOREACH()

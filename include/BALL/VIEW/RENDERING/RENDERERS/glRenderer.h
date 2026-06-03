@@ -32,6 +32,15 @@
 
 #ifdef BALL_HAS_GLEW
 # include <GL/glew.h>
+// GLEW only exposes GL, not GLU — pull GLU in explicitly. On Linux/macOS
+// this previously worked through transitive system-header includes; on
+// Windows the vcpkg glew.h does not pull <GL/glu.h>, so gluSphere /
+// gluNewQuadric / GLUquadricObj end up undeclared without this.
+# ifdef BALL_OS_DARWIN
+#  include <OpenGL/glu.h>
+# else
+#  include <GL/glu.h>
+# endif
 #elif defined(BALL_OS_DARWIN)
 # include <OpenGL/gl.h>
 # include <OpenGL/glu.h>
@@ -172,7 +181,7 @@ namespace BALL
 
 			/** Set the GL_FOG intensity
 			 */
-			void setFogIntensity(float intensity);
+			void setFogIntensity(float intensity) override;
 
 			///
 			void enterPickingMode();
@@ -182,6 +191,18 @@ namespace BALL
 
 			///
 			void setSize(float width, float height);
+
+			/** Set the device-pixel ratio of the render target.
+			 *  width_/height_ (and all picking / viewport-to-3D math) stay in
+			 *  logical pixels; this factor is applied only where the actual GL
+			 *  viewport is uploaded, so the GLRenderer fills the full
+			 *  device-pixel framebuffer of a HiDPI QOpenGLWidget. On non-HiDPI
+			 *  displays this is 1.0 and a no-op.
+			 */
+			void setPixelRatio(float ratio) { pixel_ratio_ = (ratio > 0.f) ? ratio : 1.f; }
+
+			///
+			float getPixelRatio() const { return pixel_ratio_; }
 
 			///
 			float getXScale() const;
@@ -456,6 +477,11 @@ namespace BALL
 
 			//_
 			float 								y_scale_;
+
+			// Device-pixel ratio of the render target (1.0 = non-HiDPI).
+			// Applied only when uploading the GL viewport; width_/height_ and
+			// all picking math remain in logical pixels.
+			float 								pixel_ratio_;
 
 			GLDisplayList* 				GL_spheres_list_;
 			GLDisplayList* 				GL_tubes_list_;

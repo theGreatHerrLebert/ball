@@ -45,12 +45,8 @@ IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		SET(USE_PEDANTIC OFF)
 	ENDIF()
 
-	SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -std=c++0x")
-
-	# Added -Wno-deprecated-declarations as Eigen3 currently uses binder2nd which spams the compiler output.
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 
 	IF(USE_PEDANTIC)
 		SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -pedantic")
@@ -79,7 +75,11 @@ ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
 	## disable min and max macros by default
 	## see CGAL and BOOST configs for more elaborate explanations
-	SET(BALL_PROJECT_COMPILE_DEFNS "${BALL_PROJECT_COMPILE_DEFNS} /DNOMINMAX")
+	## NOTE: BALL_PROJECT_COMPILE_DEFNS is a CMake list (LIST(APPEND ...) is
+	## used elsewhere). Append a list element, not a space-joined string —
+	## otherwise ADD_DEFINITIONS receives one mangled argument and neither
+	## NOMINMAX nor QT_NO_KEYWORDS actually reaches the compiler.
+	LIST(APPEND BALL_PROJECT_COMPILE_DEFNS "/DNOMINMAX")
 
 	## if requested, produce a parallel solution
 	OPTION(BALL_BUILD_SOLUTION_PARALLEL OFF)
@@ -125,8 +125,6 @@ ELSEIF(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang") # matches Clang and AppleClang
 		CXX_COMPILER_VERSION_MINOR ${CXX_COMPILER_VERSION})
 
 	SET(CXX_COMPILER_VERSION "${CXX_COMPILER_VERSION_MAJOR}.${CXX_COMPILER_VERSION_MINOR}")
-
-	SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -std=c++11")
 
 	IF(USE_ASAN)
 		SET(BALL_PROJECT_COMPILE_FLAGS "${BALL_PROJECT_COMPILE_FLAGS} -fsanitize=address -fno-omit-frame-pointer")

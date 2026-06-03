@@ -185,6 +185,39 @@ namespace BALL
 			*/
 			virtual bool renderOneRepresentation(const Representation& representation);
 
+			/** Capability descriptor: lets RenderSetup/Scene branch on capability,
+			 *  not on concrete renderer type.
+			 */
+			struct Caps
+			{
+				bool retained_mode;  ///< true if the backend prefers renderRepresentations_() over per-primitive virtuals
+				bool offscreen;      ///< true if the backend can render offscreen (FBO / file)
+				bool picking;        ///< true if the backend supports pickObjects()
+				bool stereo;         ///< true if the backend supports stereo setups
+			};
+
+			/** Report this renderer's capabilities.
+			 *  Default: immediate-mode, on-screen, picking, stereo.
+			 *  NON-pure on purpose: this is an ADDITIVE change; existing renderers
+			 *  must compile untouched. A retained-mode backend overrides this.
+			 */
+			virtual Caps capabilities() const;
+
+			/** Batched, retained-mode render entry point.
+			 *  Default implementation fans out to renderOneRepresentation() for each
+			 *  representation, so existing immediate-mode renderers are unaffected.
+			 *  A retained-mode backend (QRhi / GL-core) overrides THIS instead of the
+			 *  per-primitive render*_() virtuals.
+			 */
+			virtual void renderRepresentations_(const RepresentationList& representations);
+
+
+			/** Set the fog intensity.
+			 *  Default is a no-op; only fog-capable backends (GLRenderer) override
+			 *  it. Declared on the base so callers (Scene) need not know the
+			 *  concrete renderer type to set fog.
+			 */
+			virtual void setFogIntensity(float /*intensity*/) {}
 
 			/** Buffer a Representation for later rendering.
 			 */

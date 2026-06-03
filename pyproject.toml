@@ -1,0 +1,122 @@
+# Build BALL + the pybind11 binding module as a single Python wheel.
+#
+# Maintainer note (Thomas / future contributors):
+# `pip install .` from this repo configures CMake with
+#   -DBALL_BUILD_PYTHON=ON -DBUILD_TESTING=OFF
+# and produces a wheel that contains the prebuilt libBALL.so plus the
+# `ball` extension module. The first build is slow (BALL's full C++
+# tree compiles); subsequent reinstall reuses the build dir under
+# pip's cache. CI publishes prebuilt wheels via cibuildwheel so end
+# users do not pay the build cost — see
+# .github/workflows/build-wheels.yml.
+
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11>=2.13"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "ball-py"
+version = "0.1.0a6"
+description = "Python bindings for BALL — Biochemical ALgorithms Library"
+readme = "python/README.md"
+requires-python = ">=3.11"
+license = { text = "LGPL-2.1-or-later" }
+authors = [
+    { name = "BALL Project contributors" },
+]
+maintainers = [
+    { name = "Thomas Kemmer" },
+    { name = "David Teschner" },
+]
+keywords = [
+    "bioinformatics",
+    "computational-chemistry",
+    "force-field",
+    "molecular-mechanics",
+    "structural-biology",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+
+[project.urls]
+Homepage   = "https://github.com/theGreatHerrLebert/ball"
+Source     = "https://github.com/theGreatHerrLebert/ball"
+Issues     = "https://github.com/theGreatHerrLebert/ball/issues"
+Upstream   = "https://github.com/BALL-Project/ball"
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[tool.scikit-build]
+# CMake source dir is the repo root; the python/ subdir is pulled in
+# via the BALL_BUILD_PYTHON option. Wheel installs only the binding
+# .so; libBALL.so itself is built as a transitive dependency in the
+# same build tree but does not need to be inside the wheel because
+# the wheel-repair tools (auditwheel / delocate / delvewheel) bundle
+# the right .so files when CI builds wheels for distribution.
+cmake.source-dir   = "."
+# CMake 3.30+ — BALL's top-level CMakeLists.txt requires it. AlmaLinux 9
+# (the manylinux_2_34 base for the wheel build) ships 3.26.5; with
+# scikit-build-core seeing cmake.version >= 3.30 it will fall back to
+# installing the cmake PyPI package (binary distribution), bypassing
+# the system cmake automatically. Local builds with a newer system
+# cmake stay on the system one.
+cmake.version      = ">=3.30"
+cmake.build-type   = "Release"
+build-dir          = "build/{wheel_tag}"
+wheel.packages     = []
+# `cmake --install` runs BALL's full install rules, which stage the
+# entire SDK — ~800 headers, docs/examples, CMake export configs, and
+# a second copy of libBALL under lib/. None of that belongs in a
+# Python wheel. Keep only what `import ball` needs at runtime: the
+# extension module, the root-level libBALL, and the share/BALL data
+# tree (Fragments.db, force-field parameters, rotamer library).
+wheel.exclude = [
+    "include/**",        # C++ headers — dev-only
+    "share/doc/**",      # Doxygen docs + EXAMPLES/*.C
+    "lib/cmake/**",      # BALLConfig*.cmake export package
+    "lib/libBALL.so*",   # duplicate libBALL — the root copy is kept
+]
+# Leave wheel.install-dir at its default (top-level site-packages).
+# Setting it to "ball" placed the extension at
+# site-packages/ball/ball.cpython-3X-...so, where `import ball`
+# finds the *directory* and not the extension module — yielding
+# AttributeError on every binding access. The pybind11 module is
+# already named `ball` via OUTPUT_NAME in python/CMakeLists.txt and
+# PYBIND11_MODULE(ball, ...) in module.cpp, so the .so installs as
+# `site-packages/ball.cpython-3X-...so` — directly importable.
+
+# scikit-build-core does not invoke ctest as part of the wheel build,
+# so there is no separate skip-tests knob to set here. Test targets
+# the parent CMakeLists registers (the python_smoke target in
+# python/CMakeLists.txt) are simply not built unless the consumer
+# runs ctest manually after install.
+
+[tool.scikit-build.cmake.define]
+# Build the pybind11 binding module (python/) and skip the test tree.
+BALL_BUILD_PYTHON  = "ON"
+BUILD_TESTING      = "OFF"
+# Disable the pieces of BALL the bindings do not need — keeps the
+# wheel lean, the build fast, and the dependency closure small.
+# Toggle BACK on locally if a binding starts using one of these.
+#
+# BALL_PYTHON_SUPPORT — legacy SIP bindings. Dead, and a hard SIP
+#   dependency that aborts CMake configure when SIP is absent.
+#   Unrelated to the pybind11 path (BALL_BUILD_PYTHON above).
+# BALL_HAS_VIEW       — Qt/OpenGL VIEW + BALLView GUI. The pybind11
+#   module links only libBALL and includes nothing from VIEW, so
+#   building it just drags the whole Qt tree into the wheel.
+BALL_PYTHON_SUPPORT   = "OFF"
+BALL_HAS_VIEW         = "OFF"

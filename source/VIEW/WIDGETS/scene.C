@@ -31,6 +31,8 @@
 #include <BALL/VIEW/RENDERING/RENDERERS/STLRenderer.h>
 #include <BALL/VIEW/RENDERING/RENDERERS/tilingRenderer.h>
 #include <BALL/VIEW/RENDERING/glOffscreenTarget.h>
+#include <BALL/VIEW/RENDERING/rendererFactory.h>
+#include <BALL/VIEW/RENDERING/renderSurface.h>
 
 #include <BALL/VIEW/PRIMITIVES/simpleBox.h>
 #include <BALL/VIEW/PRIMITIVES/box.h>
@@ -83,7 +85,9 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QInputDialog>
 #include <QtWidgets/QProgressBar>
-#include <QtOpenGL/QGLPixelBuffer>
+#include <QtGui/QSurfaceFormat>
+#include <QtGui/QOpenGLContext>
+#include <QtGui/QOffscreenSurface>
 #include <QtWidgets/QMessageBox>
 
 #include <boost/random/mersenne_twister.hpp>
@@ -129,7 +133,7 @@ namespace BALL
 				rb_(new QRubberBand(QRubberBand::Rectangle, this)),
 				stage_(new Stage),
 				renderers_(),
-				gl_renderer_(new GLRenderer),
+				gl_renderer_(static_cast<GLRenderer*>(RendererFactory::makeRenderer(RendererFactory::Kind::OpenGL_Fixed))),
 #ifdef BALL_HAS_RTFACT
 				rt_renderer_(new t_RaytracingRenderer()),
 #endif
@@ -145,7 +149,7 @@ namespace BALL
 				show_fps_(false),
 				toolbar_view_controls_(new QToolBar(tr("3D View Controls"))),
 				toolbar_edit_controls_(new QToolBar(tr("Edit Controls"))),
-				main_display_(new GLRenderWindow(this)),
+				main_display_(static_cast<GLRenderWindow*>(RendererFactory::makeSurface(RendererFactory::Kind::OpenGL_Fixed, this))),
 				main_renderer_(0),
 				stereo_left_eye_(-1),
 				stereo_right_eye_(-1),
@@ -166,10 +170,9 @@ namespace BALL
 				setObjectName(name);
 				setAcceptDrops(true);
 
-				init();
-				renderers_[main_renderer_]->resize(width(), height());
-				renderers_[main_renderer_]->start();
-
+				// GL-context-dependent init (init()/resize()/start()) is deferred
+				// to initializeGLContext(), invoked from GLRenderWindow::initializeGL()
+				// once QOpenGLWidget has lazily created its GL context on first show.
 				registerWidget(this);
 			}
 
@@ -435,11 +438,19 @@ namespace BALL
 			for (Position i=0; i<renderers_.size(); ++i)
 			{
 				renderers_[i]->init();
-				GLRenderWindow* gt = dynamic_cast<GLRenderWindow*>(renderers_[i]->target);
-				if (gt)
+				// Route through the RenderSurface interface instead of naming the
+				// concrete GLRenderWindow type; the QWidget to install the filter
+				// on is reached via the surface's opaque native handle.
+				RenderSurface* surface = dynamic_cast<RenderSurface*>(renderers_[i]->target);
+				if (surface)
 				{
-					gt->ignoreEvents(true);
-					gt->installEventFilter(this);
+					// NOTE: do NOT ignoreEvents(true) here. In the QGLWidget era
+					// the Scene drove all rendering and the GL widget had to be
+					// kept passive. With QOpenGLWidget the widget's own paintGL()
+					// IS the render path and must run — see GLRenderWindow::
+					// paintGL() and Scene::eventFilter().
+					if (QObject* surface_obj = static_cast<QObject*>(surface->nativeHandle()))
+						surface_obj->installEventFilter(this);
 				}
 			}
 
@@ -564,7 +575,10 @@ namespace BALL
 		{
 			for (Position i=0; i<renderers_.size(); ++i)
 			{
-				if (static_cast<QObject*>(dynamic_cast<GLRenderWindow*>(renderers_[i]->target)) != object)
+				// Match the event's object against the surface's native QObject,
+				// reached through the RenderSurface interface (no concrete type).
+				RenderSurface* surface = dynamic_cast<RenderSurface*>(renderers_[i]->target);
+				if (!surface || static_cast<QObject*>(surface->nativeHandle()) != object)
 					continue;
 
 				bool filter_out = false;
@@ -574,12 +588,21 @@ namespace BALL
 				switch (event->type())
 				{
 					case QEvent::Resize:
-						// we already handle resize events for our child widgets
-						filter_out = true;
+						// Let the QOpenGLWidget receive its own resize event: it
+						// must recreate its device-pixel default framebuffer and
+						// run resizeGL() at the new size. Swallowing it (the
+						// QGLWidget-era behaviour) left the scene blank after a
+						// window resize because the FBO/viewport went stale.
+						// Scene::resizeEvent still drives RenderSetup::resize()
+						// for the renderer-side bookkeeping.
 						break;
 					case QEvent::Paint:
-						paintGL();
-						filter_out = true;
+						// Let the QOpenGLWidget receive its own paint event so
+						// GLRenderWindow::paintGL() runs — that is the ONLY place
+						// QOpenGLWidget guarantees a valid, current default FBO,
+						// and is where the GL scene is now drawn. The old code
+						// swallowed this and rendered from elsewhere, leaving the
+						// window empty until an interaction forced a repaint.
 						break;
 					case QEvent::ToolTip:
 						// prevent tool tip events for continuous renderers; these would
@@ -777,9 +800,12 @@ namespace BALL
 		{
 			for (size_t i=0; i<renderers_.size(); ++i)
 			{
-                if (RTTI::isKindOf<GLRenderWindow>(renderers_[i]->target))
+				// setDownsamplingFactor() is now on the RenderSurface interface
+				// (no-op default for surfaces that do not support it), so no
+				// concrete-type check or cast is needed.
+				if (RenderSurface* surface = dynamic_cast<RenderSurface*>(renderers_[i]->target))
 				{
-					static_cast<GLRenderWindow*>(renderers_[i]->target)->setDownsamplingFactor(ds_factor);
+					surface->setDownsamplingFactor(ds_factor);
 					renderers_[i]->resize(renderers_[i]->renderer->getWidth(), renderers_[i]->renderer->getHeight());
 				}
 			}
@@ -1107,8 +1133,10 @@ namespace BALL
 			// TODO: Fog in other renderers!
 			for (Position i=0; i<renderers_.size(); ++i)
 			{
+				// setFogIntensity() is now on the Renderer base (no-op default
+				// for backends without fog), so the concrete-type cast is gone.
 				if (renderers_[i]->getRendererType() == RenderSetup::OPENGL_RENDERER)
-					dynamic_cast<GLRenderer*>(renderers_[i]->renderer)->setFogIntensity((float)stage_->getFogIntensity());
+					renderers_[i]->renderer->setFogIntensity((float)stage_->getFogIntensity());
 			}
 
 			updateGL();
@@ -1594,10 +1622,22 @@ namespace BALL
 			}
 
 			renderer->makeCurrent();
-			// NOTE: GLRenderers currently render in the GUI thread!
-            if (RTTI::isKindOf<GLRenderer>(renderer->renderer))
-				renderer->renderToBuffer();
-			else
+			// GLRenderers must NOT render here: this is an event handler, not
+			// paintGL(). QOpenGLWidget's default framebuffer is only valid and
+			// current inside paintGL() -- drawing the GL scene from here leaves
+			// the FBO contents undefined (empty window until an interaction
+			// forces a repaint, blank on resize, z-fighting/banding from the
+			// stale refresh() blit composited over it). The GL scene is now
+			// rendered inside GLRenderWindow::paintGL(), driven by the
+			// registered RenderSetup. Here we only request that repaint via
+			// update() (issued further below once all renderers are ready).
+			//
+			// Buffered renderers (raytracer) still hand off their freshly
+			// produced CPU pixel buffer to the target here; paintGL() then
+			// blits it as a texture.
+            // Branch on the renderer type via the existing type-free enum
+            // (RenderSetup::getRendererType()) instead of an RTTI type-check.
+            if (renderer->getRendererType() != RenderSetup::OPENGL_RENDERER)
 				renderer->target->refresh();
 
 			renderer->setBufferReady(true);
@@ -1638,17 +1678,22 @@ namespace BALL
 				painter.drawPicture(0, 0, overlay_);
 				painter.end();
 			}
-			// implements a trivial synchronization mechanism: if
-			// two renderers depend on one another, their images will
-			// be swapped in at the same time
+			// Trivial synchronization mechanism: if two renderers depend on one
+			// another, their freshly-rendered buffers are presented together.
+			// QOpenGLWidget composites and presents automatically after paintGL(),
+			// so the former manual cross-renderer buffer-swap coordination is gone;
+			// a repaint request (update()) is the correct replacement. The
+			// RenderToBufferFinishedEvent handoff (worker -> GUI thread) is unchanged.
 			std::deque<boost::shared_ptr<RenderSetup> >& dependent_renderers = renderer->getDependentRenderers();
 
 			// find out if all renderers are ready
 			if (renderer->isReadyToSwap())
 			{
-				// paint all buffers
-                if (RTTI::isKindOf<GLRenderWindow>(renderer->target))
-					static_cast<GLRenderWindow*>(renderer->target)->safeBufferSwap();
+				// request a repaint of this renderer's target, reaching the
+				// QWidget through the RenderSurface interface's native handle
+				if (RenderSurface* surface = dynamic_cast<RenderSurface*>(renderer->target))
+					if (QWidget* w = static_cast<QWidget*>(surface->nativeHandle()))
+						w->update();
 
 				if (renderer->isContinuous() && (renderer->getTimeToLive() != 0))
 				{
@@ -1660,10 +1705,12 @@ namespace BALL
 				for (std::deque<boost::shared_ptr<RenderSetup> >::iterator render_it  = dependent_renderers.begin();
 						render_it != dependent_renderers.end(); ++render_it)
 				{
-					(*render_it)->makeCurrent();
-
-                    if (RTTI::isKindOf<GLRenderWindow>((*render_it)->target))
-						static_cast<GLRenderWindow*>((*render_it)->target)->swapBuffers();
+					// request a repaint of each dependent renderer's target so the
+					// dependent images are presented together with this one,
+					// reaching the QWidget through the RenderSurface interface
+					if (RenderSurface* dep_surface = dynamic_cast<RenderSurface*>((*render_it)->target))
+						if (QWidget* dep_w = static_cast<QWidget*>(dep_surface->nativeHandle()))
+							dep_w->update();
 
 					if ((*render_it)->isContinuous() && ((*render_it)->getTimeToLive() != 0))
 					{
@@ -2093,7 +2140,7 @@ namespace BALL
 			if(!p.begin(&printer)) return;
 
 			// TODO: push into renderSetup
-			QImage pic = main_display_->grabFrameBuffer();
+			QImage pic = main_display_->grabFramebuffer();
 			p.drawImage(0,0, pic);
 			p.end();
 
@@ -2147,7 +2194,7 @@ namespace BALL
 			// ok, we have to do this the hard way...
 
 			// What kind of renderer do we have to encapsulate?
-            if (RTTI::isKindOf<GLRenderer>(renderers_[main_renderer_]->renderer))
+            if (renderers_[main_renderer_]->getRendererType() == RenderSetup::OPENGL_RENDERER)
 			{
 				// it's a GLRenderer => use tiling
 				GLOffscreenTarget* new_widget = new GLOffscreenTarget(main_display_, filename);
@@ -2155,7 +2202,7 @@ namespace BALL
 				new_widget->resize(width(), height());
 				new_widget->prepareRendering();
 
-				GLRenderer* gr = new GLRenderer;
+				GLRenderer* gr = static_cast<GLRenderer*>(RendererFactory::makeRenderer(RendererFactory::Kind::OpenGL_Fixed));
 				gr->init(*this);
 				gr->enableVertexBuffers(want_to_use_vertex_buffer_);
 				gr->setSize(width(), height());
@@ -2438,6 +2485,18 @@ namespace BALL
 
 		void Scene::addGlWindow()
 		{
+			// DEFERRED (02-RESEARCH.md Pitfall 6): a top-level QOpenGLWidget
+			// (Qt::Window) for an additional GL scene window is the highest-risk
+			// composition path of the rendering port and is not validated in this
+			// phase. The embedded Scene is the Core Value. Guard-and-defer: log and
+			// return without constructing the top-level GL window. Re-enabled in
+			// Phase 5 (Qt 6 + pipeline) once top-level QOpenGLWidget compositing is
+			// validated. The body below is kept intact (compiles) for that work.
+			Log.info() << "Scene::addGlWindow(): additional top-level GL windows are "
+			              "deferred to Phase 5 (Qt 6 + pipeline) - see 02-RESEARCH.md Pitfall 6."
+			           << std::endl;
+			return;
+
 			GLRenderWindow* new_widget = new GLRenderWindow(0, ((String)tr("Scene")).c_str(), Qt::Window);
 			new_widget->init();
 			new_widget->makeCurrent();
@@ -2492,6 +2551,17 @@ namespace BALL
 		{
 			// first clean up
 			exitStereo();
+
+			// DEFERRED (02-RESEARCH.md Pitfall 6): stereo / multi-display uses
+			// top-level Qt::FramelessWindowHint GLRenderWindows - top-level
+			// QOpenGLWidget compositing is the highest-risk path of the rendering
+			// port and is not validated in this phase. Guard-and-defer: log and
+			// return before any top-level GL widget is constructed. The body below
+			// is kept intact (compiles) for the Phase 5 stereo re-enablement work.
+			Log.info() << "Scene::enterStereo(): stereo / multi-display GL windows are "
+			              "deferred to Phase 5 (Qt 6 + pipeline) - see 02-RESEARCH.md Pitfall 6."
+			           << std::endl;
+			return;
 
 			// get the correct screens for control, left, and right eye
 			// TODO: handle the control screen! currently, we just leave it alone
@@ -2674,6 +2744,17 @@ namespace BALL
 			// first clean up
 			exitStereo();
 
+			// DEFERRED (02-RESEARCH.md Pitfall 6): dual-view stereo creates
+			// top-level Qt::FramelessWindowHint GLRenderWindows. Top-level
+			// QOpenGLWidget compositing is the highest-risk path of the rendering
+			// port and is not validated in this phase. Guard-and-defer: log and
+			// return before any top-level GL widget is constructed. The body below
+			// is kept intact (compiles) for the Phase 5 stereo re-enablement work.
+			Log.info() << "Scene::enterDualStereo(): stereo / multi-display GL windows are "
+			              "deferred to Phase 5 (Qt 6 + pipeline) - see 02-RESEARCH.md Pitfall 6."
+			           << std::endl;
+			return;
+
 			// get the correct screens for control, left, and right eye
 			// TODO: handle the control screen! currently, we just leave it alone
 			int left_screen_index = stage_settings_->getLeftEyeScreenNumber();
@@ -2776,6 +2857,18 @@ namespace BALL
 		{
 			// first clean up
 			exitStereo();
+
+			// DEFERRED (02-RESEARCH.md Pitfall 6): dual-display stereo creates
+			// top-level fullscreen GLRenderWindows on separate screens. Top-level
+			// QOpenGLWidget compositing is the highest-risk path of the rendering
+			// port and is not validated in this phase. Guard-and-defer: log and
+			// return before any top-level GL widget is constructed. The body below
+			// is kept intact (compiles) for the Phase 5 stereo re-enablement work.
+			Log.info() << "Scene::enterDualStereoDifferentDisplays(): stereo / multi-display "
+			              "GL windows are deferred to Phase 5 (Qt 6 + pipeline) - see "
+			              "02-RESEARCH.md Pitfall 6."
+			           << std::endl;
+			return;
 
 			// get the correct screens for control, left, and right eye
 			// TODO: handle the control screen! currently, we just leave it alone
@@ -3061,28 +3154,40 @@ namespace BALL
 		bool Scene::stereoBufferSupportTest()
 		{
 			// TODO: push into renderTarget!
-			/*
-				 QGLFormat test_format(QGL::DepthBuffer | QGL::StereoBuffers | QGL::DoubleBuffer);
-				 QGLWidget* gl_test = new QGLWidget(test_format, 0);
-				 gl_test->makeCurrent();
-				 bool supports =  gl_test->isValid();
-				 delete gl_test;
-				 if (!supports)
-				 {
-				 gl_format_ = (QGL::DepthBuffer | QGL::DoubleBuffer);
-				 gl_test = new QGLWidget(test_format, 0);
-				 gl_test->makeCurrent();
-				 supports =  gl_test->isValid();
-				 delete gl_test;
-				 if (!supports)
-				 {
-				 gl_format_ = QGLFormat(QGL::DepthBuffer);
-				 }
-				 }
+			//
+			// Probe whether the driver can give us a quad-buffered-stereo context.
+			// The legacy Qt4-era probe constructed throwaway GL widgets; the modern
+			// equivalent is a transient QOpenGLContext created against a requested
+			// QSurfaceFormat on an offscreen surface, then inspecting the format the
+			// driver actually granted. This keeps the original contract: on success
+			// the shared GLRenderWindow::gl_format_ is left requesting stereo; on
+			// failure it is downgraded to a non-stereo (depth + double buffer) format.
+			QSurfaceFormat test_format = GLRenderWindow::gl_format_;
+			test_format.setStereo(true);
+			test_format.setDepthBufferSize(24);
+			test_format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 
-				 return supports;
-				 */
-			return false;
+			QOpenGLContext ctx;
+			ctx.setFormat(test_format);
+
+			bool supports = ctx.create() && ctx.format().stereo();
+
+			if (supports)
+			{
+				// keep the stereo request in the shared format
+				GLRenderWindow::gl_format_.setStereo(true);
+			}
+			else
+			{
+				// downgrade to a plain depth + double-buffered format
+				QSurfaceFormat fallback = GLRenderWindow::gl_format_;
+				fallback.setStereo(false);
+				fallback.setDepthBufferSize(24);
+				fallback.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+				GLRenderWindow::gl_format_ = fallback;
+			}
+
+			return supports;
 		}
 
 		bool Scene::inMoveMode() const
@@ -3308,6 +3413,21 @@ namespace BALL
 			atomic_number_ = 6;
 			default_font_ = QFont("Arial", 16., QFont::Bold);
 			has_overlay_ = false;
+			gl_initialized_ = false;
+		}
+
+		void Scene::initializeGLContext()
+		{
+			// Called from GLRenderWindow::initializeGL() on the GUI thread with
+			// the QOpenGLWidget context current. Runs exactly once. This is the
+			// GL-context-dependent init that used to live in the constructor
+			// back when QGLWidget created its context eagerly.
+			if (gl_initialized_) return;
+			gl_initialized_ = true;
+
+			init();
+			renderers_[main_renderer_]->resize(width(), height());
+			renderers_[main_renderer_]->start();
 		}
 
 		void Scene::setCursor(String c)

@@ -22,7 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-class QGLPixelBuffer;
+class QOpenGLFramebufferObject;
 
 namespace BALL
 {
@@ -45,6 +45,14 @@ namespace BALL
 				virtual void prepareRendering();
 				virtual void prepareUpscaling(Size final_width, Size final_height);
 
+				/* RenderSurface methods -- context-lifecycle verbs.
+				 * An FBO has no context of its own; beginFrame() makes the
+				 * shared GLRenderWindow context current (same as prepareRendering()).
+				 */
+				virtual void beginFrame() override;
+				virtual void endFrame() override;
+				virtual void* nativeHandle() override;
+
 				virtual bool resize(const unsigned int width, const unsigned int height);
 				virtual void refresh();
 
@@ -61,9 +69,7 @@ namespace BALL
 
 				GLRenderWindow* share_from_;
 
-				boost::shared_ptr<QGLPixelBuffer> pixel_buffer_;
-
-				bool use_pixel_buffer_;
+				boost::shared_ptr<QOpenGLFramebufferObject> fbo_;
 
 				QImage current_image_;
 		};

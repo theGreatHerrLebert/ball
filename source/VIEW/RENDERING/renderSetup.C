@@ -5,6 +5,7 @@
 #include <BALL/VIEW/RENDERING/RENDERERS/POVRenderer.h>
 #include <BALL/VIEW/RENDERING/RENDERERS/STLRenderer.h>
 #include <BALL/VIEW/RENDERING/glRenderWindow.h>
+#include <BALL/VIEW/RENDERING/renderSurface.h>
 
 #include <BALL/VIEW/WIDGETS/scene.h>
 
@@ -20,6 +21,7 @@
 #endif
 
 #include <QtWidgets/QApplication>
+#include <QtGui/QOpenGLContext>
 
 namespace BALL
 {
@@ -132,6 +134,13 @@ namespace BALL
 			gl_target_   = dynamic_cast<GLRenderWindow*>(target);
 			gl_renderer_ = dynamic_cast<GLRenderer*>(renderer);
 
+			// Let the GL window drive its renderer from inside paintGL().
+			// QOpenGLWidget's default framebuffer is only valid and current
+			// there; rendering the GL scene anywhere else (e.g. from an event
+			// handler) leaves the FBO contents undefined.
+			if (gl_target_)
+				gl_target_->setRenderSetup(this);
+
 			// initialize the rendering target
 			target->init();
 
@@ -160,15 +169,38 @@ namespace BALL
 				return;
 			}
 
+			// Ignore degenerate 0x0 resizes — these fire as a transient during
+			// the first layout pass before the widget has real geometry. The
+			// real resize follows immediately; acting on 0x0 only produced a
+			// spurious "Cannot resize window" error and a degenerate frustum.
+			if (width == 0 || height == 0)
+				return;
+
 			render_mutex_.lock();
+
+			// Keep the GL window's driving-RenderSetup back-reference current.
+			// Cheap and idempotent; also covers RenderSetups created outside the
+			// init() path (e.g. Scene::switchRenderer).
+			if (gl_target_)
+				gl_target_->setRenderSetup(this);
 
 			makeCurrent();
 
 			if(!target->resize(width, height))
 			{
-				Log.error() << "Cannot resize window. Size " 
-										<< width  << " x " 
+				Log.error() << "Cannot resize window. Size "
+										<< width  << " x "
 										<< height << " is not supported" << std::endl;
+			}
+
+			// Keep the GL renderer's viewport in sync with the target's
+			// device-pixel framebuffer. On a HiDPI QOpenGLWidget the default
+			// framebuffer is devicePixelRatio times larger than the logical
+			// widget size; width/height here are logical. pixel_ratio is 1.0
+			// on non-HiDPI displays, so this is a no-op there.
+			if (gl_renderer_ && gl_target_)
+			{
+				gl_renderer_->setPixelRatio((float)gl_target_->devicePixelRatioF());
 			}
 
 			renderer->setSize(width, height);
@@ -190,12 +222,10 @@ namespace BALL
 
 			//renderToBuffer_();
 
-			render_mutex_.lock();
-
+			// No manual buffer swap: QOpenGLWidget swaps automatically after
+			// paintGL(). A repaint is requested instead.
 			if (gl_target_)
-				gl_target_->safeBufferSwap();
-
-			render_mutex_.unlock();
+				gl_target_->update();
 		}
 
 		void RenderSetup::updateCamera(const Camera* camera)
@@ -268,9 +298,15 @@ namespace BALL
 
 		void RenderSetup::makeCurrent()
 		{
-			if (gl_target_ && 
-				   (QGLContext::currentContext() != gl_target_->context()))
-				gl_target_->makeCurrent();
+			// GUI-thread-only helper. QOpenGLWidget's context and default
+			// framebuffer are affine to the GUI thread, so makeCurrent() may
+			// only be called from there. Every caller of this method runs on
+			// the GUI thread (init/resize/exportPNG/grid/texture/picking setup,
+			// all driven from Scene event handlers). The raytracer worker loop
+			// in run() never calls this -- it issues no GL (see 02-A1-FINDINGS).
+			RenderSurface* surface = dynamic_cast<RenderSurface*>(target);
+			if (surface)
+				surface->beginFrame();
 			else
 				target->prepareRendering();
 		}
@@ -293,7 +329,11 @@ namespace BALL
 				scheduler = boost::shared_ptr<tbb::task_scheduler_init>(new tbb::task_scheduler_init(num_threads));
 			}
 #endif
-			if (gl_target_)
+			// Only suppress the GL window's own paint path when a non-GL
+			// (raytracer) worker produces its frames -- then the window is a
+			// passive blit surface. When a GLRenderer drives the window, its
+			// paintGL() IS the render path and must keep running.
+			if (gl_target_ && !gl_renderer_)
 				gl_target_->ignoreEvents(true);
 			Timer t;
 
@@ -306,6 +346,9 @@ namespace BALL
 			{
 				t.start();
 				// NOTE: GLRenderers currently *have* to render in the GUI thread!
+				// This worker loop only drives non-GL renderers (the raytracer,
+				// a pure CPU-buffer producer). It must never touch the
+				// QOpenGLWidget's GL context -- that is GUI-thread-affine.
 				if (!gl_renderer_)
 					renderToBuffer_();
 				t.stop();
@@ -412,7 +455,7 @@ namespace BALL
 				render_mutex_.lock();
 
 				makeCurrent();
-				QImage image(gl_target_->grabFrameBuffer(true));
+				QImage image(gl_target_->grabFramebuffer());
 
 				render_mutex_.unlock();
 

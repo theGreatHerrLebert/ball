@@ -5,9 +5,9 @@
 #
 ########################################################
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21...3.31 FATAL_ERROR)
 
-CMAKE_POLICY(SET CMP0042 OLD)
+CMAKE_POLICY(SET CMP0042 NEW)
 CMAKE_POLICY(SET CMP0043 NEW)
 CMAKE_POLICY(SET CMP0048 NEW)
 
@@ -15,13 +15,24 @@ IF(POLICY CMP0071)
 	CMAKE_POLICY(SET CMP0071 NEW)
 ENDIF()
 
+IF(POLICY CMP0167)
+	CMAKE_POLICY(SET CMP0167 NEW)
+ENDIF()
 
-PROJECT("BALL" VERSION 1.5.0)
+
+PROJECT("BALL" VERSION 1.6.0) # 1.6.0-dev (pre-release)
 
 
 ########################################################
 # General build system settings
 ########################################################
+
+# Project-wide C++ standard. Set before any target so it applies project-wide.
+# Set EARLY (before BALLConfiguration's C++ feature-detection tests and before
+# any target is defined) so the standard is deterministic on every compiler.
+SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
 
 # Use folders to group TARGTES using the folder target property in IDEs
 SET(USE_FOLDERS TRUE)
@@ -43,19 +54,6 @@ INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/include")
 # Add include directoy from build tree for configured files
 INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}/include")
 
-# Handling user specified path to ball_contrib installation (-DBALL_CONTRIB_PATH)
-# TODO: Get rid of BALL_CONTRIB_PATH when globally refactoring build system
-SET(BALL_CONTRIB_PATH "" CACHE PATH "Path to the ball_contrib installation directory (optional)")
-IF(BALL_CONTRIB_PATH)
-	# Add include directoy from user specified BALL_CONTRIB_PATH
-	INCLUDE_DIRECTORIES("${BALL_CONTRIB_PATH}/include")
-
-	# Add ball contrib install directories to CMake search paths for find_XXX() functions
-	SET(CMAKE_PREFIX_PATH  "${BALL_CONTRIB_PATH}" "${CMAKE_PREFIX_PATH}")
-
-	# Required for CMake include and compile tests (seems to be required only on Windows)
-	SET(CMAKE_REQUIRED_INCLUDES ${BALL_CONTRIB_PATH}/include ${CMAKE_REQUIRED_INCLUDES})
-ENDIF()
 
 # Include BALL specific CMake macros
 INCLUDE(cmake/BALLMacros.cmake)
@@ -89,6 +87,18 @@ ELSE()
 ENDIF()
 
 
+
+########################################################
+# Minimum dependency version floors (DEPS-04 / D-08)
+# Pinned inline at each find_package call site (or via the SET below for Qt).
+#
+#   CMake   3.21  — CMakePresets.json schema v3 + toolchainFile support
+#   Qt5     5.15  — the only maintained Qt5 release line; Homebrew + vcpkg both ship 5.15.x
+#   Boost   1.70  — config-mode BoostConfig.cmake is reliable from 1.70+
+#   Eigen3  3.4   — first Eigen with stable Eigen3Config.cmake (covers the 5.x line; see note at FIND_PACKAGE)
+#   TBB    2021.0 — first oneTBB release shipping TBBConfig.cmake / TBB::tbb target
+#   OpenBabel 3.0 — first OpenBabel shipping OpenBabel3Config.cmake
+########################################################
 
 ########################################################
 # Search and configure third party dependencies
@@ -143,7 +153,9 @@ LIST(APPEND BALL_DEP_LIBRARIES ${Boost_LIBRARIES})
 
 
 
-# OpenBabel availability: default false
+# OpenBabel availability: default false (GPL-gated — set TRUE automatically when
+# BALL_LICENSE=GPL and OpenBabel3 is found; LGPL builds never search for it).
+# Maintainer decision recorded in Plan 04-01 SUMMARY (2026-05-14).
 SET(BALL_HAS_OPENBABEL FALSE)
 
 IF(${BALL_LICENSE_GPL})
@@ -167,14 +179,20 @@ IF(${BALL_LICENSE_GPL})
 	ENDIF()
 
 
-	# OpenBabel
-	FIND_PACKAGE(OpenBabel2)
-	IF(OPENBABEL2_FOUND)
+	# OpenBabel (GPL-gated — dynamically linked optional dep; only searched in GPL builds).
+	# Decision: OpenBabel stays GPL-gated to avoid any licensing ambiguity in the default
+	# LGPL build (maintainer decision recorded in Plan 04-01 SUMMARY, 2026-05-14).
+	# The C++ API was ported from 2.x to 3.x in Plan 04-03.
+	# Verification: cmake --preset macos-homebrew -DBALL_LICENSE=GPL
+	# (or use the ci-macos/ci-linux presets which set BALL_HAS_OPENBABEL=ON via
+	# cacheVariables; those presets must also pass -DBALL_LICENSE=GPL in the CI step).
+	FIND_PACKAGE(OpenBabel3 3.0 CONFIG)
+	IF(OpenBabel3_FOUND)
 		SET(BALL_HAS_OPENBABEL TRUE)
-		INCLUDE_DIRECTORIES(${OPENBABEL2_INCLUDE_DIRS})
-		LIST(APPEND BALL_DEP_LIBRARIES ${OPENBABEL2_LIBRARIES})
+		INCLUDE_DIRECTORIES(${OpenBabel3_INCLUDE_DIRS})
+		MESSAGE(STATUS "Found OpenBabel ${OpenBabel3_VERSION} (config mode) — molecular file-format conversion enabled")
 	ELSE()
-		MESSAGE("Could not find a OpenBabel2 installation. Skipping OpenBabel dependencies.")
+		MESSAGE(STATUS "OpenBabel not found — molecular file-format conversion disabled (optional dependency)")
 	ENDIF()
 
 ENDIF()
@@ -217,27 +235,17 @@ IF(REQUIRE_RTFACT)
 ENDIF()
 
 IF(USE_TBB)
-	IF (REQUIRE_TBB)
-		FIND_PACKAGE(TBB REQUIRED)
+	IF(REQUIRE_TBB)
+		FIND_PACKAGE(TBB 2021.0 CONFIG REQUIRED)
 	ELSE()
-		FIND_PACKAGE(TBB)
-		IF (NOT TBB_FOUND)
-			MESSAGE(STATUS "Intel Threading Building Blocks not found!")
-		ENDIF()
+		FIND_PACKAGE(TBB 2021.0 CONFIG)
 	ENDIF()
-
-	IF(${BALL_LICENSE_GPL} OR NOT ${TBB_VERSION_MAJOR} VERSION_LESS 2017)
-
-		IF (TBB_FOUND)
-			INCLUDE_DIRECTORIES(${TBB_INCLUDE_DIRS})
-			BALL_COMBINE_LIBS(TBB_LIBRARIES "${TBB_LIBRARIES}" "${TBB_DEBUG_LIBRARIES}")
-			LIST(REMOVE_DUPLICATES TBB_LIBRARIES)
-
-			SET(BALL_HAS_TBB TRUE)
-		ENDIF()
-
+	IF(TBB_FOUND)
+		SET(BALL_HAS_TBB TRUE)
+		MESSAGE(STATUS "Found TBB ${TBB_VERSION} (config mode) — parallel speedups enabled")
+	ELSE()
+		MESSAGE(STATUS "TBB not found — building without parallel speedups (optional dependency)")
 	ENDIF()
-
 ENDIF()
 
 ## MPI
@@ -280,14 +288,14 @@ IF(QTDIR)
 	INCLUDE_DIRECTORIES(BEFORE "${QTDIR}/include")
 ENDIF()
 
-SET(QT_MIN_VERSION 5.5)
+SET(QT_MIN_VERSION 5.15)
 
 FIND_PACKAGE(Qt5 ${QT_MIN_VERSION} REQUIRED Core Network Xml)
 
 LIST(APPEND BALL_DEP_LIBRARIES Qt5::Core
                                Qt5::Network
                                Qt5::Xml)
-#LIST(APPEND BALL_PROJECT_COMPILE_DEFNS "-DQT_NO_KEYWORDS")
+LIST(APPEND BALL_PROJECT_COMPILE_DEFNS "-DQT_NO_KEYWORDS")
 
 IF (BALL_HAS_VIEW)
 	FIND_PACKAGE(Qt5 ${QT_MIN_VERSION} REQUIRED OpenGL PrintSupport Test Widgets)
@@ -341,9 +349,18 @@ IF(WIN32)
 	ENDIF()
 ENDIF()
 
-SET(EIGEN3_VERSION_OK "3.0.0")
-FIND_PACKAGE(Eigen3 REQUIRED)
-INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIR})
+# Note: do NOT use a version range (3.4...6) here. The version-range syntax requires
+# the Eigen3ConfigVersion.cmake to support range queries, but Ubuntu 22.04's system
+# libeigen3-dev (3.4.0) ships an older script that does not handle ranges and rejects
+# the upper bound. Instead, use NO version constraint in find_package and enforce the
+# floor via a cmake IF check. Homebrew's Eigen 5.x ships a modern ConfigVersion script
+# that handles both plain and range requests correctly, so this works on all platforms.
+FIND_PACKAGE(Eigen3 REQUIRED NO_MODULE)
+IF(Eigen3_VERSION VERSION_LESS "3.4")
+	MESSAGE(FATAL_ERROR "Eigen3 >= 3.4 required (found ${Eigen3_VERSION}). "
+		"Install a newer Eigen3 package.")
+ENDIF()
+MESSAGE(STATUS "Found Eigen3 ${Eigen3_VERSION} (config mode) — Eigen3::Eigen target")
 
 ## VIEW dependent packages
 IF (BALL_HAS_VIEW)
@@ -395,15 +412,6 @@ ENDIF(BALL_HAS_VIEW)
 OPTION(BALL_PYTHON_SUPPORT "Compile BALL's python interface (requires python development packages)" ON)
 
 IF (BALL_PYTHON_SUPPORT)
-	# make sure that we set the modules that come with contrib
-	IF(BALL_CONTRIB_PATH)
-		IF(WIN32)
-			SET(ENV{PYTHONPATH} "$ENV{PYTHONPATH};${BALL_CONTRIB_PATH}/install/lib/python")
-		ELSE()
-			SET(ENV{PYTHONPATH} "$ENV{PYTHONPATH}:${BALL_CONTRIB_PATH}/install/lib/python")
-		ENDIF()
-		SET(BALL_PYTHONPATH $ENV{PYTHONPATH})
-	ENDIF()
 	FIND_PACKAGE(Python3 COMPONENTS Interpreter Development)
 
 	IF (Python3_FOUND)
@@ -422,7 +430,7 @@ ENDIF()
 
 
 IF(APPLE)
-	FIND_PROGRAM(MACDEPLOYQT_EXECUTABLE macdeployqt PATHS ${BALL_CONTRIB_PATH}/bin)
+	FIND_PROGRAM(MACDEPLOYQT_EXECUTABLE macdeployqt)
 
 	IF(${MACDEPLOYQT_EXECUTABLE} STREQUAL "MACDEPLOYQT_EXECUTABLE-NOTFOUND")
 		MESSAGE(WARNING "MacOS Bundle generation not possible: macdeployqt not found")
@@ -430,7 +438,7 @@ IF(APPLE)
 		SET(QT_DEPLOY_EXECUTABLE ${MACDEPLOYQT_EXECUTABLE})
 	ENDIF()
 ELSEIF(WIN32)
-	FIND_PROGRAM(WINDEPLOYQT_EXECUTABLE windeployqt.exe PATHS ${BALL_CONTRIB_PATH}/bin)
+	FIND_PROGRAM(WINDEPLOYQT_EXECUTABLE windeployqt.exe)
 
 	IF(${WINDEPLOYQT_EXECUTABLE} STREQUAL "WINDEPLOYQT_EXECUTABLE-NOTFOUND")
 		MESSAGE(WARNING "Package generation not possible: windeployqt.exe not found")
@@ -466,7 +474,10 @@ SET(BALL_EXECUTABLES "")
 
 # Add BALL project specific compiler flags and definitions
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BALL_PROJECT_COMPILE_FLAGS}")
-ADD_DEFINITIONS("${BALL_PROJECT_COMPILE_DEFNS}")
+# Unquoted: BALL_PROJECT_COMPILE_DEFNS is a CMake list — each element must
+# reach ADD_DEFINITIONS as its own argument (e.g. -DQT_NO_KEYWORDS /DNOMINMAX).
+# Quoting collapses the list into one mangled "-Dx;/Dy" argument.
+ADD_DEFINITIONS(${BALL_PROJECT_COMPILE_DEFNS})
 
 
 ## are we building a shared or static lib?! (BOTH within 
@@ -528,6 +539,7 @@ LIST(APPEND BALL_DEP_LIBRARIES
 	${LPSOLVE_LIBRARIES}
 	${MPI_LIBRARIES}
 	${Python3_LIBRARIES}
+	Eigen3::Eigen
 )
 
 
@@ -536,7 +548,19 @@ IF(UNIX)
 ENDIF()
 
 IF(TBB_FOUND)
-	LIST(APPEND BALL_DEP_LIBRARIES ${TBB_LIBRARIES})
+	LIST(APPEND BALL_DEP_LIBRARIES TBB::tbb)
+ENDIF()
+
+IF(BALL_HAS_OPENBABEL)
+	LIST(APPEND BALL_DEP_LIBRARIES openbabel)
+	# OpenBabel 3.1.1's plugin.h inherits from std::binary_function, which was removed
+	# in C++17. Re-enable it via the libc++ (macOS) and libstdc++ (Linux) compatibility
+	# defines so BALL can include OpenBabel headers cleanly under C++17.
+	IF(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+		ADD_COMPILE_DEFINITIONS(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
+	ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		ADD_COMPILE_DEFINITIONS(_GLIBCXX_USE_DEPRECATED=1)
+	ENDIF()
 ENDIF()
 
 IF(LIBSVM_FOUND)
@@ -562,7 +586,11 @@ ENDIF()
 IF (BALL_HAS_VIEW)
 ## TODO: Qt handling!
 	IF(GLEW_FOUND)
-		LIST(APPEND VIEW_DEP_LIBRARIES ${GLEW_LIBRARIES})
+		IF(TARGET GLEW::GLEW)
+			LIST(APPEND VIEW_DEP_LIBRARIES GLEW::GLEW)
+		ELSE()
+			LIST(APPEND VIEW_DEP_LIBRARIES ${GLEW_LIBRARIES})
+		ENDIF()
 	ENDIF()
 
 	LIST(APPEND VIEW_DEP_LIBRARIES ${RTFACT_LIBRARIES})
@@ -771,7 +799,7 @@ ENDIF()
 INCLUDE(BALLDoc)
 
 # Tests
-INCLUDE(Dart)
+INCLUDE(CTest)
 ENABLE_TESTING()
 ADD_SUBDIRECTORY(test EXCLUDE_FROM_ALL) ## configure the Test project (but do not add it to BALL itself)
 
@@ -894,3 +922,16 @@ ENDIF()
 # Generate CTags for BALL project
 ######################################################
 INCLUDE(BALLCTags)
+
+# ---------------------------------------------------------------------
+# Optional Python bindings (pybind11). See python/README.md.
+#
+# Off by default — enable with -DBALL_BUILD_PYTHON=ON. The subdirectory
+# fetches pybind11 via FetchContent, so a regular BALL build that
+# leaves this option off has no new dependencies. CTest gains a
+# `python_smoke` target when the option is on.
+# ---------------------------------------------------------------------
+OPTION(BALL_BUILD_PYTHON "Build the pybind11 Python bindings under python/" OFF)
+IF(BALL_BUILD_PYTHON)
+    ADD_SUBDIRECTORY(python)
+ENDIF()

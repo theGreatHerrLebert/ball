@@ -330,7 +330,8 @@ namespace BALL
 			GlobalExceptionHandler::GlobalExceptionHandler()
 			{
 				std::set_terminate(terminate);
-				std::set_unexpected(terminate);
+				// std::set_unexpected removed in C++17 (dynamic exception specs were removed;
+				// std::unexpected is never invoked in C++17 and later)
 				std::set_new_handler(newHandler);
 			}
 

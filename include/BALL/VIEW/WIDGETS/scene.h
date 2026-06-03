@@ -755,6 +755,22 @@ namespace BALL
 				*/
 				virtual void init();
 
+			public:
+
+				/** Run the GL-context-dependent initialization of the scene's
+				 *  render setups.
+				 *
+				 *  QOpenGLWidget creates its GL context lazily on first show,
+				 *  unlike the old QGLWidget which created it eagerly in its
+				 *  constructor. Display-list allocation and texture setup must
+				 *  therefore be deferred out of the Scene constructor until a
+				 *  context exists. GLRenderWindow::initializeGL() calls this
+				 *  once, with the context guaranteed current on the GUI thread.
+				 */
+				void initializeGLContext();
+
+			protected:
+
 				/** Render the visualization.
 						Overriden qt method for rendering the visualization of this scene.
 						This method will be called automatically every time an update is necessary.
@@ -919,6 +935,9 @@ namespace BALL
 				GLRenderWindow* main_display_;
 				/// The index of the renderer responsible for the main display
 				Position main_renderer_;
+
+				/// Guard so the deferred GL-context init runs exactly once.
+				bool gl_initialized_;
 
 				Index stereo_left_eye_;
 				Index stereo_right_eye_;
