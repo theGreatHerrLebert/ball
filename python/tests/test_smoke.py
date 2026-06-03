@@ -507,3 +507,64 @@ def test_minimize_energy_drops_energy(tmp_path):
     )
     # PDB written.
     assert out_path.is_file()
+
+
+# ---------------------------------------------------------------------------
+# Solvent-Excluded Surface oracle (ses_mesh / ses_area / reduced_surface_stats
+# / ses_graph). These take raw spheres, so they need no PDB fixture and assert
+# geometric invariants — the same invariants proteon's SES port is gated on.
+# ---------------------------------------------------------------------------
+
+def test_ses_symbols_present():
+    for name in ("ses_mesh", "ses_area", "reduced_surface_stats", "ses_graph"):
+        assert callable(getattr(ball, name)), f"missing {name}"
+
+
+def test_ses_area_single_sphere_is_exact():
+    # An isolated atom's SES is the atom sphere itself: area = 4*pi*r^2,
+    # volume = 4/3*pi*r^3. A closed-form ground truth independent of any mesh.
+    r = 2.0
+    a = ball.ses_area([[0.0, 0.0, 0.0, r]], probe_radius=1.5)
+    assert a["area"] == pytest.approx(4.0 * math.pi * r * r, rel=1e-4)
+    assert a["volume"] == pytest.approx(4.0 / 3.0 * math.pi * r ** 3, rel=1e-4)
+
+
+def test_ses_mesh_single_sphere_area_converges():
+    r = 2.0
+    m = ball.ses_mesh([[0.0, 0.0, 0.0, r]], probe_radius=1.5, density=4.5)
+    assert m["n_vertices"] > 0 and m["n_triangles"] > 0
+    assert len(m["vertices"]) == m["n_vertices"]
+    assert len(m["triangles"]) == m["n_triangles"]
+    # Mesh surface area must approach the analytic sphere area (under-estimates
+    # a convex sphere; 10% is a loose, density-robust band).
+    area = 0.0
+    V = m["vertices"]
+    for t in m["triangles"]:
+        p, q, s = V[t[0]], V[t[1]], V[t[2]]
+        ux, uy, uz = q[0] - p[0], q[1] - p[1], q[2] - p[2]
+        vx, vy, vz = s[0] - p[0], s[1] - p[1], s[2] - p[2]
+        cx, cy, cz = uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx
+        area += 0.5 * math.sqrt(cx * cx + cy * cy + cz * cz)
+    assert area == pytest.approx(4.0 * math.pi * r * r, rel=0.10)
+
+
+def test_reduced_surface_stats_three_atoms():
+    sph = [[0, 0, 0, 2.0], [2.5, 0, 0, 2.0], [1.25, 2.0, 0, 2.0]]
+    rs = ball.reduced_surface_stats(sph, probe_radius=1.4)
+    assert rs["n_vertices"] == 3          # all three atoms on the surface
+    assert rs["n_faces"] >= 1
+    for face in rs["face_atoms"]:
+        assert face == sorted(face)       # atom triples are sorted
+        assert all(0 <= a < 3 for a in face)
+    assert len(rs["probe_centers"]) == len(rs["face_atoms"])
+
+
+def test_ses_graph_three_atoms_consistent():
+    sph = [[0, 0, 0, 2.0], [2.5, 0, 0, 2.0], [1.25, 2.0, 0, 2.0]]
+    g = ball.ses_graph(sph, probe_radius=1.4)
+    assert g["cleaned"] is True
+    assert g["n_contact_faces"] == 3      # one convex patch per surface atom
+    assert g["n_toric_faces"] >= 1 and g["n_spheric_faces"] >= 1
+    assert len(g["contact_atoms"]) == g["n_contact_faces"]
+    for pair in g["toric_atoms"]:
+        assert pair == sorted(pair)

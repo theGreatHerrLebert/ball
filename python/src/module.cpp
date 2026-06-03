@@ -30,6 +30,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <dlfcn.h>
 #include <filesystem>
@@ -62,6 +64,10 @@
 #include <BALL/STRUCTURE/solventExcludedSurface.h>
 #include <BALL/STRUCTURE/triangulatedSES.h>
 #include <BALL/STRUCTURE/analyticalSES.h>
+#include <BALL/STRUCTURE/RSVertex.h>
+#include <BALL/STRUCTURE/RSEdge.h>
+#include <BALL/STRUCTURE/RSFace.h>
+#include <BALL/STRUCTURE/SESFace.h>
 #include <BALL/MATHS/surface.h>
 #include <BALL/MATHS/sphere3.h>
 #include <BALL/MATHS/vector3.h>
@@ -1030,6 +1036,151 @@ py::dict ses_area(const std::vector<std::array<double, 4>>& spheres,
     return d;
 }
 
+// Reduced-surface graph stats from raw spheres (L1 oracle). Order-independent
+// per-face atom triples + probe centers and per-edge atom pairs, so a proteon
+// port can be gated on RS combinatorics, not just final mesh.
+py::dict reduced_surface_stats(const std::vector<std::array<double, 4>>& spheres,
+                               double probe_radius)
+{
+    std::vector<BALL::TSphere3<double>> balls;
+    balls.reserve(spheres.size());
+    for (const auto& s : spheres)
+        balls.emplace_back(BALL::TVector3<double>(s[0], s[1], s[2]), s[3]);
+
+    py::dict d;
+    try
+    {
+        BALL::ReducedSurface rs(balls, probe_radius);
+        rs.compute();
+
+        std::vector<std::array<int, 3>> face_atoms;
+        std::vector<std::array<double, 3>> probe_centers;
+        for (BALL::Position i = 0; i < rs.numberOfFaces(); ++i)
+        {
+            BALL::RSFace* f = rs.getFace(i);
+            if (f == nullptr) continue;
+            std::array<int, 3> a = {static_cast<int>(f->getVertex(0)->getAtom()),
+                                    static_cast<int>(f->getVertex(1)->getAtom()),
+                                    static_cast<int>(f->getVertex(2)->getAtom())};
+            std::sort(a.begin(), a.end());
+            face_atoms.push_back(a);
+            BALL::TVector3<double> c = f->getCenter();
+            probe_centers.push_back({c.x, c.y, c.z});
+        }
+
+        std::vector<std::array<int, 2>> edge_atoms;
+        for (BALL::Position i = 0; i < rs.numberOfEdges(); ++i)
+        {
+            BALL::RSEdge* e = rs.getEdge(i);
+            if (e == nullptr) continue;
+            std::array<int, 2> b = {static_cast<int>(e->getVertex(0)->getAtom()),
+                                    static_cast<int>(e->getVertex(1)->getAtom())};
+            std::sort(b.begin(), b.end());
+            edge_atoms.push_back(b);
+        }
+
+        d["n_vertices"]    = rs.numberOfVertices();
+        d["n_edges"]       = rs.numberOfEdges();
+        d["n_faces"]       = rs.numberOfFaces();
+        d["face_atoms"]    = face_atoms;     // sorted [a,b,c] per RS face
+        d["probe_centers"] = probe_centers;  // probe center per RS face (same order)
+        d["edge_atoms"]    = edge_atoms;     // sorted [a,b] per RS edge
+        d["probe_radius"]  = probe_radius;
+        d["n_spheres"]     = spheres.size();
+    }
+    catch (BALL::Exception::GeneralException& e)
+    {
+        throw py::value_error(std::string("BALL reduced surface failed: ")
+                              + e.getName() + ": " + e.getMessage());
+    }
+    return d;
+}
+
+// SES element-graph stats from raw spheres (L2/L3 oracle), POST singular
+// cleaning (cleaning is in-place inside compute(); the pre-clean snapshot needs
+// a BALL-side helper and is a follow-up). Per-face-type counts + per-face atom
+// ownership (contact<-atom, toric<-atom pair, spheric<-atom triple).
+py::dict ses_graph(const std::vector<std::array<double, 4>>& spheres,
+                   double probe_radius)
+{
+    std::vector<BALL::TSphere3<double>> balls;
+    balls.reserve(spheres.size());
+    for (const auto& s : spheres)
+        balls.emplace_back(BALL::TVector3<double>(s[0], s[1], s[2]), s[3]);
+
+    py::dict d;
+    try
+    {
+        BALL::ReducedSurface rs(balls, probe_radius);
+        rs.compute();
+        BALL::SolventExcludedSurface ses(&rs);
+        ses.compute();  // includes singularity cleaning
+
+        std::size_t n_vert = 0, n_edge = 0, n_singular = 0;
+        for (auto it = ses.beginVertex(); it != ses.endVertex(); ++it)
+            if (*it != nullptr) ++n_vert;
+        for (auto it = ses.beginEdge(); it != ses.endEdge(); ++it)
+            if (*it != nullptr) ++n_edge;
+        for (auto it = ses.beginSingularEdge(); it != ses.endSingularEdge(); ++it)
+            if (*it != nullptr) ++n_singular;
+
+        std::vector<int> contact_atoms;
+        std::vector<std::array<int, 2>> toric_atoms;
+        std::vector<std::array<int, 3>> spheric_atoms;
+        for (auto it = ses.beginContactFace(); it != ses.endContactFace(); ++it)
+        {
+            BALL::SESFace* f = *it;
+            if (f == nullptr) continue;
+            if (BALL::RSVertex* v = f->getRSVertex())
+                contact_atoms.push_back(static_cast<int>(v->getAtom()));
+        }
+        for (auto it = ses.beginToricFace(); it != ses.endToricFace(); ++it)
+        {
+            BALL::SESFace* f = *it;
+            if (f == nullptr) continue;
+            if (BALL::RSEdge* e = f->getRSEdge())
+            {
+                std::array<int, 2> b = {static_cast<int>(e->getVertex(0)->getAtom()),
+                                        static_cast<int>(e->getVertex(1)->getAtom())};
+                std::sort(b.begin(), b.end());
+                toric_atoms.push_back(b);
+            }
+        }
+        for (auto it = ses.beginSphericFace(); it != ses.endSphericFace(); ++it)
+        {
+            BALL::SESFace* f = *it;
+            if (f == nullptr) continue;
+            if (BALL::RSFace* rf = f->getRSFace())
+            {
+                std::array<int, 3> a = {static_cast<int>(rf->getVertex(0)->getAtom()),
+                                        static_cast<int>(rf->getVertex(1)->getAtom()),
+                                        static_cast<int>(rf->getVertex(2)->getAtom())};
+                std::sort(a.begin(), a.end());
+                spheric_atoms.push_back(a);
+            }
+        }
+
+        d["n_vertices"]       = n_vert;
+        d["n_edges"]          = n_edge;
+        d["n_singular_edges"] = n_singular;
+        d["n_contact_faces"]  = contact_atoms.size();
+        d["n_toric_faces"]    = toric_atoms.size();
+        d["n_spheric_faces"]  = spheric_atoms.size();
+        d["contact_atoms"]    = contact_atoms;
+        d["toric_atoms"]      = toric_atoms;
+        d["spheric_atoms"]    = spheric_atoms;
+        d["cleaned"]          = true;
+        d["probe_radius"]     = probe_radius;
+        d["n_spheres"]        = spheres.size();
+    }
+    catch (BALL::Exception::GeneralException& e)
+    {
+        throw py::value_error(std::string("BALL SES graph failed: ")
+                              + e.getName() + ": " + e.getMessage());
+    }
+    return d;
+}
+
 }  // namespace
 
 PYBIND11_MODULE(ball, m) {
@@ -1210,6 +1361,32 @@ PYBIND11_MODULE(ball, m) {
           "not the reduced-surface/triangulation classes), so it is a\n"
           "genuine cross-check on the mesh's surface area rather than a\n"
           "restatement of the same intermediate state.");
+
+    m.def("reduced_surface_stats",
+          &reduced_surface_stats,
+          py::arg("spheres"),
+          py::arg("probe_radius") = 1.5,
+          "Reduced-surface combinatorics from raw spheres (L1 oracle).\n"
+          "\n"
+          "Returns a dict: n_vertices, n_edges, n_faces, face_atoms\n"
+          "(sorted [a,b,c] atom indices per RS face), probe_centers\n"
+          "(probe center per RS face, same order), edge_atoms (sorted\n"
+          "[a,b] per RS edge), probe_radius, n_spheres. Gate a port's RS\n"
+          "step on these (order-independent), not just the final mesh.");
+
+    m.def("ses_graph",
+          &ses_graph,
+          py::arg("spheres"),
+          py::arg("probe_radius") = 1.5,
+          "SES element-graph stats from raw spheres (L2/L3 oracle),\n"
+          "AFTER singularity cleaning.\n"
+          "\n"
+          "Returns a dict: n_vertices, n_edges, n_singular_edges,\n"
+          "n_contact_faces, n_toric_faces, n_spheric_faces, and per-face\n"
+          "atom ownership (contact_atoms: owning atom; toric_atoms: atom\n"
+          "pair; spheric_atoms: atom triple). cleaned=True (BALL cleans\n"
+          "in-place inside compute(); a pre-clean snapshot needs a\n"
+          "BALL-side helper, tracked as a follow-up).");
 
     m.def("build_bonds",
           &build_bonds_in_pdb,
